@@ -2017,6 +2017,69 @@
   .radio-ctrl-btn.primary:hover { background: rgba(224,48,48,0.1); }
 
   /* QUEUE */
+  .radio-volume-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 0 2px;
+  }
+
+  .radio-vol-icon {
+    font-size: 12px;
+    color: var(--muted);
+    flex-shrink: 0;
+    width: 16px;
+    text-align: center;
+  }
+
+  .radio-volume-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .radio-volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--red);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 6px rgba(224,48,48,0.5);
+    transition: box-shadow 0.15s;
+  }
+
+  .radio-volume-slider::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--red);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 6px rgba(224,48,48,0.5);
+  }
+
+  .radio-volume-slider:hover::-webkit-slider-thumb {
+    box-shadow: 0 0 10px rgba(224,48,48,0.8);
+  }
+
+  .radio-vol-pct {
+    font-size: 9px;
+    color: var(--muted);
+    width: 26px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
   .radio-queue-label {
     font-size: 8px;
     letter-spacing: 3px;
@@ -2131,6 +2194,12 @@
       <div class="radio-controls">
         <button class="radio-ctrl-btn primary" id="radioPlayPauseBtn" onclick="radioTogglePlay()">⏸ PAUSE</button>
         <button class="radio-ctrl-btn" onclick="radioSkip()">⏭ SKIP</button>
+      </div>
+
+      <div class="radio-volume-row">
+        <span class="radio-vol-icon" id="radioVolIcon">🔊</span>
+        <input class="radio-volume-slider" id="radioVolSlider" type="range" min="0" max="100" value="15" oninput="radioSetVolume(this.value)" />
+        <span class="radio-vol-pct" id="radioVolPct">80%</span>
       </div>
 
       <!-- QUEUE -->
@@ -4425,6 +4494,26 @@
   let radioPlaying = false;
   let radioElapsedSec = 0;
   let radioElapsedTimer = null;
+  let radioVolume = 15;
+
+  function radioSetVolume(val) {
+    radioVolume = parseInt(val);
+    if (ytPlayer && ytPlayer.setVolume) ytPlayer.setVolume(radioVolume);
+    document.getElementById('radioVolPct').textContent = radioVolume + '%';
+    const icon = document.getElementById('radioVolIcon');
+    if (radioVolume === 0) icon.textContent = '🔇';
+    else if (radioVolume < 40) icon.textContent = '🔈';
+    else if (radioVolume < 70) icon.textContent = '🔉';
+    else icon.textContent = '🔊';
+    // Update slider fill
+    const slider = document.getElementById('radioVolSlider');
+    slider.style.background = `linear-gradient(to right, #e03030 0%, #e03030 ${radioVolume}%, #2a2a35 ${radioVolume}%, #2a2a35 100%)`;
+  }
+
+  // Initialize slider fill on load
+  document.addEventListener('DOMContentLoaded', () => {
+    radioSetVolume(radioVolume);
+  });
 
   // Load YT IFrame API (hidden)
   (function() {
@@ -4441,9 +4530,9 @@
     document.getElementById('ytHiddenFrame').appendChild(div);
     ytPlayer = new YT.Player('ytHiddenPlayer', {
       width: 1, height: 1,
-      playerVars: { autoplay: 0 },
+      playerVars: { autoplay: 1 },
       events: {
-        onReady: () => radioPlayNext(),
+        onReady: () => { ytPlayer.setVolume(radioVolume); radioPlayNext(); },
         onStateChange: e => {
           if (e.data === YT.PlayerState.ENDED) radioSkip();
           if (e.data === YT.PlayerState.PLAYING) {
