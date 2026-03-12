@@ -2855,7 +2855,7 @@
 
       <!-- CONTROLS -->
       <div class="radio-controls">
-        <button class="radio-ctrl-btn primary" id="radioPlayPauseBtn" onclick="radioTogglePlay()">⏸ PAUSE</button>
+        <button class="radio-ctrl-btn primary" id="radioPlayPauseBtn" onclick="radioTogglePlay()">▶ PLAY</button>
         <button class="radio-ctrl-btn" onclick="radioSkip()">⏭ SKIP</button>
       </div>
 
@@ -5428,9 +5428,9 @@
     document.getElementById('ytHiddenFrame').appendChild(div);
     ytPlayer = new YT.Player('ytHiddenPlayer', {
       width: 1, height: 1,
-      playerVars: { autoplay: 1 },
+      playerVars: { autoplay: 0 },
       events: {
-        onReady: () => { ytPlayer.setVolume(radioVolume); radioPlayNext(); },
+        onReady: () => { ytPlayer.setVolume(radioVolume); },
         onStateChange: e => {
           if (e.data === YT.PlayerState.ENDED) radioSkip();
           if (e.data === YT.PlayerState.PLAYING) {
@@ -5491,6 +5491,7 @@
 
   function radioTogglePlay() {
     if (!ytPlayer) return;
+    if (!radioCurrentTrack) { radioPlayNext(); return; }
     if (radioPlaying) {
       ytPlayer.pauseVideo();
     } else {
