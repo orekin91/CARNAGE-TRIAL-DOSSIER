@@ -5482,9 +5482,12 @@
             gridVisualizerStop();
             document.getElementById('radioPlayPauseBtn').textContent = '▶ PLAY';
             setTimeout(_hostBroadcast, 150); // tell players we paused
+          }
         }
       }
     });
+    // Start menu music now that YT API is ready
+    startMenuMusic();
   };
 
   function radioPlayNext() {
@@ -5776,37 +5779,37 @@
   }
 
   /* Format code input as user types */
-  document.getElementById('gateCodeInput').addEventListener('input', function() {
-    let v = this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
-    if (v.length > 4) v = v.slice(0,4) + '-' + v.slice(4,8);
-    this.value = v;
-  });
+  if (document.getElementById('gateCodeInput')) {
+    document.getElementById('gateCodeInput').addEventListener('input', function() {
+      let v = this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+      if (v.length > 4) v = v.slice(0,4) + '-' + v.slice(4,8);
+      this.value = v;
+    });
+    document.getElementById('gateCodeInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { const j = document.getElementById('gateJoinBtn'); if (j) j.click(); }
+      const errEl = document.getElementById('gateCodeError');
+      if (errEl) errEl.classList.remove('visible');
+    });
+  }
 
-  /* JOIN button on gate */
-  document.getElementById('gateJoinBtn').addEventListener('click', function() {
-    const code = document.getElementById('gateCodeInput').value.trim().toUpperCase();
-    const errEl = document.getElementById('gateCodeError');
-    if (code.length !== 9 || code[4] !== '-') {
-      errEl.classList.add('visible');
-      return;
-    }
-    // Validate code exists in sessionStorage
-    const data = sessionStorage.getItem(SESSION_PREFIX + code);
-    if (!data) {
-      errEl.classList.add('visible');
-      errEl.textContent = '⚠ SESSION NOT FOUND — ASK HOST TO REGENERATE';
-      return;
-    }
-    errEl.classList.remove('visible');
-    _sessionCode = code;
-    window._pendingSessionCode = code; // picked up after gate clears
-  });
-
-  // Also allow hitting Enter in the code input
-  document.getElementById('gateCodeInput').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') document.getElementById('gateJoinBtn').click();
-    document.getElementById('gateCodeError').classList.remove('visible');
-  });
+  if (document.getElementById('gateJoinBtn')) {
+    document.getElementById('gateJoinBtn').addEventListener('click', function() {
+      const code = document.getElementById('gateCodeInput').value.trim().toUpperCase();
+      const errEl = document.getElementById('gateCodeError');
+      if (code.length !== 9 || code[4] !== '-') {
+        if (errEl) errEl.classList.add('visible');
+        return;
+      }
+      const data = sessionStorage.getItem(SESSION_PREFIX + code);
+      if (!data) {
+        if (errEl) { errEl.classList.add('visible'); errEl.textContent = '⚠ SESSION NOT FOUND — ASK HOST TO REGENERATE'; }
+        return;
+      }
+      if (errEl) errEl.classList.remove('visible');
+      _sessionCode = code;
+      window._pendingSessionCode = code;
+    });
+  }
 
   /* Called once gate clears — finalize session join if pending */
   function _finalizeSessionJoin() {
@@ -6006,14 +6009,6 @@
     };
     step();
   }
-
-  // Extend onYouTubeIframeAPIReady to also trigger menu music
-  const _origYTReady = window.onYouTubeIframeAPIReady;
-  window.onYouTubeIframeAPIReady = function() {
-    if (_origYTReady) _origYTReady();
-    startMenuMusic();
-  };
-  if (window.YT && window.YT.Player) startMenuMusic();
 
   // 25002500 UNSAVED WARNING 25002500
   window.addEventListener('beforeunload', e => {
