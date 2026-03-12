@@ -5397,6 +5397,7 @@
 
   // ─── RADIO PANEL ────────────────────────────────────────────
   let radioOpen = false;
+  let dossierUnlocked = false; // becomes true once the gate is dismissed
 
   function toggleRadio() {
     radioOpen = !radioOpen;
@@ -5455,13 +5456,14 @@
       width: 1, height: 1,
       playerVars: { autoplay: 1 },
       events: {
-        onReady: () => { ytPlayer.setVolume(radioVolume); radioPlayNext(); },
+        onReady: () => { ytPlayer.setVolume(radioVolume); if (dossierUnlocked) radioPlayNext(); },
         onStateChange: e => {
           if (e.data === YT.PlayerState.ENDED) radioSkip();
           if (e.data === YT.PlayerState.PLAYING) {
             radioPlaying = true;
             radioStartElapsedTimer();
             gridVisualizerStart();
+            fadeOutMenuMusic(); // fade menu music when radio begins
             // Grab title & duration from player if not cached
             const dur = ytPlayer.getDuration ? Math.round(ytPlayer.getDuration()) : 0;
             const vid = ytPlayer.getVideoData ? ytPlayer.getVideoData() : {};
@@ -5732,7 +5734,10 @@
       gate.addEventListener('animationend', () => {
         gate.remove();
         document.body.classList.remove('gate-locked');
+        dossierUnlocked = true;
         startMenuMusic();
+        // If YT player already initialized before gate was dismissed, start radio now
+        if (ytPlayer && ytApiReady && !radioCurrentTrack) radioPlayNext();
       }, { once: true });
     }
 
@@ -5746,7 +5751,215 @@
     setTimeout(() => input.focus(), 400);
   })();
 
-  // 25002500 MENU BACKGROUND MUSIC 25002500
+  // ── HOST SESSION SYSTEM ──────────────────────────────────────
+  // Uses BroadcastChannel for real-time same-origin sync (multi-tab).
+  // Session state stored in sessionStorage keyed by session code.
+  // Host pushes radio queue state; players receive it.
+
+  let _hostCode    = null;   // set if this tab is the host
+  let _sessionCode = null;   // set if this tab has joined a session (not host)
+  let _hostChannel = null;   // BroadcastChannel instance
+
+  const SESSION_PREFIX = 'carnage_session_';
+
+  /* Generate a readable XXXX-XXXX code */
+  function _genCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const seg = n => Array.from({length:n}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+    return `${seg(4)}-${seg(4)}`;
+  }
+
+  /* Format code input as user types */
+  document.getElementById('gateCodeInput').addEventListener('input', function() {
+    let v = this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+    if (v.length > 4) v = v.slice(0,4) + '-' + v.slice(4,8);
+    this.value = v;
+  });
+
+  /* JOIN button on gate */
+  document.getElementById('gateJoinBtn').addEventListener('click', function() {
+    const code = document.getElementById('gateCodeInput').value.trim().toUpperCase();
+    const errEl = document.getElementById('gateCodeError');
+    if (code.length !== 9 || code[4] !== '-') {
+      errEl.classList.add('visible');
+      return;
+    }
+    // Validate code exists in sessionStorage
+    const data = sessionStorage.getItem(SESSION_PREFIX + code);
+    if (!data) {
+      errEl.classList.add('visible');
+      errEl.textContent = '⚠ SESSION NOT FOUND — ASK HOST TO REGENERATE';
+      return;
+    }
+    errEl.classList.remove('visible');
+    _sessionCode = code;
+    window._pendingSessionCode = code; // picked up after gate clears
+  });
+
+  // Also allow hitting Enter in the code input
+  document.getElementById('gateCodeInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') document.getElementById('gateJoinBtn').click();
+    document.getElementById('gateCodeError').classList.remove('visible');
+  });
+
+  /* Called once gate clears — finalize session join if pending */
+  function _finalizeSessionJoin() {
+    if (!window._pendingSessionCode) return;
+    _sessionCode = window._pendingSessionCode;
+    delete window._pendingSessionCode;
+    _joinSession(_sessionCode);
+  }
+
+  /* HOST: generate a code and start broadcasting */
+  function hostGenerateCode() {
+    if (_hostCode) hostEndSession();
+    _hostCode = _genCode();
+    // Register in sessionStorage so players can validate
+    sessionStorage.setItem(SESSION_PREFIX + _hostCode, JSON.stringify({ host: window.investigatorName || 'Host', ts: Date.now() }));
+    // Open broadcast channel
+    _hostChannel = new BroadcastChannel('carnage_' + _hostCode);
+    // Show UI
+    document.getElementById('hostCodeVal').textContent = _hostCode;
+    document.getElementById('hostCodeDisplay').style.display = '';
+    document.getElementById('hostNoCode').style.display = 'none';
+    document.getElementById('hostGenBtn').style.display = 'none';
+    document.getElementById('hostEndBtn').style.display = '';
+    document.getElementById('radioHostBadge').style.display = '';
+    document.getElementById('radioHostCode').textContent = _hostCode;
+    // Immediately broadcast current queue
+    _hostBroadcast();
+  }
+
+  /* HOST: copy code to clipboard */
+  function hostCopyCode() {
+    const code = _hostCode || _sessionCode;
+    if (!code) return;
+    navigator.clipboard.writeText(code).then(() => {
+      const el = document.getElementById('hostCodeVal') || document.getElementById('radioHostCode');
+      const orig = el.textContent;
+      el.textContent = 'COPIED!';
+      setTimeout(() => { el.textContent = orig; }, 1200);
+    }).catch(() => {});
+  }
+
+  /* HOST: end session */
+  function hostEndSession() {
+    if (_hostChannel) {
+      _hostChannel.postMessage({ type: 'SESSION_END' });
+      _hostChannel.close();
+      _hostChannel = null;
+    }
+    if (_hostCode) sessionStorage.removeItem(SESSION_PREFIX + _hostCode);
+    _hostCode = null;
+    document.getElementById('hostCodeDisplay').style.display = 'none';
+    document.getElementById('hostNoCode').style.display = '';
+    document.getElementById('hostGenBtn').style.display = '';
+    document.getElementById('hostEndBtn').style.display = 'none';
+    document.getElementById('radioHostBadge').style.display = 'none';
+  }
+
+  /* HOST: broadcast current radio state to all players */
+  function _hostBroadcast() {
+    if (!_hostChannel || !_hostCode) return;
+    const state = {
+      type: 'RADIO_STATE',
+      queue: radioQueue.map(t => ({...t})),
+      currentTrack: radioCurrentTrack ? {...radioCurrentTrack} : null,
+      playing: radioPlaying,
+      elapsed: radioElapsedSec,
+    };
+    // Also persist to sessionStorage for late-joiners
+    sessionStorage.setItem(SESSION_PREFIX + _hostCode + '_state', JSON.stringify(state));
+    _hostChannel.postMessage(state);
+  }
+
+  /* PLAYER: join an existing session */
+  function _joinSession(code) {
+    _hostChannel = new BroadcastChannel('carnage_' + code);
+    _hostChannel.addEventListener('message', _onSessionMessage);
+    // Pull latest persisted state immediately
+    const saved = sessionStorage.getItem(SESSION_PREFIX + code + '_state');
+    if (saved) {
+      try { _applyRadioState(JSON.parse(saved)); } catch(e) {}
+    }
+    // Show UI
+    document.getElementById('radioSessionBadge').style.display = '';
+    document.getElementById('radioSessionInfo').textContent = 'synced to host';
+    // Lock add-to-queue
+    document.getElementById('radioAddRow').style.opacity = '0.3';
+    document.getElementById('radioAddRow').style.pointerEvents = 'none';
+    document.getElementById('radioLockNote').style.display = '';
+  }
+
+  /* PLAYER: handle incoming messages from host */
+  function _onSessionMessage(e) {
+    const msg = e.data;
+    if (!msg || !msg.type) return;
+    if (msg.type === 'SESSION_END') {
+      _sessionCode = null;
+      if (_hostChannel) { _hostChannel.close(); _hostChannel = null; }
+      document.getElementById('radioSessionBadge').style.display = 'none';
+      document.getElementById('radioAddRow').style.opacity = '';
+      document.getElementById('radioAddRow').style.pointerEvents = '';
+      document.getElementById('radioLockNote').style.display = 'none';
+      document.getElementById('radioSessionInfo').textContent = 'host ended session';
+      return;
+    }
+    if (msg.type === 'RADIO_STATE') {
+      _applyRadioState(msg);
+    }
+  }
+
+  /* PLAYER: apply a state snapshot from host */
+  function _applyRadioState(state) {
+    if (!state) return;
+    // Update queue display
+    radioQueue = (state.queue || []).map(t => ({...t}));
+    radioRenderQueue();
+    // Update now-playing display (player does not actually play via YT — host controls playback)
+    const t = state.currentTrack;
+    if (t) {
+      document.getElementById('radioNpTitle').textContent = t.title || t.videoId || '—';
+      document.getElementById('radioNpDur').textContent = t.duration ? radioFmtTime(t.duration) : '—';
+      document.getElementById('radioElapsed').textContent = radioFmtTime(state.elapsed || 0);
+      const pct = t.duration ? Math.min(100, ((state.elapsed||0)/t.duration)*100) : 0;
+      const slider = document.getElementById('radioSeekSlider');
+      slider.value = pct;
+      slider.style.background = `linear-gradient(to right, var(--accent) 0%, var(--accent) ${pct}%, #2a2a35 ${pct}%, #2a2a35 100%)`;
+    } else {
+      document.getElementById('radioNpTitle').textContent = '—';
+    }
+    document.getElementById('radioPlayPauseBtn').textContent = state.playing ? '⏸ PAUSE' : '▶ PLAY';
+    // Update session badge
+    const badge = document.getElementById('radioSessionInfo');
+    if (badge) badge.textContent = state.playing ? '▶ playing via host' : '⏸ paused via host';
+  }
+
+  /* Patch radioAddToQueue and radioSkip to also broadcast when hosting */
+  const _origRadioAddToQueue = radioAddToQueue;
+  radioAddToQueue = function() {
+    _origRadioAddToQueue();
+    _hostBroadcast();
+  };
+
+  const _origRadioSkip = radioSkip;
+  radioSkip = function() {
+    _origRadioSkip();
+    _hostBroadcast();
+  };
+
+  const _origRadioTogglePlay = radioTogglePlay;
+  radioTogglePlay = function() {
+    _origRadioTogglePlay();
+    setTimeout(_hostBroadcast, 200);
+  };
+
+  const _origRadioPlayFromQueue = radioPlayFromQueue;
+  radioPlayFromQueue = function(idx) {
+    _origRadioPlayFromQueue(idx);
+    setTimeout(_hostBroadcast, 200);
+  };
+
   let menuMusicPlayer = null;
 
   function startMenuMusic() {
@@ -5762,9 +5975,24 @@
       videoId: 'GnsJdmjlSjc',
       playerVars: { autoplay: 1, loop: 1, playlist: 'GnsJdmjlSjc', controls: 0 },
       events: {
-        onReady: function(e) { e.target.setVolume(12); e.target.playVideo(); }
+        onReady: function(e) { e.target.setVolume(5); e.target.playVideo(); }
       }
     });
+  }
+
+  function fadeOutMenuMusic() {
+    if (!menuMusicPlayer || !menuMusicPlayer.setVolume) return;
+    let vol = 5;
+    const step = () => {
+      vol -= 0.5;
+      if (vol <= 0) {
+        menuMusicPlayer.stopVideo();
+        return;
+      }
+      menuMusicPlayer.setVolume(vol);
+      setTimeout(step, 60);
+    };
+    step();
   }
 
   // 25002500 UNSAVED WARNING 25002500
