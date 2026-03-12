@@ -2438,7 +2438,7 @@
         <div class="verdict-name-field">
           <div class="verdict-name-label">🔪 ACCUSED MURDERER</div>
           <div style="position:relative;">
-            <input class="verdict-name-input murderer-input" placeholder="Player username..." />
+            <input class="verdict-name-input murderer-input" placeholder="e.g. Player @ Username" />
             <div class="stamp innocent-stamp verdict-stamp" id="innocentStampAccused">INNOCENT</div>
           </div>
         </div>
@@ -2612,7 +2612,7 @@
                 onchange="updateSuspectNickname(${s.id}, this.value)" />
             </div>
             <div class="name-row">
-              <input class="suspect-name" value="${s.name}" placeholder="Player username..."
+              <input class="suspect-name" value="${s.name}" placeholder="e.g. Player @ Username"
                 oninput="debounceFetch(${s.id}, this.value)"
                 onchange="updateSuspectName(${s.id}, this.value)"
                 style="color:${s.nameColor || 'var(--text)'}"/>
@@ -3112,7 +3112,7 @@
           <div class="avatar-wrap deceased-x" style="border-color:rgba(150,0,150,0.3);">${avatarHtml}</div>
           <div class="name-talent-col">
             <div class="name-row">
-              <input class="suspect-name" value="${s.name}" placeholder="Player username..."
+              <input class="suspect-name" value="${s.name}" placeholder="e.g. Player @ Username"
                 style="color:${s.nameColor || 'var(--muted)'}; text-decoration: line-through; opacity:0.7;"
                 onchange="updateDeceasedName(${s.id}, this.value)" />
             </div>
@@ -3183,7 +3183,7 @@
         <div class="victim-avatar-wrap" onclick="fetchVictimAvatar(${v.id})" title="Click to reload">${avatarHtml}</div>
         <div class="name-talent-col">
           <div class="name-row">
-            <input class="victim-name" value="${v.name}" placeholder="Player username..."
+            <input class="victim-name" value="${v.name}" placeholder="e.g. Player @ Username"
               oninput="debounceVictimFetch(${v.id}, this.value)"
               onchange="updateVictimName(${v.id}, this.value)"
               style="color:${v.nameColor || 'var(--red)'}"/>
