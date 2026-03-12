@@ -28,10 +28,34 @@
     color: var(--text);
     font-family: 'Share Tech Mono', monospace;
     min-height: 100vh;
+    position: relative;
     background-image:
       radial-gradient(ellipse 80% 60% at 50% -10%, rgba(224,48,48,0.08) 0%, transparent 60%),
       repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.015) 39px, rgba(255,255,255,0.015) 40px),
       repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.015) 39px, rgba(255,255,255,0.015) 40px);
+  }
+
+  @keyframes redGridIdle {
+    0%, 100% { opacity: 0; }
+    50%       { opacity: 1; }
+  }
+
+  body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    min-height: 100%;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(224,48,48,0.07) 39px, rgba(224,48,48,0.07) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(224,48,48,0.07) 39px, rgba(224,48,48,0.07) 40px);
+    pointer-events: none;
+    z-index: 0;
+    animation: redGridIdle 8s ease-in-out infinite;
+  }
+
+  body.radio-active::before {
+    animation: none;
+    opacity: var(--grid-pulse, 0);
   }
 
   .header {
@@ -4875,6 +4899,7 @@
           if (e.data === YT.PlayerState.PLAYING) {
             radioPlaying = true;
             radioStartElapsedTimer();
+            gridVisualizerStart();
             // Grab title & duration from player if not cached
             const dur = ytPlayer.getDuration ? Math.round(ytPlayer.getDuration()) : 0;
             const vid = ytPlayer.getVideoData ? ytPlayer.getVideoData() : {};
@@ -4889,6 +4914,7 @@
           if (e.data === YT.PlayerState.PAUSED) {
             radioPlaying = false;
             clearInterval(radioElapsedTimer);
+            gridVisualizerStop();
             document.getElementById('radioPlayPauseBtn').textContent = '▶ PLAY';
           }
         }
@@ -5116,6 +5142,57 @@
     });
   })();
 
+  // ── GRID BEAT VISUALIZER ──
+  let _gridRafId = null;
+  let _gridCurrent = 0;   // current opacity value
+  let _gridTarget  = 0;   // target opacity value
+  let _beatTimer   = null;
+
+  function gridVisualizerStart() {
+    document.body.classList.add('radio-active');
+    _scheduleBeat();
+    _gridRafLoop();
+  }
+
+  function gridVisualizerStop() {
+    document.body.classList.remove('radio-active');
+    clearTimeout(_beatTimer);
+    cancelAnimationFrame(_gridRafId);
+    _gridTarget = 0;
+    // let it ease back to 0
+    _gridFadeOut();
+  }
+
+  function _gridFadeOut() {
+    _gridCurrent += (0 - _gridCurrent) * 0.08;
+    document.body.style.setProperty('--grid-pulse', _gridCurrent.toFixed(4));
+    if (_gridCurrent > 0.002) {
+      requestAnimationFrame(_gridFadeOut);
+    } else {
+      document.body.style.removeProperty('--grid-pulse');
+    }
+  }
+
+  function _scheduleBeat() {
+    // Random BPM between 70–140, with occasional double-time hits
+    const bpm   = 85 + Math.random() * 55;
+    const ms    = (60000 / bpm) * (Math.random() < 0.2 ? 0.5 : 1);
+    const peak  = 0.55 + Math.random() * 0.45; // how intense this beat is
+    _beatTimer = setTimeout(() => {
+      _gridTarget = peak;
+      // Schedule decay back down quickly after the hit
+      setTimeout(() => { _gridTarget = 0.04 + Math.random() * 0.08; }, 80 + Math.random() * 60);
+      _scheduleBeat();
+    }, ms);
+  }
+
+  function _gridRafLoop() {
+    // Smooth lerp toward target
+    const speed = _gridTarget > _gridCurrent ? 0.18 : 0.06;
+    _gridCurrent += (_gridTarget - _gridCurrent) * speed;
+    document.body.style.setProperty('--grid-pulse', _gridCurrent.toFixed(4));
+    _gridRafId = requestAnimationFrame(_gridRafLoop);
+  }
 
 </script>
 
