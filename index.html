@@ -5430,7 +5430,11 @@
       width: 1, height: 1,
       playerVars: { autoplay: 0 },
       events: {
-        onReady: () => { ytPlayer.setVolume(radioVolume); },
+        onReady: () => {
+          ytPlayer.setVolume(radioVolume);
+          // Only autoplay if user has already entered the dossier
+          if (!document.getElementById('investigatorGate')) radioPlayNext();
+        },
         onStateChange: e => {
           if (e.data === YT.PlayerState.ENDED) radioSkip();
           if (e.data === YT.PlayerState.PLAYING) {
@@ -5736,6 +5740,8 @@
       gate.addEventListener('animationend', () => {
         gate.remove();
         document.body.classList.remove('gate-locked');
+        // If radio player already ready, start playing immediately
+        if (ytPlayer && ytApiReady && !radioCurrentTrack) radioPlayNext();
       }, { once: true });
     }
 
