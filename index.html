@@ -3354,16 +3354,19 @@
       `).join('');
       card.innerHTML = `
         <div class="suspect-item">
-          <span class="participant-num" style="color:#c060c0;opacity:0.6;">#${(s._order ?? 0) + 1}</span>
-          <div class="status-dot" style="background:#c060c0;box-shadow:0 0 6px #c060c0;"></div>
+          <div class="num-dot-col">
+            <span class="participant-num" style="color:#c060c0;opacity:0.6;">#${(s._order ?? 0) + 1}</span>
+            <div class="status-dot" style="background:#c060c0;box-shadow:0 0 6px #c060c0;"></div>
+          </div>
           <div class="avatar-wrap deceased-x" style="border-color:rgba(150,0,150,0.3);">${avatarHtml}</div>
           <div class="name-talent-col">
+            ${s.nickname ? `<div class="name-row"><input class="nickname-input" value="${s.nickname}" placeholder="nickname..." onchange="updateDeceasedNickname(${s.id}, this.value)" /></div>` : ''}
             <div class="name-row">
               <input class="suspect-name" value="${s.name}" placeholder="Insert player handle/username..."
                 style="color:${s.nameColor || 'var(--muted)'}; text-decoration: line-through; opacity:0.7;"
                 onchange="updateDeceasedName(${s.id}, this.value)" />
             </div>
-            ${s.displayName ? `<span class="display-name-tag" style="display:inline">${s.displayName}</span>` : ''}
+            <span class="display-name-tag" style="display:${s.displayName ? 'inline' : 'none'}">${s.displayName || ''}</span>
             ${s.deathNote ? `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);opacity:0.7;letter-spacing:0.5px;">${s.deathNote}</span>` : ''}
             <div class="talent-row">
               <span class="talent-prefix">Ultimate</span>
@@ -3373,8 +3376,6 @@
             </div>
           </div>
           <div class="suspect-actions">
-            <button class="tag-btn clr ${s.status==='cleared'?'active':''}" onclick="setDeceasedStatus(${s.id},'cleared')">CLR</button>
-            <button class="tag-btn glt ${s.status==='guilty'?'active':''}" onclick="setDeceasedStatus(${s.id},'guilty')">SUS</button>
             <button class="tag-btn revive" onclick="reviveSuspect(${s.id})" title="Move back to participants">↩ ALIVE</button>
           </div>
           <button class="del-btn" onclick="removeDeceased(${s.id})">×</button>
@@ -3389,6 +3390,11 @@
   function updateDeceasedName(id, val) {
     const d = deceased.find(x => x.id === id);
     if (d) d.name = val;
+  }
+
+  function updateDeceasedNickname(id, val) {
+    const d = deceased.find(x => x.id === id);
+    if (d) d.nickname = val;
   }
 
   function updateDeceasedTalent(id, val) {
@@ -3857,11 +3863,11 @@
     const victimTalent = victims[0]?.talent?.trim() || '';
 
     // Collect ALL named victims
-    const allVictims = victims.map(v => ({ name: v.name?.trim() || '', talent: v.talent?.trim() || '', nickname: v.nickname?.trim() || '' })).filter(v => v.name);
+    const allVictims = victims.map(v => ({ name: v.name?.trim() || '', talent: v.talent?.trim() || '', nickname: v.nickname?.trim() || '', avatarUrl: v.avatarUrl || null })).filter(v => v.name);
 
     const accusedEl  = document.querySelector('.verdict-name-input.murderer-input');
     const accused    = accusedEl ? accusedEl.value.trim() : '';
-    // Find accused's talent and nickname from suspects or deceased arrays
+    // Find accused's talent, nickname and avatar from suspects or deceased arrays
     const accusedTalent = (() => {
       const name = accused.toLowerCase();
       const match = [...suspects, ...deceased].find(s => s.name.trim().toLowerCase() === name);
@@ -3871,6 +3877,11 @@
       const name = accused.toLowerCase();
       const match = [...suspects, ...deceased].find(s => s.name.trim().toLowerCase() === name);
       return match?.nickname?.trim() || '';
+    })();
+    const accusedAvatarUrl = (() => {
+      const name = accused.toLowerCase();
+      const match = [...suspects, ...deceased].find(s => s.name.trim().toLowerCase() === name);
+      return match?.avatarUrl || null;
     })();
     const realEl     = document.getElementById('realMurdererInput');
     const realMurderer = realEl ? realEl.value.trim() : '';
@@ -3891,6 +3902,7 @@
       accused,
       accusedTalent,
       accusedNickname,
+      accusedAvatarUrl,
       murderWeapon,
       realMurderer: isWrong ? realMurderer : '',
       isWrong,
@@ -3975,6 +3987,16 @@
         ? `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-align:center;padding:3px 0 1px;border-top:1px solid var(--border);margin-top:3px;">⏱ ${t.trialTime}</div>`
         : '';
 
+      const victimAvatarUrl = t.allVictims?.[0]?.avatarUrl || null;
+      const accusedAvatarUrl = t.accusedAvatarUrl || null;
+
+      const victimBg = victimAvatarUrl
+        ? `background-image:url('${victimAvatarUrl}');background-size:cover;background-position:center;`
+        : '';
+      const accusedBg = accusedAvatarUrl
+        ? `background-image:url('${accusedAvatarUrl}');background-size:cover;background-position:center;`
+        : '';
+
       wrap.innerHTML = `
         <div class="trial-card">
           <button class="trial-card-del" onclick="deleteTrial(${t.id})" title="Remove">×</button>
@@ -3985,18 +4007,24 @@
           </div>
           <div style="display:flex;flex-direction:column;flex:1;">
             <div class="trial-card-body">
-              <div class="trial-card-side">
-                ${victimSideHtml}
+              <div class="trial-card-side" style="position:relative;overflow:hidden;${victimBg}">
+                ${victimAvatarUrl ? `<div style="position:absolute;inset:0;background:rgba(13,13,27,0.78);"></div>` : ''}
+                <div style="position:relative;z-index:1;">
+                  ${victimSideHtml}
+                </div>
               </div>
               <div class="trial-card-arrow" style="display:flex;flex-direction:column;align-items:center;gap:3px;">
                 ${t.murderWeapon ? `<span style="font-family:'Special Elite',cursive;font-size:10px;color:var(--red);letter-spacing:1px;opacity:0.85;white-space:nowrap;">🗡 ${t.murderWeapon}</span>` : ''}
                 →
               </div>
-              <div class="trial-card-side">
-                <div class="trial-card-role">🔪 ACCUSED MURDERER</div>
-                ${t.accusedNickname ? `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--blue);letter-spacing:0.5px;">${t.accusedNickname}</div>` : ''}
-                <div class="trial-card-name murderer">${t.accused || '—'}</div>
-                ${t.accusedTalent ? `<div class="trial-card-talent">Ultimate ${t.accusedTalent}</div>` : ''}
+              <div class="trial-card-side" style="position:relative;overflow:hidden;${accusedBg}">
+                ${accusedAvatarUrl ? `<div style="position:absolute;inset:0;background:rgba(13,13,27,0.78);"></div>` : ''}
+                <div style="position:relative;z-index:1;">
+                  <div class="trial-card-role">🔪 ACCUSED MURDERER</div>
+                  ${t.accusedNickname ? `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--blue);letter-spacing:0.5px;">${t.accusedNickname}</div>` : ''}
+                  <div class="trial-card-name murderer">${t.accused || '—'}</div>
+                  ${t.accusedTalent ? `<div class="trial-card-talent">Ultimate ${t.accusedTalent}</div>` : ''}
+                </div>
               </div>
               <div class="trial-card-verdict">${verdictHtml}</div>
             </div>
