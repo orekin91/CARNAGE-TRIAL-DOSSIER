@@ -1918,15 +1918,14 @@
     display: flex;
     flex-direction: column;
   }
-  .radio-panel.open { width: 320px; border-color: var(--red-dim); }
+  .radio-panel.open { width: 300px; border-color: var(--red-dim); }
 
   .radio-panel-inner {
-    width: 320px;
-    padding: 12px;
+    width: 300px;
+    padding: 14px 12px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    height: 100%;
+    gap: 12px;
   }
   .radio-panel-title {
     font-family: 'Bebas Neue', cursive;
@@ -1934,8 +1933,144 @@
     letter-spacing: 3px;
     color: var(--red);
     text-align: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
   }
-  .radio-url-row {
+
+  /* NOW PLAYING */
+  .radio-now-playing {
+    background: rgba(224,48,48,0.05);
+    border: 1px solid rgba(224,48,48,0.2);
+    border-radius: 2px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .radio-np-label {
+    font-size: 8px;
+    letter-spacing: 3px;
+    color: var(--red);
+    text-transform: uppercase;
+  }
+  .radio-np-title {
+    font-family: 'Special Elite', cursive;
+    font-size: 13px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 18px;
+  }
+  .radio-np-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .radio-np-duration {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+  .radio-np-elapsed {
+    font-size: 10px;
+    color: var(--yellow);
+    letter-spacing: 1px;
+  }
+
+  /* PROGRESS BAR */
+  .radio-progress-bar {
+    height: 2px;
+    background: var(--border);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .radio-progress-fill {
+    height: 100%;
+    background: var(--red);
+    width: 0%;
+    transition: width 1s linear;
+    box-shadow: 0 0 6px var(--red);
+  }
+
+  /* CONTROLS */
+  .radio-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .radio-ctrl-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding: 5px 12px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .radio-ctrl-btn:hover { border-color: var(--red); color: var(--red); }
+  .radio-ctrl-btn.primary { border-color: var(--red-dim); color: var(--red); }
+  .radio-ctrl-btn.primary:hover { background: rgba(224,48,48,0.1); }
+
+  /* QUEUE */
+  .radio-queue-label {
+    font-size: 8px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .radio-queue {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .radio-queue-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 9px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .radio-queue-item:hover { border-color: rgba(224,48,48,0.3); background: rgba(224,48,48,0.04); }
+  .radio-queue-num {
+    font-size: 9px;
+    color: var(--muted);
+    min-width: 12px;
+    text-align: center;
+  }
+  .radio-queue-info { flex: 1; min-width: 0; }
+  .radio-queue-title {
+    font-family: 'Special Elite', cursive;
+    font-size: 11px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .radio-queue-dur {
+    font-size: 9px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+  .radio-queue-play-icon {
+    font-size: 10px;
+    color: var(--muted);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .radio-queue-item:hover .radio-queue-play-icon { opacity: 1; }
+
+  /* ADD TO QUEUE */
+  .radio-add-row {
     display: flex;
     gap: 6px;
   }
@@ -1945,118 +2080,69 @@
     border: 1px solid var(--border);
     color: var(--text);
     font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
+    font-size: 9px;
     padding: 5px 8px;
     outline: none;
     border-radius: 2px;
     min-width: 0;
   }
   .radio-url-input:focus { border-color: var(--red-dim); }
-  .radio-url-input::placeholder { color: var(--muted); }
-  .radio-load-btn {
+  .radio-url-input::placeholder { color: var(--muted); font-size: 9px; }
+  .radio-add-btn {
     background: transparent;
-    border: 1px solid var(--red-dim);
-    color: var(--red);
+    border: 1px solid var(--border);
+    color: var(--muted);
     font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
+    font-size: 9px;
     letter-spacing: 1px;
-    padding: 5px 10px;
+    padding: 5px 8px;
     cursor: pointer;
     border-radius: 2px;
     transition: all 0.2s;
     white-space: nowrap;
   }
-  .radio-load-btn:hover { background: rgba(224,48,48,0.08); }
-  .radio-embed-wrap {
-    flex: 1;
-    background: #0a0a0c;
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 200px;
-  }
-  .radio-embed-wrap iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block;
-  }
-  .radio-volume-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .radio-vol-label {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: 1px;
-    white-space: nowrap;
-    min-width: 20px;
-    text-align: right;
-  }
-  .radio-vol-slider {
-    flex: 1;
-    -webkit-appearance: none;
-    appearance: none;
-    height: 3px;
-    background: var(--border);
-    border-radius: 2px;
-    outline: none;
-    cursor: pointer;
-  }
-  .radio-vol-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--red);
-    cursor: pointer;
-    box-shadow: 0 0 6px rgba(224,48,48,0.5);
-  }
-  .radio-vol-slider::-moz-range-thumb {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--red);
-    border: none;
-    cursor: pointer;
-  }
-  .radio-vol-icon {
-    font-size: 13px;
-    color: var(--muted);
-  }
+  .radio-add-btn:hover { border-color: var(--red-dim); color: var(--red); }
 
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    text-align: center;
-    padding: 20px;
-    line-height: 1.8;
-  }
+  /* hidden YT iframe */
+  #ytHiddenFrame { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; left: -9999px; }
 </style>
 </head>
 <body>
 
 <!-- RADIO PANEL -->
+<div id="ytHiddenFrame"></div>
 <div class="radio-tab" id="radioTab">
   <div class="radio-panel" id="radioPanel">
     <div class="radio-panel-inner">
       <div class="radio-panel-title">📻 RADIO</div>
-      <div class="radio-url-row">
-        <input class="radio-url-input" id="radioUrlInput" placeholder="Paste YouTube URL..." onkeydown="if(event.key==='Enter') loadRadio()" />
-        <button class="radio-load-btn" onclick="loadRadio()">▶ LOAD</button>
+
+      <!-- NOW PLAYING -->
+      <div class="radio-now-playing">
+        <div class="radio-np-label">▶ NOW PLAYING</div>
+        <div class="radio-np-title" id="radioNpTitle">—</div>
+        <div class="radio-progress-bar"><div class="radio-progress-fill" id="radioProgressFill"></div></div>
+        <div class="radio-np-meta">
+          <span class="radio-np-elapsed" id="radioElapsed">0:00</span>
+          <span class="radio-np-duration" id="radioNpDur">—</span>
+        </div>
       </div>
-      <div class="radio-volume-row">
-        <span class="radio-vol-icon">🔈</span>
-        <input class="radio-vol-slider" id="radioVolSlider" type="range" min="0" max="100" value="80" oninput="setRadioVolume(this.value)" />
-        <span class="radio-vol-label" id="radioVolLabel">80</span>
+
+      <!-- CONTROLS -->
+      <div class="radio-controls">
+        <button class="radio-ctrl-btn primary" id="radioPlayPauseBtn" onclick="radioTogglePlay()">⏸ PAUSE</button>
+        <button class="radio-ctrl-btn" onclick="radioSkip()">⏭ SKIP</button>
       </div>
-      <div class="radio-embed-wrap" id="radioEmbedWrap">
-        <div class="radio-placeholder">Paste a YouTube video<br>or playlist URL above<br>and press LOAD</div>
+
+      <!-- QUEUE -->
+      <div>
+        <div class="radio-queue-label">UP NEXT</div>
+        <div class="radio-queue" id="radioQueue"></div>
+      </div>
+
+      <!-- ADD TO QUEUE -->
+      <div class="radio-add-row">
+        <input class="radio-url-input" id="radioUrlInput" placeholder="YouTube URL to queue..." onkeydown="if(event.key==='Enter') radioAddToQueue()" />
+        <button class="radio-add-btn" onclick="radioAddToQueue()">+ ADD</button>
       </div>
     </div>
   </div>
@@ -4320,10 +4406,27 @@
 
   // ─── RADIO PANEL ────────────────────────────────────────────
   let radioOpen = false;
+
+  function toggleRadio() {
+    radioOpen = !radioOpen;
+    document.getElementById('radioPanel').classList.toggle('open', radioOpen);
+    document.getElementById('radioTabBtn').classList.toggle('open', radioOpen);
+  }
+
+  // ── Queue-based radio player ──
+  const RADIO_DEFAULT_QUEUE = [
+    { videoId: 'Qw0ARn68WMY', title: null, duration: null },
+  ];
+
+  let radioQueue = [...RADIO_DEFAULT_QUEUE]; // queue of {videoId, title, duration}
+  let radioCurrentTrack = null;
   let ytPlayer = null;
   let ytApiReady = false;
+  let radioPlaying = false;
+  let radioElapsedSec = 0;
+  let radioElapsedTimer = null;
 
-  // Load YouTube IFrame API once
+  // Load YT IFrame API (hidden)
   (function() {
     const tag = document.createElement('script');
     tag.src = 'https://www.youtube.com/iframe_api';
@@ -4332,69 +4435,158 @@
 
   window.onYouTubeIframeAPIReady = function() {
     ytApiReady = true;
+    // Create a hidden player
+    const div = document.createElement('div');
+    div.id = 'ytHiddenPlayer';
+    document.getElementById('ytHiddenFrame').appendChild(div);
+    ytPlayer = new YT.Player('ytHiddenPlayer', {
+      width: 1, height: 1,
+      playerVars: { autoplay: 0 },
+      events: {
+        onReady: () => radioPlayNext(),
+        onStateChange: e => {
+          if (e.data === YT.PlayerState.ENDED) radioSkip();
+          if (e.data === YT.PlayerState.PLAYING) {
+            radioPlaying = true;
+            radioStartElapsedTimer();
+            // Grab title & duration from player if not cached
+            const dur = ytPlayer.getDuration ? Math.round(ytPlayer.getDuration()) : 0;
+            const vid = ytPlayer.getVideoData ? ytPlayer.getVideoData() : {};
+            if (radioCurrentTrack) {
+              if (!radioCurrentTrack.title) radioCurrentTrack.title = vid.title || radioCurrentTrack.videoId;
+              if (!radioCurrentTrack.duration) radioCurrentTrack.duration = dur;
+              document.getElementById('radioNpTitle').textContent = radioCurrentTrack.title;
+              document.getElementById('radioNpDur').textContent = radioFmtTime(radioCurrentTrack.duration);
+            }
+            document.getElementById('radioPlayPauseBtn').textContent = '⏸ PAUSE';
+          }
+          if (e.data === YT.PlayerState.PAUSED) {
+            radioPlaying = false;
+            clearInterval(radioElapsedTimer);
+            document.getElementById('radioPlayPauseBtn').textContent = '▶ PLAY';
+          }
+        }
+      }
+    });
   };
 
-  function toggleRadio() {
-    radioOpen = !radioOpen;
-    document.getElementById('radioPanel').classList.toggle('open', radioOpen);
-    document.getElementById('radioTabBtn').classList.toggle('open', radioOpen);
-  }
-
-  function loadRadio() {
-    const raw = document.getElementById('radioUrlInput').value.trim();
-    if (!raw) return;
-    const params = youtubeParseParams(raw);
-    if (!params) {
-      document.getElementById('radioEmbedWrap').innerHTML =
-        '<div class="radio-placeholder">⚠ Could not parse YouTube URL.<br>Try a video or playlist link.</div>';
+  function radioPlayNext() {
+    if (!radioQueue.length) {
+      document.getElementById('radioNpTitle').textContent = '— Queue empty —';
+      document.getElementById('radioNpDur').textContent = '';
+      document.getElementById('radioElapsed').textContent = '0:00';
+      document.getElementById('radioProgressFill').style.width = '0%';
+      radioCurrentTrack = null;
+      radioRenderQueue();
       return;
     }
+    radioCurrentTrack = radioQueue.shift();
+    radioElapsedSec = 0;
+    document.getElementById('radioNpTitle').textContent = radioCurrentTrack.title || '⏳ Loading...';
+    document.getElementById('radioNpDur').textContent = radioCurrentTrack.duration ? radioFmtTime(radioCurrentTrack.duration) : '—';
+    document.getElementById('radioElapsed').textContent = '0:00';
+    document.getElementById('radioProgressFill').style.width = '0%';
+    if (ytPlayer && ytPlayer.loadVideoById) {
+      ytPlayer.loadVideoById(radioCurrentTrack.videoId);
+    }
+    radioRenderQueue();
+  }
 
-    const vol = parseInt(document.getElementById('radioVolSlider').value) || 80;
-    const wrap = document.getElementById('radioEmbedWrap');
+  function radioSkip() {
+    if (ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
+    clearInterval(radioElapsedTimer);
+    radioElapsedSec = 0;
+    radioPlayNext();
+  }
 
-    // Use YT IFrame API if loaded, else fall back to plain embed
-    if (typeof YT !== 'undefined' && YT.Player) {
-      wrap.innerHTML = '<div id="ytPlayerEl"></div>';
-      const playerVars = { autoplay: 1 };
-      if (params.list) { playerVars.listType = 'playlist'; playerVars.list = params.list; }
-      ytPlayer = new YT.Player('ytPlayerEl', {
-        width: '100%',
-        height: '100%',
-        videoId: params.videoId || undefined,
-        playerVars,
-        events: { onReady: e => e.target.setVolume(vol) }
-      });
+  function radioTogglePlay() {
+    if (!ytPlayer) return;
+    if (radioPlaying) {
+      ytPlayer.pauseVideo();
     } else {
-      // Plain iframe fallback
-      let src = '';
-      if (params.videoId && params.list) src = `https://www.youtube.com/embed/${params.videoId}?list=${params.list}&autoplay=1`;
-      else if (params.videoId) src = `https://www.youtube.com/embed/${params.videoId}?autoplay=1`;
-      else if (params.list) src = `https://www.youtube.com/embed/videoseries?list=${params.list}&autoplay=1`;
-      wrap.innerHTML = `<iframe src="${src}" allow="autoplay; encrypted-media" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
+      ytPlayer.playVideo();
     }
   }
 
-  function setRadioVolume(val) {
-    document.getElementById('radioVolLabel').textContent = val;
-    if (ytPlayer && ytPlayer.setVolume) ytPlayer.setVolume(parseInt(val));
+  function radioStartElapsedTimer() {
+    clearInterval(radioElapsedTimer);
+    radioElapsedTimer = setInterval(() => {
+      radioElapsedSec++;
+      document.getElementById('radioElapsed').textContent = radioFmtTime(radioElapsedSec);
+      const dur = radioCurrentTrack && radioCurrentTrack.duration;
+      if (dur) {
+        const pct = Math.min(100, (radioElapsedSec / dur) * 100);
+        document.getElementById('radioProgressFill').style.width = pct + '%';
+      }
+    }, 1000);
   }
 
-  function youtubeParseParams(url) {
+  function radioFmtTime(sec) {
+    if (!sec) return '0:00';
+    const m = Math.floor(sec / 60);
+    const s = String(Math.floor(sec % 60)).padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  function radioAddToQueue() {
+    const raw = document.getElementById('radioUrlInput').value.trim();
+    if (!raw) return;
+    const videoId = youtubeParseVideoId(raw);
+    if (!videoId) return;
+    const track = { videoId, title: null, duration: null };
+    radioQueue.push(track);
+    document.getElementById('radioUrlInput').value = '';
+    radioRenderQueue();
+    radioFetchTitle(track, () => radioRenderQueue());
+    // If nothing is playing, start
+    if (!radioCurrentTrack && ytPlayer) radioPlayNext();
+  }
+
+  function radioFetchTitle(track, cb) {
+    fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${track.videoId}&format=json`)
+      .then(r => r.json())
+      .then(d => { track.title = d.title || track.videoId; if (cb) cb(); })
+      .catch(() => { track.title = track.videoId; if (cb) cb(); });
+  }
+
+  function radioPlayFromQueue(idx) {
+    // Move that track to front and skip current
+    const [track] = radioQueue.splice(idx, 1);
+    radioQueue.unshift(track);
+    radioSkip();
+  }
+
+  function radioRenderQueue() {
+    const el = document.getElementById('radioQueue');
+    const visible = radioQueue.slice(0, 3);
+    if (!visible.length) {
+      el.innerHTML = '<div style="font-size:10px;color:var(--muted);text-align:center;padding:8px 0;">Queue empty</div>';
+      return;
+    }
+    el.innerHTML = visible.map((t, i) => `
+      <div class="radio-queue-item" onclick="radioPlayFromQueue(${i})">
+        <span class="radio-queue-num">${i + 1}</span>
+        <div class="radio-queue-info">
+          <div class="radio-queue-title">${t.title || t.videoId}</div>
+          <div class="radio-queue-dur">${t.duration ? radioFmtTime(t.duration) : '—'}</div>
+        </div>
+        <span class="radio-queue-play-icon">▶</span>
+      </div>`).join('');
+  }
+
+  function youtubeParseVideoId(url) {
     try {
-      // youtu.be short links
       let match = url.match(/youtu\.be\/([^?&]+)/);
-      if (match) {
-        const u = new URL(url);
-        return { videoId: match[1], list: u.searchParams.get('list') };
-      }
+      if (match) return match[1];
       const u = new URL(url);
-      const v = u.searchParams.get('v');
-      const list = u.searchParams.get('list');
-      if (v || list) return { videoId: v, list };
+      return u.searchParams.get('v') || null;
     } catch(e) {}
     return null;
   }
+
+  // Init queue display — fetch titles for pre-loaded tracks
+  radioQueue.forEach(t => radioFetchTitle(t, () => radioRenderQueue()));
+  radioRenderQueue();
   (function() {
     const grid = document.querySelector('.main-grid');
     const DEFAULT_ORDER = ['panel-participants','panel-photos','panel-timeline','panel-misc','panel-verdict'];
