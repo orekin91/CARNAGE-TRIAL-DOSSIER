@@ -5474,13 +5474,14 @@
               document.getElementById('radioNpDur').textContent = radioFmtTime(radioCurrentTrack.duration);
             }
             document.getElementById('radioPlayPauseBtn').textContent = '⏸ PAUSE';
+            setTimeout(_hostBroadcast, 300); // tell players we're playing
           }
           if (e.data === YT.PlayerState.PAUSED) {
             radioPlaying = false;
             clearInterval(radioElapsedTimer);
             gridVisualizerStop();
             document.getElementById('radioPlayPauseBtn').textContent = '▶ PLAY';
-          }
+            setTimeout(_hostBroadcast, 150); // tell players we paused
         }
       }
     });
@@ -5527,6 +5528,7 @@
 
   function radioStartElapsedTimer() {
     clearInterval(radioElapsedTimer);
+    let _broadcastTick = 0;
     radioElapsedTimer = setInterval(() => {
       if (ytPlayer && ytPlayer.getCurrentTime) {
         radioElapsedSec = Math.floor(ytPlayer.getCurrentTime());
@@ -5541,6 +5543,9 @@
         slider.value = pct;
         slider.style.background = `linear-gradient(to right, var(--accent) 0%, var(--accent) ${pct}%, #2a2a35 ${pct}%, #2a2a35 100%)`;
       }
+      // Broadcast to players every 5 seconds
+      _broadcastTick++;
+      if (_broadcastTick % 5 === 0) _hostBroadcast();
     }, 1000);
   }
 
@@ -5735,9 +5740,10 @@
         gate.remove();
         document.body.classList.remove('gate-locked');
         dossierUnlocked = true;
-        startMenuMusic();
         // If YT player already initialized before gate was dismissed, start radio now
         if (ytPlayer && ytApiReady && !radioCurrentTrack) radioPlayNext();
+        // Finalize host session join if code was entered
+        _finalizeSessionJoin();
       }, { once: true });
     }
 
@@ -5960,11 +5966,17 @@
     setTimeout(_hostBroadcast, 200);
   };
 
+  // ── MENU BACKGROUND MUSIC ──
   let menuMusicPlayer = null;
+  let menuMusicStarted = false;
 
   function startMenuMusic() {
-    if (menuMusicPlayer || !window.YT || !YT.Player) {
-      if (!window.YT) { setTimeout(startMenuMusic, 300); return; }
+    if (menuMusicStarted) return;
+    menuMusicStarted = true;
+    if (!window.YT || !YT.Player) {
+      menuMusicStarted = false;
+      setTimeout(startMenuMusic, 200);
+      return;
     }
     const div = document.createElement('div');
     div.id = 'menuMusicPlayer';
@@ -5981,19 +5993,27 @@
   }
 
   function fadeOutMenuMusic() {
-    if (!menuMusicPlayer || !menuMusicPlayer.setVolume) return;
+    if (!menuMusicPlayer) return;
     let vol = 5;
     const step = () => {
-      vol -= 0.5;
+      vol -= 0.4;
       if (vol <= 0) {
-        menuMusicPlayer.stopVideo();
+        try { menuMusicPlayer.stopVideo(); } catch(e) {}
         return;
       }
-      menuMusicPlayer.setVolume(vol);
+      try { menuMusicPlayer.setVolume(Math.max(0, vol)); } catch(e) {}
       setTimeout(step, 60);
     };
     step();
   }
+
+  // Extend onYouTubeIframeAPIReady to also trigger menu music
+  const _origYTReady = window.onYouTubeIframeAPIReady;
+  window.onYouTubeIframeAPIReady = function() {
+    if (_origYTReady) _origYTReady();
+    startMenuMusic();
+  };
+  if (window.YT && window.YT.Player) startMenuMusic();
 
   // 25002500 UNSAVED WARNING 25002500
   window.addEventListener('beforeunload', e => {
