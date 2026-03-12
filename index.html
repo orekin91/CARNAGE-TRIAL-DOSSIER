@@ -1371,6 +1371,33 @@
     display: none;
   }
 
+  .suspect-list.compact .suspect-weapons:has(.sw-tag) {
+    display: block;
+    padding: 4px 6px;
+    border-top: 1px solid rgba(240,192,64,0.15);
+    background: rgba(240,192,64,0.04);
+  }
+
+  .suspect-list.compact .suspect-weapons-label,
+  .suspect-list.compact .sw-add-row {
+    display: none;
+  }
+
+  .suspect-list.compact .suspect-weapon-tags {
+    gap: 3px;
+    margin-bottom: 0;
+  }
+
+  .suspect-list.compact .sw-tag {
+    font-size: 9px;
+    padding: 2px 5px;
+    gap: 3px;
+  }
+
+  .suspect-list.compact .sw-tag-del {
+    display: none;
+  }
+
   .view-toggle-btn {
     background: transparent;
     border: 1px solid var(--border);
@@ -2007,16 +2034,44 @@
 
   /* PROGRESS BAR */
   .radio-progress-bar {
-    height: 2px;
-    background: var(--border);
-    border-radius: 1px;
-    overflow: hidden;
+    position: relative;
+    height: 14px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
   }
-  .radio-progress-fill {
-    height: 100%;
+  .radio-seek-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 3px;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    background: linear-gradient(to right, var(--red) 0%, var(--red) 0%, #2a2a35 0%, #2a2a35 100%);
+  }
+  .radio-seek-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
     background: var(--red);
-    width: 0%;
-    transition: width 1s linear;
+    cursor: pointer;
+    box-shadow: 0 0 6px var(--red);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .radio-progress-bar:hover .radio-seek-slider::-webkit-slider-thumb {
+    opacity: 1;
+  }
+  .radio-seek-slider::-moz-range-thumb {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--red);
+    cursor: pointer;
+    border: none;
     box-shadow: 0 0 6px var(--red);
   }
 
@@ -2202,7 +2257,7 @@
 <!-- RADIO PANEL -->
 <div id="ytHiddenFrame"></div>
 <div class="radio-tab" id="radioTab">
-  <div class="radio-panel" id="radioPanel">
+  <div class="radio-panel open" id="radioPanel">
     <div class="radio-panel-inner">
       <div class="radio-panel-title">📻 RADIO</div>
 
@@ -2210,7 +2265,7 @@
       <div class="radio-now-playing">
         <div class="radio-np-label">▶ NOW PLAYING</div>
         <div class="radio-np-title" id="radioNpTitle">—</div>
-        <div class="radio-progress-bar"><div class="radio-progress-fill" id="radioProgressFill"></div></div>
+        <div class="radio-progress-bar"><input class="radio-seek-slider" id="radioSeekSlider" type="range" min="0" max="100" value="0" step="0.1" oninput="radioSeek(this.value)" /></div>
         <div class="radio-np-meta">
           <span class="radio-np-elapsed" id="radioElapsed">0:00</span>
           <span class="radio-np-duration" id="radioNpDur">—</span>
@@ -2225,8 +2280,8 @@
 
       <div class="radio-volume-row">
         <span class="radio-vol-icon" id="radioVolIcon">🔊</span>
-        <input class="radio-volume-slider" id="radioVolSlider" type="range" min="0" max="100" value="15" oninput="radioSetVolume(this.value)" />
-        <span class="radio-vol-pct" id="radioVolPct">80%</span>
+        <input class="radio-volume-slider" id="radioVolSlider" type="range" min="0" max="100" value="5" oninput="radioSetVolume(this.value)" />
+        <span class="radio-vol-pct" id="radioVolPct">5%</span>
       </div>
 
       <!-- QUEUE -->
@@ -2242,7 +2297,7 @@
       </div>
     </div>
   </div>
-  <button class="radio-tab-btn" id="radioTabBtn" onclick="toggleRadio()">
+  <button class="radio-tab-btn open" id="radioTabBtn" onclick="toggleRadio()">
     <span class="radio-icon">📻</span>
     RADIO
   </button>
@@ -2271,7 +2326,7 @@
     </div>
     <div class="meta-field">
       <span class="meta-label">INVESTIGATOR</span>
-      <input class="meta-input" placeholder="Your username" />
+      <input class="meta-input" placeholder="Insert player handle/username..." />
     </div>
   </div>
 </div>
@@ -2281,7 +2336,7 @@
 <!-- TIMERR -->
 <div class="trial-timer-bar" id="trialTimerBar">
   <span class="trial-timer-label">⏱ TIMER</span>
-  <span class="trial-timer-display stopped" id="timerDisplay">00:00</span>
+  <span class="trial-timer-display stopped" id="timerDisplay">00:00:00</span>
   <button class="timer-btn" id="timerStartBtn" onclick="timerToggle()">START</button>
   <button class="timer-btn" onclick="timerReset()" style="font-size:9px;">RESET</button>
   <button class="timer-btn" onclick="timerLogToTimeline()" style="font-size:9px;border-color:var(--yellow);color:var(--yellow);" title="Add current time to timeline">📌 LOG</button>
@@ -2639,7 +2694,7 @@
                 onchange="updateSuspectNickname(${s.id}, this.value)" />
             </div>
             <div class="name-row">
-              <input class="suspect-name" value="${s.name}" placeholder="e.g. Player @ Username"
+              <input class="suspect-name" value="${s.name}" placeholder="Insert player handle/username..."
                 oninput="debounceFetch(${s.id}, this.value)"
                 onchange="updateSuspectName(${s.id}, this.value)"
                 style="color:${s.nameColor || 'var(--text)'}"/>
@@ -3139,7 +3194,7 @@
           <div class="avatar-wrap deceased-x" style="border-color:rgba(150,0,150,0.3);">${avatarHtml}</div>
           <div class="name-talent-col">
             <div class="name-row">
-              <input class="suspect-name" value="${s.name}" placeholder="e.g. Player @ Username"
+              <input class="suspect-name" value="${s.name}" placeholder="Insert player handle/username..."
                 style="color:${s.nameColor || 'var(--muted)'}; text-decoration: line-through; opacity:0.7;"
                 onchange="updateDeceasedName(${s.id}, this.value)" />
             </div>
@@ -3210,7 +3265,7 @@
         <div class="victim-avatar-wrap" onclick="fetchVictimAvatar(${v.id})" title="Click to reload">${avatarHtml}</div>
         <div class="name-talent-col">
           <div class="name-row">
-            <input class="victim-name" value="${v.name}" placeholder="e.g. Player @ Username"
+            <input class="victim-name" value="${v.name}" placeholder="Insert player handle/username..."
               oninput="debounceVictimFetch(${v.id}, this.value)"
               onchange="updateVictimName(${v.id}, this.value)"
               style="color:${v.nameColor || 'var(--red)'}"/>
@@ -3493,9 +3548,10 @@
     updateTimerDisplay();
   }
   function updateTimerDisplay() {
-    const m = String(Math.floor(timerSeconds / 60)).padStart(2,'0');
+    const h = String(Math.floor(timerSeconds / 3600)).padStart(2,'0');
+    const m = String(Math.floor((timerSeconds % 3600) / 60)).padStart(2,'0');
     const s = String(timerSeconds % 60).padStart(2,'0');
-    document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+    document.getElementById('timerDisplay').textContent = `${h}:${m}:${s}`;
   }
   function timerToggle() {
     if (timerRunning) {
@@ -3527,12 +3583,13 @@
   function timerReset() {
     timerStop();
     timerSeconds = 0;
-    document.getElementById('timerDisplay').textContent = '00:00';
+    document.getElementById('timerDisplay').textContent = '00:00:00';
   }
   function timerGetFormatted() {
-    const m = String(Math.floor(timerSeconds / 60)).padStart(2,'0');
+    const h = String(Math.floor(timerSeconds / 3600)).padStart(2,'0');
+    const m = String(Math.floor((timerSeconds % 3600) / 60)).padStart(2,'0');
     const s = String(timerSeconds % 60).padStart(2,'0');
-    return `${m}:${s}`;
+    return `${h}:${m}:${s}`;
   }
   function timerLogToTimeline() {
     const time = timerGetFormatted();
@@ -3749,7 +3806,7 @@
            <div class="trial-card-name victim">${t.victimName || '—'}</div>
            ${t.victimTalent ? `<div class="trial-card-talent">Ultimate ${t.victimTalent}</div>` : ''}`;
 
-      const timeRow = t.trialTime && t.trialTime !== '00:00'
+      const timeRow = t.trialTime && t.trialTime !== '00:00:00'
         ? `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-align:center;padding:3px 0 1px;border-top:1px solid var(--border);margin-top:3px;">⏱ ${t.trialTime}</div>`
         : '';
 
@@ -3909,7 +3966,7 @@
     const SURF   = '#16161c';
     const BORDER = '#2a2a35';
 
-    const activeParticipants = suspects.filter(s => s.name.trim());
+    const activeParticipants = suspects.filter(s => s.name.trim() && !s.accused);
     const deceasedNamed      = deceased.filter(d => d.name.trim());
     const PCOLS   = 4;
     const rows    = Math.ceil(activeParticipants.length / PCOLS);
@@ -3922,18 +3979,17 @@
     const photoRows  = photoCount > 0 ? Math.ceil(photoCount / PHOTO_COLS) : 0;
     const H_PHOTOS   = photoCount > 0 ? (36 + photoRows * (PHOTO_SIZE + 28) + 12) : 0;
 
-    const H_HEADER    = 120;
-    const VCOLS = Math.min(victimNames.length || 1, 4);
-    const vRows = Math.ceil(Math.max(victimNames.length, 1) / VCOLS);
-    const H_VICTIM    = victimNames.length > 1
-      ? 30 + vRows * 52 + 16
-      : 30 + 64 + 16;
+    const H_HEADER    = 160;
     const H_PART_LBL  = 36;
     const H_PART      = rows * 60 + 20;
     const H_DEAD      = deceasedNamed.length > 0 ? (40 + decRows * 56 + 16) : 0;
+    const confirmedWeapons = weapons.filter(w => w.found && w.name.trim());
+    const WCOLS = Math.min(confirmedWeapons.length, 4);
+    const wRows = confirmedWeapons.length > 0 ? Math.ceil(confirmedWeapons.length / WCOLS) : 0;
+    const H_WEAPONS   = confirmedWeapons.length > 0 ? (40 + wRows * 44 + 12) : 0;
     const H_VERDICT   = isWrongVerdict ? 240 : 140;
     const H_FOOTER    = 44;
-    const H = H_HEADER + H_VICTIM + H_PART_LBL + H_PART + H_DEAD + H_PHOTOS + H_VERDICT + H_FOOTER + PAD * 2;
+    const H = H_HEADER + H_PART_LBL + H_PART + H_DEAD + H_WEAPONS + H_PHOTOS + H_VERDICT + H_FOOTER + PAD * 2;
 
     const canvas = document.createElement('canvas');
     canvas.width  = W;
@@ -3948,82 +4004,51 @@
     for (let gy = 0; gy < H; gy += 40) { ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(W,gy); ctx.stroke(); }
     for (let gx = 0; gx < W; gx += 40) { ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,H); ctx.stroke(); }
 
-    // Top red glow
-    const grad = ctx.createLinearGradient(0,0,W,0);
-    grad.addColorStop(0,'transparent'); grad.addColorStop(0.5,'rgba(224,48,48,0.12)'); grad.addColorStop(1,'transparent');
-    ctx.fillStyle = grad; ctx.fillRect(0,0,W,90);
-
     const divGrad = ctx.createLinearGradient(0,0,W,0);
     divGrad.addColorStop(0,'transparent'); divGrad.addColorStop(0.3,'#7a1515'); divGrad.addColorStop(0.5,RED); divGrad.addColorStop(0.7,'#7a1515'); divGrad.addColorStop(1,'transparent');
 
     let y = PAD;
 
     // ── HEADER ──
-    ctx.fillStyle = RED; ctx.font = 'bold 42px "Bebas Neue", sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('CARNAGE', W/2, y + 42);
-    ctx.fillStyle = MUTED; ctx.font = '10px "Share Tech Mono", monospace';
-    ctx.fillText('TRIAL DOSSIER — EVIDENCE & SUSPECT TRACKING', W/2, y + 60);
-    ctx.textAlign = 'left'; ctx.font = '9px "Share Tech Mono", monospace'; ctx.fillStyle = MUTED;
-    const mY = y + 82;
-    if (caseNo)        { ctx.fillText('TRIAL NO.',  PAD,         mY); ctx.fillStyle=YELLOW; ctx.fillText(caseNo,        PAD,         mY+14); ctx.fillStyle=MUTED; }
-    if (caseDate)      { ctx.fillText('DATE',       W/2-50,      mY); ctx.fillStyle=YELLOW; ctx.fillText(caseDate,      W/2-50,      mY+14); ctx.fillStyle=MUTED; }
-    if (investigator)  { ctx.fillText('INVESTIGATOR', W-PAD-140, mY); ctx.fillStyle=YELLOW; ctx.fillText(investigator,  W-PAD-140,   mY+14); ctx.fillStyle=MUTED; }
-    // Trial time
+    ctx.fillStyle = RED; ctx.font = 'bold 56px "Bebas Neue", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('CARNAGE', W/2, y + 54);
+    ctx.fillStyle = MUTED; ctx.font = '11px "Share Tech Mono", monospace';
+    ctx.fillText('TRIAL DOSSIER — EVIDENCE & SUSPECT TRACKING', W/2, y + 72);
+
+    // Meta row — pill-style cards
     const savedTime = timerGetFormatted();
-    if (savedTime && savedTime !== '00:00') {
-      ctx.fillText('TIMER', W/2+60, mY); ctx.fillStyle=YELLOW; ctx.fillText(savedTime, W/2+60, mY+14); ctx.fillStyle=MUTED;
+    const metaItems = [];
+    if (caseNo)                              metaItems.push({ label: 'TRIAL NO.', value: caseNo });
+    if (caseDate)                            metaItems.push({ label: 'DATE',      value: caseDate });
+    if (savedTime && savedTime !== '00:00:00')  metaItems.push({ label: 'TIMER',     value: savedTime });
+    if (investigator)                        metaItems.push({ label: 'PLAYER',    value: investigator });
+
+    if (metaItems.length) {
+      const pillW = 190, pillH = 50, pillGap = 16;
+      const totalW = metaItems.length * pillW + (metaItems.length - 1) * pillGap;
+      let mx = (W - totalW) / 2;
+      const my = y + 84;
+      metaItems.forEach(item => {
+        // pill bg
+        ctx.fillStyle = 'rgba(240,192,64,0.07)';
+        roundRect(ctx, mx, my, pillW, pillH, 3); ctx.fill();
+        ctx.strokeStyle = 'rgba(240,192,64,0.25)'; ctx.lineWidth = 1;
+        roundRect(ctx, mx, my, pillW, pillH, 3); ctx.stroke();
+        // top accent line
+        ctx.fillStyle = YELLOW; roundRect(ctx, mx, my, pillW, 2, 3); ctx.fill();
+        // label
+        ctx.fillStyle = MUTED; ctx.font = '10px "Share Tech Mono", monospace'; ctx.textAlign = 'left';
+        ctx.fillText(item.label, mx + 12, my + 16);
+        // value
+        ctx.fillStyle = YELLOW; ctx.font = 'bold 22px "Bebas Neue", sans-serif';
+        ctx.fillText(item.value, mx + 12, my + 40);
+        mx += pillW + pillGap;
+      });
     }
     y += H_HEADER;
 
     // divider
     ctx.fillStyle = divGrad; ctx.fillRect(PAD, y, W-PAD*2, 1); y += 14;
-
-    // ── VICTIM SECTION (centered) ──
-    const VB_H = H_VICTIM - 14;
-    ctx.fillStyle = 'rgba(224,48,48,0.08)';
-    roundRect(ctx, PAD, y, W-PAD*2, VB_H, 2); ctx.fill();
-    ctx.strokeStyle = 'rgba(224,48,48,0.25)'; ctx.lineWidth = 1;
-    roundRect(ctx, PAD, y, W-PAD*2, VB_H, 2); ctx.stroke();
-    // top red bar
-    ctx.fillStyle = RED; roundRect(ctx, PAD, y, W-PAD*2, 3, 2); ctx.fill();
-
-    ctx.fillStyle = RED; ctx.font = '14px "Bebas Neue", sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('🩸 VICTIM', W/2, y + 20);
-
-    if (victimNames.length > 1) {
-      // Compact grid
-      const VPW = (W - PAD*2 - (VCOLS-1)*6) / VCOLS;
-      victimNames.forEach((name, i) => {
-        const col = i % VCOLS;
-        const row = Math.floor(i / VCOLS);
-        const vx = PAD + col * (VPW + 6);
-        const vy2 = y + 28 + row * 52;
-        ctx.fillStyle = 'rgba(224,48,48,0.12)'; roundRect(ctx, vx, vy2, VPW, 44, 2); ctx.fill();
-        ctx.strokeStyle = 'rgba(224,48,48,0.3)'; ctx.lineWidth=1; roundRect(ctx, vx, vy2, VPW, 44, 2); ctx.stroke();
-        ctx.fillStyle = RED; roundRect(ctx, vx, vy2, VPW, 2, 2); ctx.fill();
-        ctx.fillStyle = RED; ctx.font = '15px "Special Elite", cursive'; ctx.textAlign = 'left';
-        ctx.fillText(truncate(ctx, name, VPW - 12), vx + 8, vy2 + 20);
-        if (victimTalents[i]) {
-          ctx.fillStyle = YELLOW; ctx.font = '9px "Share Tech Mono", monospace';
-          ctx.fillText(truncate(ctx, 'Ultimate ' + victimTalents[i], VPW - 12), vx + 8, vy2 + 34);
-        }
-      });
-    } else {
-      victimNames.forEach((name, i) => {
-        const vy2 = y + 32 + i * 64;
-        ctx.fillStyle = RED; ctx.font = '28px "Special Elite", cursive'; ctx.textAlign = 'center';
-        ctx.fillText(name || '—', W/2, vy2 + 28);
-        if (victimTalents[i]) {
-          ctx.fillStyle = YELLOW; ctx.font = '12px "Share Tech Mono", monospace';
-          ctx.fillText('Ultimate ' + victimTalents[i], W/2, vy2 + 46);
-        }
-      });
-      if (!victimNames.length) {
-        ctx.fillStyle = MUTED; ctx.font = '22px "Special Elite", cursive'; ctx.textAlign = 'center';
-        ctx.fillText('—', W/2, y + 52);
-      }
-    }
-    y += H_VICTIM;
 
     // ── PARTICIPANTS LABEL ──
     ctx.fillStyle = MUTED; ctx.font = '9px "Share Tech Mono", monospace'; ctx.textAlign = 'center';
@@ -4037,21 +4062,16 @@
       const row = Math.floor(i / PCOLS);
       const px = PAD + col * (PW + 6);
       const py = y + row * 60;
-      const sc = s.status === 'cleared' ? GREEN : s.status === 'suspect' ? MUTED : RED;
 
       ctx.fillStyle = SURF; roundRect(ctx, px, py, PW, 52, 2); ctx.fill();
-      ctx.strokeStyle = sc === RED ? 'rgba(224,48,48,0.35)' : sc === GREEN ? 'rgba(48,192,96,0.35)' : BORDER;
+      ctx.strokeStyle = BORDER;
       ctx.lineWidth = 1; roundRect(ctx, px, py, PW, 52, 2); ctx.stroke();
-      // status bar top
-      ctx.fillStyle = sc; roundRect(ctx, px, py, PW, 2, 2); ctx.fill();
+      // neutral top bar
+      ctx.fillStyle = BORDER; roundRect(ctx, px, py, PW, 2, 2); ctx.fill();
 
-      ctx.fillStyle = sc; ctx.beginPath(); ctx.arc(px+12, py+16, 4, 0, Math.PI*2); ctx.fill();
       ctx.fillStyle = s.nameColor || COL; ctx.font = '15px "Special Elite", cursive'; ctx.textAlign = 'left';
-      ctx.fillText(truncate(ctx, s.name, PW-55), px+22, py+19);
-      if (s.talent) { ctx.fillStyle = YELLOW; ctx.font = '9px "Share Tech Mono", monospace'; ctx.fillText(truncate(ctx, 'Ultimate ' + s.talent, PW-26), px+22, py+32); }
-
-      ctx.fillStyle = sc; ctx.font = 'bold 8px "Share Tech Mono", monospace'; ctx.textAlign = 'right';
-      ctx.fillText(s.status === 'cleared' ? 'CLR' : s.status === 'suspect' ? 'N/A' : s.status === 'none' ? 'N/A' : 'SUS', px+PW-8, py+19);
+      ctx.fillText(truncate(ctx, s.name, PW-16), px+10, py+22);
+      if (s.talent) { ctx.fillStyle = YELLOW; ctx.font = '9px "Share Tech Mono", monospace'; ctx.fillText(truncate(ctx, 'Ultimate ' + s.talent, PW-16), px+10, py+36); }
       ctx.textAlign = 'left';
     });
     y += H_PART;
@@ -4072,6 +4092,37 @@
         if (d.talent) { ctx.fillStyle=YELLOW; ctx.font='9px "Share Tech Mono", monospace'; ctx.fillText(truncate(ctx,'Ultimate '+d.talent,PW-20), px, py+27); }
       });
       y += H_DEAD;
+    }
+
+    // ── CONFIRMED WEAPONS ──
+    if (confirmedWeapons.length > 0) {
+      ctx.fillStyle=divGrad; ctx.fillRect(PAD, y, W-PAD*2, 1); y += 14;
+      ctx.fillStyle = 'rgba(240,192,64,0.06)';
+      roundRect(ctx, PAD, y, W-PAD*2, H_WEAPONS-16, 2); ctx.fill();
+      ctx.strokeStyle = 'rgba(240,192,64,0.25)'; ctx.lineWidth=1;
+      roundRect(ctx, PAD, y, W-PAD*2, H_WEAPONS-16, 2); ctx.stroke();
+      ctx.fillStyle = YELLOW; roundRect(ctx, PAD, y, W-PAD*2, 2, 2); ctx.fill();
+      ctx.fillStyle = YELLOW; ctx.font='11px "Bebas Neue", sans-serif'; ctx.textAlign='left';
+      ctx.fillText(`⚔ CONFIRMED WEAPONS  (${confirmedWeapons.length})`, PAD+12, y+16);
+      const WPW = (W - PAD*2 - (WCOLS-1)*6) / WCOLS;
+      confirmedWeapons.forEach((w, i) => {
+        const col = i % WCOLS;
+        const row = Math.floor(i / WCOLS);
+        const wx = PAD + col * (WPW + 6);
+        const wy = y + 24 + row * 44;
+        ctx.fillStyle = SURF; roundRect(ctx, wx, wy, WPW, 36, 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(240,192,64,0.3)'; ctx.lineWidth=1; roundRect(ctx, wx, wy, WPW, 36, 2); ctx.stroke();
+        ctx.fillStyle = YELLOW; roundRect(ctx, wx, wy, WPW, 2, 2); ctx.fill();
+        // weapon icon dot
+        ctx.fillStyle = YELLOW; ctx.beginPath(); ctx.arc(wx+12, wy+12, 3, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = COL; ctx.font='13px "Special Elite", cursive'; ctx.textAlign='left';
+        ctx.fillText(truncate(ctx, w.name, WPW-26), wx+22, wy+15);
+        if (w.note) {
+          ctx.fillStyle = MUTED; ctx.font='8px "Share Tech Mono", monospace';
+          ctx.fillText(truncate(ctx, w.note, WPW-14), wx+8, wy+28);
+        }
+      });
+      y += H_WEAPONS;
     }
 
     // ── EVIDENCE PHOTOS ──
@@ -4143,14 +4194,20 @@
       ? [...suspects, ...deceased, ...victimizedSuspects].find(s => s.name.trim().toLowerCase() === realMurderer.trim().toLowerCase())
       : null;
     const realMurdererAvatarSrc = realMurdererSuspect?.avatarUrl || null;
-    Promise.all([loadImg(victimAvatarSrc), loadImg(accusedAvatarSrc), loadImg(realMurdererAvatarSrc)]).then(([victimImg, accusedImg, realMurdererImg]) => {
-      finishCard(victimImg, accusedImg, realMurdererImg);
+    const allVictimAvatarSrcs = victimAvatarSrcs;
+    Promise.all([
+      loadImg(victimAvatarSrc),
+      loadImg(accusedAvatarSrc),
+      loadImg(realMurdererAvatarSrc),
+      ...allVictimAvatarSrcs.map(loadImg)
+    ]).then(([victimImg, accusedImg, realMurdererImg, ...allVictimImgs]) => {
+      finishCard(victimImg, accusedImg, realMurdererImg, allVictimImgs);
     });
     return;
 
     finishCard();
 
-    function finishCard(victimImg, accusedImg, realMurdererImg) {
+    function finishCard(victimImg, accusedImg, realMurdererImg, allVictimImgs = []) {
       // ── VERDICT ──
       ctx.fillStyle=divGrad; ctx.fillRect(PAD, y+H_PHOTOS, W-PAD*2, 1);
       let vy = y + H_PHOTOS + 14;
@@ -4174,19 +4231,41 @@
         drawAvatarBg(victimImg, PAD, midX-PAD, vy, VH);
         drawAvatarBg(accusedImg, midX, W-midX-PAD, vy, VH);
 
-        // Victim side — compact if multiple
+        // Victim side — compact avatar boxes if multiple
         if (victimNames.length > 1) {
-          ctx.fillStyle=MUTED; ctx.font='10px "Share Tech Mono", monospace'; ctx.textAlign='left';
-          ctx.fillText('🩸 VICTIMS', PAD+20, vy+18);
-          const vSlotH = Math.floor((VH - 26) / Math.min(victimNames.length, 3));
-          victimNames.slice(0, 3).forEach((name, i) => {
-            const lineY = vy + 26 + i * vSlotH;
-            ctx.fillStyle=RED; ctx.font=`${Math.min(18, vSlotH-8)}px "Special Elite", cursive`; ctx.textAlign='left';
-            ctx.fillText(truncate(ctx, name, midX-PAD-40), PAD+20, lineY + vSlotH*0.6);
+          ctx.fillStyle=MUTED; ctx.font='9px "Share Tech Mono", monospace'; ctx.textAlign='left';
+          ctx.fillText('🩸 VICTIMS', PAD+8, vy+12);
+          const maxShow = Math.min(victimNames.length, 3);
+          const boxW = Math.floor((midX - PAD - 12 - (maxShow-1)*4) / maxShow);
+          const boxH = VH - 20;
+          const boxY = vy + 18;
+          victimNames.slice(0, maxShow).forEach((name, i) => {
+            const bx = PAD + 4 + i * (boxW + 4);
+            // bg
+            ctx.fillStyle='rgba(224,48,48,0.10)'; roundRect(ctx, bx, boxY, boxW, boxH, 2); ctx.fill();
+            ctx.strokeStyle='rgba(224,48,48,0.35)'; ctx.lineWidth=1; roundRect(ctx, bx, boxY, boxW, boxH, 2); ctx.stroke();
+            // avatar
+            const aImg = allVictimImgs[i];
+            if (aImg) {
+              const ratio = aImg.naturalWidth / aImg.naturalHeight;
+              const ah = boxH - 22;
+              const aw = Math.min(boxW, ah * ratio);
+              ctx.save();
+              roundRect(ctx, bx, boxY, boxW, boxH-22, 2); ctx.clip();
+              ctx.globalAlpha = 0.35;
+              ctx.drawImage(aImg, bx + (boxW-aw)/2, boxY, aw, ah);
+              ctx.globalAlpha = 1;
+              ctx.restore();
+            }
+            // red top bar
+            ctx.fillStyle=RED; roundRect(ctx, bx, boxY, boxW, 2, 2); ctx.fill();
+            // name
+            ctx.fillStyle=RED; ctx.font=`${Math.min(13, boxW/5+6)}px "Special Elite", cursive`; ctx.textAlign='center';
+            ctx.fillText(truncate(ctx, name, boxW-8), bx+boxW/2, boxY+boxH-8);
           });
-          if (victimNames.length > 3) {
+          if (victimNames.length > maxShow) {
             ctx.fillStyle=MUTED; ctx.font='9px "Share Tech Mono", monospace'; ctx.textAlign='left';
-            ctx.fillText(`+${victimNames.length-3} more`, PAD+20, vy+VH-10);
+            ctx.fillText(`+${victimNames.length-maxShow} more`, PAD+8, vy+VH-4);
           }
         } else {
           ctx.fillStyle=MUTED; ctx.font='10px "Share Tech Mono", monospace'; ctx.textAlign='left';
@@ -4226,16 +4305,35 @@
         drawAvatarBg(victimImg, PAD, halfW, vy, topH);
 
         ctx.fillStyle=MUTED; ctx.font='9px "Share Tech Mono", monospace'; ctx.textAlign='left';
-        ctx.fillText(victimNames.length > 1 ? '🩸 VICTIMS' : '🩸 VICTIM', PAD+10, vy+14);
+        ctx.fillText(victimNames.length > 1 ? '🩸 VICTIMS' : '🩸 VICTIM', PAD+10, vy+12);
         if (victimNames.length > 1) {
-          const vSlotH = Math.floor((topH - 20) / Math.min(victimNames.length, 2));
-          victimNames.slice(0, 2).forEach((name, i) => {
-            ctx.fillStyle=COL; ctx.font='16px "Special Elite", cursive';
-            ctx.fillText(truncate(ctx, name, halfW-80), PAD+10, vy+22+i*vSlotH+vSlotH*0.6);
+          const maxShow2 = Math.min(victimNames.length, 3);
+          const bw2 = Math.floor((halfW - 16 - (maxShow2-1)*4) / maxShow2);
+          const bh2 = topH - 22;
+          const by2 = vy + 16;
+          victimNames.slice(0, maxShow2).forEach((name, i) => {
+            const bx2 = PAD + 6 + i * (bw2 + 4);
+            ctx.fillStyle='rgba(224,48,48,0.12)'; roundRect(ctx, bx2, by2, bw2, bh2, 2); ctx.fill();
+            ctx.strokeStyle='rgba(224,48,48,0.35)'; ctx.lineWidth=1; roundRect(ctx, bx2, by2, bw2, bh2, 2); ctx.stroke();
+            const aImg2 = allVictimImgs[i];
+            if (aImg2) {
+              const ratio2 = aImg2.naturalWidth / aImg2.naturalHeight;
+              const ah2 = bh2 - 18;
+              const aw2 = Math.min(bw2, ah2 * ratio2);
+              ctx.save();
+              roundRect(ctx, bx2, by2, bw2, bh2-18, 2); ctx.clip();
+              ctx.globalAlpha = 0.35;
+              ctx.drawImage(aImg2, bx2 + (bw2-aw2)/2, by2, aw2, ah2);
+              ctx.globalAlpha = 1;
+              ctx.restore();
+            }
+            ctx.fillStyle=RED; roundRect(ctx, bx2, by2, bw2, 2, 2); ctx.fill();
+            ctx.fillStyle=RED; ctx.font=`${Math.min(11, bw2/5+5)}px "Special Elite", cursive`; ctx.textAlign='center';
+            ctx.fillText(truncate(ctx, name, bw2-6), bx2+bw2/2, by2+bh2-5);
           });
-          if (victimNames.length > 2) {
-            ctx.fillStyle=MUTED; ctx.font='9px "Share Tech Mono", monospace';
-            ctx.fillText(`+${victimNames.length-2} more`, PAD+10, vy+topH-6);
+          if (victimNames.length > maxShow2) {
+            ctx.fillStyle=MUTED; ctx.font='8px "Share Tech Mono", monospace'; ctx.textAlign='left';
+            ctx.fillText(`+${victimNames.length-maxShow2} more`, PAD+10, vy+topH-4);
           }
         } else {
           if (victimNicknames[0]) { ctx.fillStyle='#4090e0'; ctx.font='9px "Share Tech Mono", monospace'; ctx.fillText(victimNicknames[0], PAD+10, vy+30); }
@@ -4501,7 +4599,7 @@
   document.getElementById('viewToggleBtn').textContent = '⊞ COMPACT';
 
   // ─── RADIO PANEL ────────────────────────────────────────────
-  let radioOpen = false;
+  let radioOpen = true;
 
   function toggleRadio() {
     radioOpen = !radioOpen;
@@ -4521,7 +4619,7 @@
   let radioPlaying = false;
   let radioElapsedSec = 0;
   let radioElapsedTimer = null;
-  let radioVolume = 15;
+  let radioVolume = 5;
 
   function radioSetVolume(val) {
     radioVolume = parseInt(val);
@@ -4591,7 +4689,7 @@
       document.getElementById('radioNpTitle').textContent = '— Queue empty —';
       document.getElementById('radioNpDur').textContent = '';
       document.getElementById('radioElapsed').textContent = '0:00';
-      document.getElementById('radioProgressFill').style.width = '0%';
+      document.getElementById('radioSeekSlider').value = 0; document.getElementById('radioSeekSlider').style.background = 'linear-gradient(to right, var(--red) 0%, var(--red) 0%, #2a2a35 0%, #2a2a35 100%)';
       radioCurrentTrack = null;
       radioRenderQueue();
       return;
@@ -4601,7 +4699,8 @@
     document.getElementById('radioNpTitle').textContent = radioCurrentTrack.title || '⏳ Loading...';
     document.getElementById('radioNpDur').textContent = radioCurrentTrack.duration ? radioFmtTime(radioCurrentTrack.duration) : '—';
     document.getElementById('radioElapsed').textContent = '0:00';
-    document.getElementById('radioProgressFill').style.width = '0%';
+    document.getElementById('radioSeekSlider').value = 0;
+    document.getElementById('radioSeekSlider').style.background = `linear-gradient(to right, var(--red) 0%, var(--red) 0%, #2a2a35 0%, #2a2a35 100%)`;
     if (ytPlayer && ytPlayer.loadVideoById) {
       ytPlayer.loadVideoById(radioCurrentTrack.videoId);
     }
@@ -4627,14 +4726,30 @@
   function radioStartElapsedTimer() {
     clearInterval(radioElapsedTimer);
     radioElapsedTimer = setInterval(() => {
-      radioElapsedSec++;
+      if (ytPlayer && ytPlayer.getCurrentTime) {
+        radioElapsedSec = Math.floor(ytPlayer.getCurrentTime());
+      } else {
+        radioElapsedSec++;
+      }
       document.getElementById('radioElapsed').textContent = radioFmtTime(radioElapsedSec);
       const dur = radioCurrentTrack && radioCurrentTrack.duration;
       if (dur) {
         const pct = Math.min(100, (radioElapsedSec / dur) * 100);
-        document.getElementById('radioProgressFill').style.width = pct + '%';
+        const slider = document.getElementById('radioSeekSlider');
+        slider.value = pct;
+        slider.style.background = `linear-gradient(to right, var(--red) 0%, var(--red) ${pct}%, #2a2a35 ${pct}%, #2a2a35 100%)`;
       }
     }, 1000);
+  }
+
+  function radioSeek(pct) {
+    if (!ytPlayer || !radioCurrentTrack || !radioCurrentTrack.duration) return;
+    const seekTo = (pct / 100) * radioCurrentTrack.duration;
+    ytPlayer.seekTo(seekTo, true);
+    radioElapsedSec = Math.floor(seekTo);
+    document.getElementById('radioElapsed').textContent = radioFmtTime(radioElapsedSec);
+    const slider = document.getElementById('radioSeekSlider');
+    slider.style.background = `linear-gradient(to right, var(--red) 0%, var(--red) ${pct}%, #2a2a35 ${pct}%, #2a2a35 100%)`;
   }
 
   function radioFmtTime(sec) {
