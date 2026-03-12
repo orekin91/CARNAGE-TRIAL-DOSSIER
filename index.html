@@ -120,10 +120,12 @@
     justify-content: center;
     gap: 18px;
     padding: 10px 20px;
-    background: rgba(224,48,48,0.06);
-    border: 1px solid rgba(224,48,48,0.2);
-    border-radius: 4px;
-    margin: 0 40px 4px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    max-width: 1060px;
+    margin: 0 auto 4px;
+    box-sizing: border-box;
   }
   .trial-timer-label {
     font-family: 'Share Tech Mono', monospace;
@@ -1231,6 +1233,31 @@
   body.light .notes-area,
   body.light .misc-notes-area,
   body.light .suspect-notes-area { background: rgba(0,0,0,0.02); }
+
+  body.light .suspect-card {
+    background: #1a1a1f;
+    border-color: #2a2a35;
+    color: #d8d0c8;
+  }
+  body.light .suspect-card.accused {
+    background: rgba(139,0,0,0.5);
+    border-color: #8b0000;
+  }
+  body.light .suspect-card.cleared {
+    background: #1a1a1f;
+    border-color: #1a4a2a;
+  }
+  body.light .suspect-card .suspect-name { color: #d8d0c8; }
+  body.light .suspect-card .nickname-input,
+  body.light .suspect-card .talent-input,
+  body.light .suspect-card .suspect-notes-area { color: #a09888; background: transparent; border-color: #2a2a35; }
+  body.light .suspect-card .suspect-weapons-label,
+  body.light .suspect-card .confirmed-label { color: #706a60; }
+  body.light .suspect-card .weapon-tag { background: rgba(255,255,255,0.07); color: #d8d0c8; border-color: #3a3a45; }
+  body.light .suspect-card select,
+  body.light .suspect-card .crime-scene-weapon-select { background: #111115; color: #d8d0c8; border-color: #2a2a35; }
+  body.light .suspect-card .tag-btn { border-color: #3a3a45; color: #706a60; }
+  body.light .suspect-card .tag-btn.active { color: inherit; }
 
   .misc-notes-area {
     width: 100%;
@@ -2438,7 +2465,7 @@
         <div class="verdict-name-field">
           <div class="verdict-name-label">🔪 ACCUSED MURDERER</div>
           <div style="position:relative;">
-            <input class="verdict-name-input murderer-input" placeholder="e.g. Player @ Username" />
+            <input class="verdict-name-input murderer-input" id="verdictMurdererInput" placeholder="Auto-filled from accused above..." readonly style="cursor:default; opacity:0.8;" />
             <div class="stamp innocent-stamp verdict-stamp" id="innocentStampAccused">INNOCENT</div>
           </div>
         </div>
@@ -2842,7 +2869,7 @@
     }
   }
 
-  const STATIC_WEAPONS = ['Knife', 'Toy Hammer', 'Poison', 'Gloves'];
+  const STATIC_WEAPONS = ['Knife', 'Toy Hammer', 'Poison', 'Gun'];
 
   function checkStatic(weaponName, callback) {
     if (STATIC_WEAPONS.includes(weaponName)) {
@@ -3050,8 +3077,8 @@
     const susp = suspects.filter(x=>x.status==='suspect').length;
     const total = suspects.length + victimizedSuspects.length + deceased.length;
     const alive = suspects.length;
-    document.getElementById('suspectCount').textContent =
-      `${alive}/${total} alive · ${susp} under review · ${cleared} cleared · ${guilty} suspects`;
+    document.getElementById('suspectCount').innerHTML =
+      `${alive}/${total} alive · ${susp} under review · <span style="color:var(--green)">${cleared} cleared</span> · <span style="color:var(--yellow)">${guilty} suspects</span>`;
   }
 
   // ─── DECEASED ───────────────────────────────────────────────
@@ -4764,6 +4791,10 @@
 
 
 </script>
+
+<div style="text-align:center; padding: 12px 20px 20px; font-family:'Share Tech Mono',monospace; font-size:10px; color:#3a3a45; letter-spacing:1px;">
+  found a bug? dm <span style="color:#4a4a58;">h0stile</span> on discord
+</div>
 
 </body>
 </html>
