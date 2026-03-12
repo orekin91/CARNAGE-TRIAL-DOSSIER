@@ -317,6 +317,10 @@
     left: 50%;
     transform: translateX(-50%);
     pointer-events: none;
+    white-space: nowrap;
+    max-width: 50%;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .drag-handle {
@@ -376,6 +380,10 @@
     font-size: 11px;
     color: var(--muted);
     letter-spacing: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
   }
 
   .panel-body { padding: 12px; }
@@ -1848,6 +1856,13 @@
   .stamp.guilty-stamp { color: rgba(224,48,48,0.7); border-color: rgba(224,48,48,0.7); }
   .stamp.show { opacity: 1; }
 
+  .verdict-stamp {
+    top: 50%;
+    right: auto;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+  }
+
   /* ─── SAVE TRIAL BUTTON ─── */
   .save-trial-btn {
     background: transparent;
@@ -2978,7 +2993,7 @@
   <div class="panel" style="grid-column: 1 / -1; border-top: 2px solid var(--accent);">
     <div class="panel-header" onclick="toggleParticipantsPanel()" style="cursor:pointer;">
       <span class="drag-handle" title="Drag to reorder">⠿</span><span class="panel-title" style="color:var(--accent);">👁 PARTICIPANTS</span>
-      <span style="display:flex;align-items:center;gap:10px;">
+      <span style="display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden;flex-shrink:1;">
         <span class="panel-count" id="suspectCount">0 under review · 0 cleared · 0 suspects</span>
         <span class="bulk-import-arrow" id="participantsPanelArrow">▼</span>
       </span>
@@ -3915,16 +3930,23 @@
       `).join('');
       card.innerHTML = `
         <div class="suspect-item">
-          <span class="participant-num" style="color:#c060c0;opacity:0.6;">#${(s._order ?? 0) + 1}</span>
-          <div class="status-dot" style="background:#c060c0;box-shadow:0 0 6px #c060c0;"></div>
-          <div class="avatar-wrap deceased-x" style="border-color:rgba(150,0,150,0.3);">${avatarHtml}</div>
+          <div class="num-dot-col">
+            <span class="participant-num" style="color:#c060c0;opacity:0.6;">#${(s._order ?? 0) + 1}</span>
+            <div class="status-dot" style="background:#c060c0;box-shadow:0 0 6px #c060c0;"></div>
+          </div>
+          <div class="avatar-wrap deceased-x" style="border-color:rgba(150,0,150,0.3);" title="Click to reload avatar" onclick="fetchAvatar(${s.id})">${avatarHtml}</div>
           <div class="name-talent-col">
+            <div class="name-row">
+              <input class="nickname-input" value="${s.nickname || ''}" placeholder="nickname..."
+                style="text-decoration: line-through; opacity:0.7;"
+                onchange="updateDeceasedNickname(${s.id}, this.value)" />
+            </div>
             <div class="name-row">
               <input class="suspect-name" value="${s.name}" placeholder="Insert player handle/username..."
                 style="color:${s.nameColor || 'var(--muted)'}; text-decoration: line-through; opacity:0.7;"
                 onchange="updateDeceasedName(${s.id}, this.value)" />
             </div>
-            ${s.displayName ? `<span class="display-name-tag" style="display:inline">${s.displayName}</span>` : ''}
+            <span class="display-name-tag" style="display:${s.displayName ? 'inline' : 'none'}">${s.displayName || ''}</span>
             ${s.deathNote ? `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);opacity:0.7;letter-spacing:0.5px;">${s.deathNote}</span>` : ''}
             <div class="talent-row">
               <span class="talent-prefix">${useShsl ? 'SHSL' : 'Ultimate'}</span>
@@ -3934,8 +3956,6 @@
             </div>
           </div>
           <div class="suspect-actions">
-            <button class="tag-btn clr ${s.status==='cleared'?'active':''}" onclick="setDeceasedStatus(${s.id},'cleared')">CLR</button>
-            <button class="tag-btn glt ${s.status==='guilty'?'active':''}" onclick="setDeceasedStatus(${s.id},'guilty')">SUS</button>
             <button class="tag-btn revive" onclick="reviveSuspect(${s.id})" title="Move back to participants">↩ ALIVE</button>
           </div>
           <button class="del-btn" onclick="removeDeceased(${s.id})">×</button>
@@ -3950,6 +3970,11 @@
   function updateDeceasedName(id, val) {
     const d = deceased.find(x => x.id === id);
     if (d) d.name = val;
+  }
+
+  function updateDeceasedNickname(id, val) {
+    const d = deceased.find(x => x.id === id);
+    if (d) d.nickname = val.trim();
   }
 
   function updateDeceasedTalent(id, val) {
@@ -4769,12 +4794,12 @@
     const rows    = Math.ceil(activeParticipants.length / PCOLS);
     const decRows = Math.ceil(deceasedNamed.length / PCOLS);
 
-    // Photo strip height
-    const photoCount = photos.length;
+    // Photo strip height — excluded from saved image
+    const photoCount = 0;
     const PHOTO_SIZE = 120;
-    const PHOTO_COLS = Math.min(photoCount, Math.floor((W - PAD*2 + 8) / (PHOTO_SIZE + 8)));
-    const photoRows  = photoCount > 0 ? Math.ceil(photoCount / PHOTO_COLS) : 0;
-    const H_PHOTOS   = photoCount > 0 ? (36 + photoRows * (PHOTO_SIZE + 28) + 12) : 0;
+    const PHOTO_COLS = 1;
+    const photoRows  = 0;
+    const H_PHOTOS   = 0;
 
     const H_HEADER    = 160;
     const H_PART_LBL  = 36;
@@ -4922,56 +4947,6 @@
       y += H_WEAPONS;
     }
 
-    // ── EVIDENCE PHOTOS ──
-    if (photoCount > 0) {
-      ctx.fillStyle=divGrad; ctx.fillRect(PAD, y, W-PAD*2, 1); y+=14;
-      ctx.fillStyle=MUTED; ctx.font='9px "Share Tech Mono", monospace'; ctx.textAlign='center';
-      ctx.fillText('— EVIDENCE PHOTOS —', W/2, y+12);
-      y += 26;
-
-      const totalPhotoW = PHOTO_COLS*(PHOTO_SIZE+8)-8;
-      const photoStartX = (W - totalPhotoW) / 2;
-
-      const loadPhoto = (src) => new Promise(res => {
-        const img = new Image(); img.crossOrigin = 'anonymous'; img.onload = () => res(img); img.onerror = () => res(null); img.src = src;
-      });
-
-      // We need async for photos — store and render after
-      const photoPromises = photos.map(p => loadPhoto(p.src));
-      Promise.all(photoPromises).then(imgs => {
-        imgs.forEach((img, i) => {
-          if (!img) return;
-          const col = i % PHOTO_COLS;
-          const row = Math.floor(i / PHOTO_COLS);
-          const px = photoStartX + col*(PHOTO_SIZE+8);
-          const py = y + row*(PHOTO_SIZE+28);
-          // border
-          ctx.strokeStyle = BORDER; ctx.lineWidth=1;
-          ctx.strokeRect(px, py, PHOTO_SIZE, PHOTO_SIZE);
-          // image (cover crop)
-          ctx.save();
-          ctx.beginPath(); ctx.rect(px, py, PHOTO_SIZE, PHOTO_SIZE); ctx.clip();
-          const aspect = img.width/img.height;
-          let dw=PHOTO_SIZE, dh=PHOTO_SIZE, dx=px, dy_=py;
-          if (aspect>1) { dh=PHOTO_SIZE; dw=dh*aspect; dx=px-(dw-PHOTO_SIZE)/2; }
-          else          { dw=PHOTO_SIZE; dh=dw/aspect; dy_=py-(dh-PHOTO_SIZE)/2; }
-          ctx.drawImage(img, dx, dy_, dw, dh);
-          ctx.restore();
-          // caption
-          const cap = photos[i]?.caption || '';
-          if (cap) {
-            ctx.fillStyle=MUTED; ctx.font='9px "Share Tech Mono", monospace'; ctx.textAlign='center';
-            ctx.fillText(truncate(ctx, cap, PHOTO_SIZE), px+PHOTO_SIZE/2, py+PHOTO_SIZE+12);
-          }
-        });
-
-        finishCard();
-      });
-
-      // skip sync finish — photos need async
-      return;
-    }
-
     // Load verdict avatars then finish
     const loadImg = src => new Promise(res => {
       if (!src) return res(null);
@@ -5006,8 +4981,8 @@
 
     function finishCard(victimImg, accusedImg, realMurdererImg, allVictimImgs = []) {
       // ── VERDICT ──
-      ctx.fillStyle=divGrad; ctx.fillRect(PAD, y+H_PHOTOS, W-PAD*2, 1);
-      let vy = y + H_PHOTOS + 14;
+      ctx.fillStyle=divGrad; ctx.fillRect(PAD, y, W-PAD*2, 1);
+      let vy = y + 14;
       const VH = H_VERDICT - 14;
 
       const drawAvatarBg = (img, x, bw, bY, bH) => {
@@ -5397,7 +5372,6 @@
 
   // ─── RADIO PANEL ────────────────────────────────────────────
   let radioOpen = false;
-  let dossierUnlocked = false; // becomes true once the gate is dismissed
 
   function toggleRadio() {
     radioOpen = !radioOpen;
@@ -5456,14 +5430,13 @@
       width: 1, height: 1,
       playerVars: { autoplay: 1 },
       events: {
-        onReady: () => { ytPlayer.setVolume(radioVolume); if (dossierUnlocked) radioPlayNext(); },
+        onReady: () => { ytPlayer.setVolume(radioVolume); radioPlayNext(); },
         onStateChange: e => {
           if (e.data === YT.PlayerState.ENDED) radioSkip();
           if (e.data === YT.PlayerState.PLAYING) {
             radioPlaying = true;
             radioStartElapsedTimer();
             gridVisualizerStart();
-            fadeOutMenuMusic(); // fade menu music when radio begins
             // Grab title & duration from player if not cached
             const dur = ytPlayer.getDuration ? Math.round(ytPlayer.getDuration()) : 0;
             const vid = ytPlayer.getVideoData ? ytPlayer.getVideoData() : {};
@@ -5474,20 +5447,16 @@
               document.getElementById('radioNpDur').textContent = radioFmtTime(radioCurrentTrack.duration);
             }
             document.getElementById('radioPlayPauseBtn').textContent = '⏸ PAUSE';
-            setTimeout(_hostBroadcast, 300); // tell players we're playing
           }
           if (e.data === YT.PlayerState.PAUSED) {
             radioPlaying = false;
             clearInterval(radioElapsedTimer);
             gridVisualizerStop();
             document.getElementById('radioPlayPauseBtn').textContent = '▶ PLAY';
-            setTimeout(_hostBroadcast, 150); // tell players we paused
           }
         }
       }
     });
-    // Start menu music now that YT API is ready
-    startMenuMusic();
   };
 
   function radioPlayNext() {
@@ -5531,7 +5500,6 @@
 
   function radioStartElapsedTimer() {
     clearInterval(radioElapsedTimer);
-    let _broadcastTick = 0;
     radioElapsedTimer = setInterval(() => {
       if (ytPlayer && ytPlayer.getCurrentTime) {
         radioElapsedSec = Math.floor(ytPlayer.getCurrentTime());
@@ -5546,9 +5514,6 @@
         slider.value = pct;
         slider.style.background = `linear-gradient(to right, var(--accent) 0%, var(--accent) ${pct}%, #2a2a35 ${pct}%, #2a2a35 100%)`;
       }
-      // Broadcast to players every 5 seconds
-      _broadcastTick++;
-      if (_broadcastTick % 5 === 0) _hostBroadcast();
     }, 1000);
   }
 
@@ -5742,11 +5707,7 @@
       gate.addEventListener('animationend', () => {
         gate.remove();
         document.body.classList.remove('gate-locked');
-        dossierUnlocked = true;
-        // If YT player already initialized before gate was dismissed, start radio now
-        if (ytPlayer && ytApiReady && !radioCurrentTrack) radioPlayNext();
-        // Finalize host session join if code was entered
-        _finalizeSessionJoin();
+        startMenuMusic();
       }, { once: true });
     }
 
@@ -5760,226 +5721,12 @@
     setTimeout(() => input.focus(), 400);
   })();
 
-  // ── HOST SESSION SYSTEM ──────────────────────────────────────
-  // Uses BroadcastChannel for real-time same-origin sync (multi-tab).
-  // Session state stored in sessionStorage keyed by session code.
-  // Host pushes radio queue state; players receive it.
-
-  let _hostCode    = null;   // set if this tab is the host
-  let _sessionCode = null;   // set if this tab has joined a session (not host)
-  let _hostChannel = null;   // BroadcastChannel instance
-
-  const SESSION_PREFIX = 'carnage_session_';
-
-  /* Generate a readable XXXX-XXXX code */
-  function _genCode() {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    const seg = n => Array.from({length:n}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
-    return `${seg(4)}-${seg(4)}`;
-  }
-
-  /* Format code input as user types */
-  if (document.getElementById('gateCodeInput')) {
-    document.getElementById('gateCodeInput').addEventListener('input', function() {
-      let v = this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
-      if (v.length > 4) v = v.slice(0,4) + '-' + v.slice(4,8);
-      this.value = v;
-    });
-    document.getElementById('gateCodeInput').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') { const j = document.getElementById('gateJoinBtn'); if (j) j.click(); }
-      const errEl = document.getElementById('gateCodeError');
-      if (errEl) errEl.classList.remove('visible');
-    });
-  }
-
-  if (document.getElementById('gateJoinBtn')) {
-    document.getElementById('gateJoinBtn').addEventListener('click', function() {
-      const code = document.getElementById('gateCodeInput').value.trim().toUpperCase();
-      const errEl = document.getElementById('gateCodeError');
-      if (code.length !== 9 || code[4] !== '-') {
-        if (errEl) errEl.classList.add('visible');
-        return;
-      }
-      const data = sessionStorage.getItem(SESSION_PREFIX + code);
-      if (!data) {
-        if (errEl) { errEl.classList.add('visible'); errEl.textContent = '⚠ SESSION NOT FOUND — ASK HOST TO REGENERATE'; }
-        return;
-      }
-      if (errEl) errEl.classList.remove('visible');
-      _sessionCode = code;
-      window._pendingSessionCode = code;
-    });
-  }
-
-  /* Called once gate clears — finalize session join if pending */
-  function _finalizeSessionJoin() {
-    if (!window._pendingSessionCode) return;
-    _sessionCode = window._pendingSessionCode;
-    delete window._pendingSessionCode;
-    _joinSession(_sessionCode);
-  }
-
-  /* HOST: generate a code and start broadcasting */
-  function hostGenerateCode() {
-    if (_hostCode) hostEndSession();
-    _hostCode = _genCode();
-    // Register in sessionStorage so players can validate
-    sessionStorage.setItem(SESSION_PREFIX + _hostCode, JSON.stringify({ host: window.investigatorName || 'Host', ts: Date.now() }));
-    // Open broadcast channel
-    _hostChannel = new BroadcastChannel('carnage_' + _hostCode);
-    // Show UI
-    document.getElementById('hostCodeVal').textContent = _hostCode;
-    document.getElementById('hostCodeDisplay').style.display = '';
-    document.getElementById('hostNoCode').style.display = 'none';
-    document.getElementById('hostGenBtn').style.display = 'none';
-    document.getElementById('hostEndBtn').style.display = '';
-    document.getElementById('radioHostBadge').style.display = '';
-    document.getElementById('radioHostCode').textContent = _hostCode;
-    // Immediately broadcast current queue
-    _hostBroadcast();
-  }
-
-  /* HOST: copy code to clipboard */
-  function hostCopyCode() {
-    const code = _hostCode || _sessionCode;
-    if (!code) return;
-    navigator.clipboard.writeText(code).then(() => {
-      const el = document.getElementById('hostCodeVal') || document.getElementById('radioHostCode');
-      const orig = el.textContent;
-      el.textContent = 'COPIED!';
-      setTimeout(() => { el.textContent = orig; }, 1200);
-    }).catch(() => {});
-  }
-
-  /* HOST: end session */
-  function hostEndSession() {
-    if (_hostChannel) {
-      _hostChannel.postMessage({ type: 'SESSION_END' });
-      _hostChannel.close();
-      _hostChannel = null;
-    }
-    if (_hostCode) sessionStorage.removeItem(SESSION_PREFIX + _hostCode);
-    _hostCode = null;
-    document.getElementById('hostCodeDisplay').style.display = 'none';
-    document.getElementById('hostNoCode').style.display = '';
-    document.getElementById('hostGenBtn').style.display = '';
-    document.getElementById('hostEndBtn').style.display = 'none';
-    document.getElementById('radioHostBadge').style.display = 'none';
-  }
-
-  /* HOST: broadcast current radio state to all players */
-  function _hostBroadcast() {
-    if (!_hostChannel || !_hostCode) return;
-    const state = {
-      type: 'RADIO_STATE',
-      queue: radioQueue.map(t => ({...t})),
-      currentTrack: radioCurrentTrack ? {...radioCurrentTrack} : null,
-      playing: radioPlaying,
-      elapsed: radioElapsedSec,
-    };
-    // Also persist to sessionStorage for late-joiners
-    sessionStorage.setItem(SESSION_PREFIX + _hostCode + '_state', JSON.stringify(state));
-    _hostChannel.postMessage(state);
-  }
-
-  /* PLAYER: join an existing session */
-  function _joinSession(code) {
-    _hostChannel = new BroadcastChannel('carnage_' + code);
-    _hostChannel.addEventListener('message', _onSessionMessage);
-    // Pull latest persisted state immediately
-    const saved = sessionStorage.getItem(SESSION_PREFIX + code + '_state');
-    if (saved) {
-      try { _applyRadioState(JSON.parse(saved)); } catch(e) {}
-    }
-    // Show UI
-    document.getElementById('radioSessionBadge').style.display = '';
-    document.getElementById('radioSessionInfo').textContent = 'synced to host';
-    // Lock add-to-queue
-    document.getElementById('radioAddRow').style.opacity = '0.3';
-    document.getElementById('radioAddRow').style.pointerEvents = 'none';
-    document.getElementById('radioLockNote').style.display = '';
-  }
-
-  /* PLAYER: handle incoming messages from host */
-  function _onSessionMessage(e) {
-    const msg = e.data;
-    if (!msg || !msg.type) return;
-    if (msg.type === 'SESSION_END') {
-      _sessionCode = null;
-      if (_hostChannel) { _hostChannel.close(); _hostChannel = null; }
-      document.getElementById('radioSessionBadge').style.display = 'none';
-      document.getElementById('radioAddRow').style.opacity = '';
-      document.getElementById('radioAddRow').style.pointerEvents = '';
-      document.getElementById('radioLockNote').style.display = 'none';
-      document.getElementById('radioSessionInfo').textContent = 'host ended session';
-      return;
-    }
-    if (msg.type === 'RADIO_STATE') {
-      _applyRadioState(msg);
-    }
-  }
-
-  /* PLAYER: apply a state snapshot from host */
-  function _applyRadioState(state) {
-    if (!state) return;
-    // Update queue display
-    radioQueue = (state.queue || []).map(t => ({...t}));
-    radioRenderQueue();
-    // Update now-playing display (player does not actually play via YT — host controls playback)
-    const t = state.currentTrack;
-    if (t) {
-      document.getElementById('radioNpTitle').textContent = t.title || t.videoId || '—';
-      document.getElementById('radioNpDur').textContent = t.duration ? radioFmtTime(t.duration) : '—';
-      document.getElementById('radioElapsed').textContent = radioFmtTime(state.elapsed || 0);
-      const pct = t.duration ? Math.min(100, ((state.elapsed||0)/t.duration)*100) : 0;
-      const slider = document.getElementById('radioSeekSlider');
-      slider.value = pct;
-      slider.style.background = `linear-gradient(to right, var(--accent) 0%, var(--accent) ${pct}%, #2a2a35 ${pct}%, #2a2a35 100%)`;
-    } else {
-      document.getElementById('radioNpTitle').textContent = '—';
-    }
-    document.getElementById('radioPlayPauseBtn').textContent = state.playing ? '⏸ PAUSE' : '▶ PLAY';
-    // Update session badge
-    const badge = document.getElementById('radioSessionInfo');
-    if (badge) badge.textContent = state.playing ? '▶ playing via host' : '⏸ paused via host';
-  }
-
-  /* Patch radioAddToQueue and radioSkip to also broadcast when hosting */
-  const _origRadioAddToQueue = radioAddToQueue;
-  radioAddToQueue = function() {
-    _origRadioAddToQueue();
-    _hostBroadcast();
-  };
-
-  const _origRadioSkip = radioSkip;
-  radioSkip = function() {
-    _origRadioSkip();
-    _hostBroadcast();
-  };
-
-  const _origRadioTogglePlay = radioTogglePlay;
-  radioTogglePlay = function() {
-    _origRadioTogglePlay();
-    setTimeout(_hostBroadcast, 200);
-  };
-
-  const _origRadioPlayFromQueue = radioPlayFromQueue;
-  radioPlayFromQueue = function(idx) {
-    _origRadioPlayFromQueue(idx);
-    setTimeout(_hostBroadcast, 200);
-  };
-
-  // ── MENU BACKGROUND MUSIC ──
+  // 25002500 MENU BACKGROUND MUSIC 25002500
   let menuMusicPlayer = null;
-  let menuMusicStarted = false;
 
   function startMenuMusic() {
-    if (menuMusicStarted) return;
-    menuMusicStarted = true;
-    if (!window.YT || !YT.Player) {
-      menuMusicStarted = false;
-      setTimeout(startMenuMusic, 200);
-      return;
+    if (menuMusicPlayer || !window.YT || !YT.Player) {
+      if (!window.YT) { setTimeout(startMenuMusic, 300); return; }
     }
     const div = document.createElement('div');
     div.id = 'menuMusicPlayer';
@@ -5990,24 +5737,9 @@
       videoId: 'GnsJdmjlSjc',
       playerVars: { autoplay: 1, loop: 1, playlist: 'GnsJdmjlSjc', controls: 0 },
       events: {
-        onReady: function(e) { e.target.setVolume(5); e.target.playVideo(); }
+        onReady: function(e) { e.target.setVolume(12); e.target.playVideo(); }
       }
     });
-  }
-
-  function fadeOutMenuMusic() {
-    if (!menuMusicPlayer) return;
-    let vol = 5;
-    const step = () => {
-      vol -= 0.4;
-      if (vol <= 0) {
-        try { menuMusicPlayer.stopVideo(); } catch(e) {}
-        return;
-      }
-      try { menuMusicPlayer.setVolume(Math.max(0, vol)); } catch(e) {}
-      setTimeout(step, 60);
-    };
-    step();
   }
 
   // 25002500 UNSAVED WARNING 25002500
