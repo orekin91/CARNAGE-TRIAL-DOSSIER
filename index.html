@@ -13,6 +13,8 @@
     --border: #2a2a35;
     --red: #e03030;
     --red-dim: #7a1515;
+    --accent: #e03030;
+    --accent-rgb: 224, 48, 48;
     --yellow: #f0c040;
     --green: #30c060;
     --blue: #4090e0;
@@ -30,7 +32,7 @@
     min-height: 100vh;
     position: relative;
     background-image:
-      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(224,48,48,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(var(--accent-rgb),0.08) 0%, transparent 60%),
       repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.015) 39px, rgba(255,255,255,0.015) 40px),
       repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.015) 39px, rgba(255,255,255,0.015) 40px);
   }
@@ -46,8 +48,8 @@
     inset: 0;
     min-height: 100%;
     background-image:
-      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(224,48,48,0.07) 39px, rgba(224,48,48,0.07) 40px),
-      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(224,48,48,0.07) 39px, rgba(224,48,48,0.07) 40px);
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(var(--accent-rgb),0.07) 39px, rgba(var(--accent-rgb),0.07) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(var(--accent-rgb),0.07) 39px, rgba(var(--accent-rgb),0.07) 40px);
     pointer-events: none;
     z-index: 0;
     animation: redGridIdle 8s ease-in-out infinite;
@@ -132,11 +134,11 @@
   @keyframes logoBreathe {
     0%,100% {
       transform: scale(1);
-      filter: drop-shadow(0 0 24px rgba(224,48,48,0.4));
+      filter: drop-shadow(0 0 24px rgba(var(--accent-rgb),0.4));
     }
     50% {
       transform: scale(1.012);
-      filter: drop-shadow(0 0 32px rgba(224,48,48,0.6));
+      filter: drop-shadow(0 0 32px rgba(var(--accent-rgb),0.6));
     }
   }
 
@@ -146,7 +148,7 @@
     height: auto;
     display: block;
     margin: 0 auto 4px;
-    filter: drop-shadow(0 0 24px rgba(224,48,48,0.4));
+    filter: drop-shadow(0 0 24px rgba(var(--accent-rgb),0.4));
     animation: logoBreathe 5s ease-in-out infinite;
   }
 
@@ -265,7 +267,7 @@
 
   .divider {
     height: 1px;
-    background: linear-gradient(90deg, transparent, var(--red-dim), var(--red), var(--red-dim), transparent);
+    background: linear-gradient(90deg, transparent, var(--accent), var(--accent), transparent);
     margin: 20px 40px;
   }
 
@@ -295,7 +297,7 @@
     height: 2px;
   }
 
-  .panel.red::before { background: var(--red); }
+  .panel.red::before { background: var(--accent); }
   .panel.yellow::before { background: var(--yellow); }
   .panel.green::before { background: var(--green); }
   .panel.blue::before { background: var(--blue); }
@@ -349,8 +351,8 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: var(--red);
-    box-shadow: 0 0 8px var(--red);
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
     border-radius: 2px;
     pointer-events: none;
     z-index: 100;
@@ -365,7 +367,7 @@
     letter-spacing: 3px;
   }
 
-  .panel.red .panel-title { color: var(--red); }
+  .panel.red .panel-title { color: var(--accent); }
   .panel.yellow .panel-title { color: var(--yellow); }
   .panel.green .panel-title { color: var(--green); }
   .panel.blue .panel-title { color: var(--blue); }
@@ -485,8 +487,8 @@
 
   /* VICTIM SECTION */
   .victim-section {
-    background: rgba(224,48,48,0.05);
-    border: 1px solid rgba(224,48,48,0.2);
+    background: rgba(var(--accent-rgb),0.05);
+    border: 1px solid rgba(var(--accent-rgb),0.2);
     border-radius: 2px;
     padding: 12px;
     margin-bottom: 4px;
@@ -496,7 +498,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 14px;
     letter-spacing: 3px;
-    color: var(--red);
+    color: var(--accent);
     margin-bottom: 10px;
   }
 
@@ -570,7 +572,8 @@
     content: '';
     flex: 1;
     height: 1px;
-    background: var(--border);
+    background: var(--accent);
+    opacity: 0.35;
   }
 
   /* AVATAR */
@@ -827,7 +830,7 @@
   .crime-input {
     background: transparent;
     border: none;
-    border-bottom: 2px solid var(--red-dim);
+    border-bottom: 2px solid rgba(var(--accent-rgb),0.45);
     color: var(--text);
     font-family: 'Special Elite', cursive;
     font-size: 15px;
@@ -837,7 +840,7 @@
     width: 100%;
   }
   .crime-input:hover { text-shadow: 0 0 8px rgba(216,208,200,0.35); }
-  .crime-input:focus { border-bottom-color: var(--red); text-shadow: 0 0 8px rgba(224,48,48,0.3); }
+  .crime-input:focus { border-bottom-color: var(--accent); text-shadow: 0 0 8px rgba(var(--accent-rgb),0.3); }
   .crime-input::placeholder { color: var(--muted); font-size: 12px; }
 
   /* SUSPECT NOTES */
@@ -1562,14 +1565,14 @@
     transition: all 0.2s;
   }
   .view-toggle-btn:hover, .view-toggle-btn.active {
-    border-color: var(--red);
-    color: var(--red);
+    border-color: var(--accent);
+    color: var(--accent);
   }
 
   /* BULK IMPORT */
   .bulk-import {
-    background: rgba(224,48,48,0.04);
-    border: 1px dashed rgba(224,48,48,0.2);
+    background: rgba(var(--accent-rgb),0.04);
+    border: 1px dashed rgba(var(--accent-rgb),0.2);
     border-radius: 2px;
     padding: 8px 14px;
     margin-bottom: 10px;
@@ -1612,14 +1615,14 @@
     outline: none;
     transition: border-color 0.2s;
   }
-  .bulk-import-input:focus { border-bottom-color: var(--red); }
+  .bulk-import-input:focus { border-bottom-color: var(--accent); }
   .bulk-import-input::placeholder { color: var(--muted); font-size: 11px; }
   .bulk-import-btn {
     padding: 4px 14px;
     font-size: 10px;
     letter-spacing: 2px;
-    border: 1px solid var(--red);
-    color: var(--red);
+    border: 1px solid var(--accent);
+    color: var(--accent);
     background: transparent;
     border-radius: 2px;
     cursor: pointer;
@@ -1627,7 +1630,7 @@
     transition: all 0.15s;
     white-space: nowrap;
   }
-  .bulk-import-btn:hover { background: var(--red); color: #fff; }
+  .bulk-import-btn:hover { background: var(--accent); color: #fff; }
   .bulk-import-hint {
     font-size: 9px;
     color: var(--muted);
@@ -1642,13 +1645,13 @@
     justify-content: space-between;
     margin-top: 12px;
     padding-top: 10px;
-    border-top: 1px solid rgba(224,48,48,0.2);
+    border-top: 1px solid rgba(var(--accent-rgb),0.2);
     cursor: pointer;
     user-select: none;
     font-family: 'Bebas Neue', sans-serif;
     font-size: 13px;
     letter-spacing: 3px;
-    color: var(--red);
+    color: var(--accent);
   }
   .crime-collapse-header:hover { opacity: 0.8; }
 
@@ -2076,19 +2079,18 @@
     appearance: none;
     -webkit-appearance: none;
     cursor: pointer;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23c03030'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23e03030'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 6px center;
     padding-right: 24px;
   }
-  .crime-weapon-select option { background: #16161c; color: var(--red); }
+  .crime-weapon-select option { background: #16161c; color: var(--accent); }
 
   /* RADIO PANEL */
   .radio-tab {
     position: fixed;
     left: 0;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 300px;
     z-index: 1000;
     display: flex;
     align-items: stretch;
@@ -2112,7 +2114,7 @@
     transition: all 0.2s;
     white-space: nowrap;
   }
-  .radio-tab-btn:hover, .radio-tab-btn.open { border-color: var(--red); color: var(--red); }
+  .radio-tab-btn:hover, .radio-tab-btn.open { border-color: var(--accent); color: var(--accent); }
   .radio-tab-btn .radio-icon { font-size: 14px; writing-mode: horizontal-tb; }
 
   .radio-panel {
@@ -2124,8 +2126,9 @@
     transition: width 0.3s ease;
     display: flex;
     flex-direction: column;
+    align-self: flex-start;
   }
-  .radio-panel.open { width: 300px; border-color: var(--red-dim); }
+  .radio-panel.open { width: 300px; border-color: var(--accent); }
 
   .radio-panel-inner {
     width: 300px;
@@ -2138,7 +2141,7 @@
     font-family: 'Bebas Neue', cursive;
     font-size: 16px;
     letter-spacing: 3px;
-    color: var(--red);
+    color: var(--accent);
     text-align: center;
     border-bottom: 1px solid var(--border);
     padding-bottom: 8px;
@@ -2146,8 +2149,8 @@
 
   /* NOW PLAYING */
   .radio-now-playing {
-    background: rgba(224,48,48,0.05);
-    border: 1px solid rgba(224,48,48,0.2);
+    background: rgba(var(--accent-rgb),0.05);
+    border: 1px solid rgba(var(--accent-rgb),0.2);
     border-radius: 2px;
     padding: 10px 12px;
     display: flex;
@@ -2157,7 +2160,7 @@
   .radio-np-label {
     font-size: 8px;
     letter-spacing: 3px;
-    color: var(--red);
+    color: var(--accent);
     text-transform: uppercase;
   }
   .radio-np-title {
@@ -2201,7 +2204,7 @@
     border-radius: 2px;
     outline: none;
     cursor: pointer;
-    background: linear-gradient(to right, var(--red) 0%, var(--red) 0%, #2a2a35 0%, #2a2a35 100%);
+    background: linear-gradient(to right, var(--accent) 0%, var(--accent) 0%, #2a2a35 0%, #2a2a35 100%);
   }
   .radio-seek-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
@@ -2209,9 +2212,9 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: var(--red);
+    background: var(--accent);
     cursor: pointer;
-    box-shadow: 0 0 6px var(--red);
+    box-shadow: 0 0 6px var(--accent);
     opacity: 0;
     transition: opacity 0.15s;
   }
@@ -2222,10 +2225,10 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: var(--red);
+    background: var(--accent);
     cursor: pointer;
     border: none;
-    box-shadow: 0 0 6px var(--red);
+    box-shadow: 0 0 6px var(--accent);
   }
 
   /* CONTROLS */
@@ -2247,9 +2250,9 @@
     border-radius: 2px;
     transition: all 0.2s;
   }
-  .radio-ctrl-btn:hover { border-color: var(--red); color: var(--red); }
-  .radio-ctrl-btn.primary { border-color: var(--red-dim); color: var(--red); }
-  .radio-ctrl-btn.primary:hover { background: rgba(224,48,48,0.1); }
+  .radio-ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .radio-ctrl-btn.primary { border-color: var(--accent); color: var(--accent); }
+  .radio-ctrl-btn.primary:hover { background: rgba(var(--accent-rgb),0.1); }
 
   /* QUEUE */
   .radio-volume-row {
@@ -2286,10 +2289,10 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: var(--red);
+    background: var(--accent);
     cursor: pointer;
     border: none;
-    box-shadow: 0 0 6px rgba(224,48,48,0.5);
+    box-shadow: 0 0 6px rgba(var(--accent-rgb),0.5);
     transition: box-shadow 0.15s;
   }
 
@@ -2297,14 +2300,14 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: var(--red);
+    background: var(--accent);
     cursor: pointer;
     border: none;
-    box-shadow: 0 0 6px rgba(224,48,48,0.5);
+    box-shadow: 0 0 6px rgba(var(--accent-rgb),0.5);
   }
 
   .radio-volume-slider:hover::-webkit-slider-thumb {
-    box-shadow: 0 0 10px rgba(224,48,48,0.8);
+    box-shadow: 0 0 10px rgba(var(--accent-rgb),0.8);
   }
 
   .radio-vol-pct {
@@ -2338,7 +2341,7 @@
     cursor: pointer;
     transition: all 0.15s;
   }
-  .radio-queue-item:hover { border-color: rgba(224,48,48,0.3); background: rgba(224,48,48,0.04); }
+  .radio-queue-item:hover { border-color: rgba(var(--accent-rgb),0.3); background: rgba(var(--accent-rgb),0.04); }
   .radio-queue-num {
     font-size: 9px;
     color: var(--muted);
@@ -2384,7 +2387,7 @@
     border-radius: 2px;
     min-width: 0;
   }
-  .radio-url-input:focus { border-color: var(--red-dim); }
+  .radio-url-input:focus { border-color: var(--accent); }
   .radio-url-input::placeholder { color: var(--muted); font-size: 9px; }
   .radio-add-btn {
     background: transparent;
@@ -2399,18 +2402,428 @@
     transition: all 0.2s;
     white-space: nowrap;
   }
-  .radio-add-btn:hover { border-color: var(--red-dim); color: var(--red); }
+  .radio-add-btn:hover { border-color: var(--accent); color: var(--accent); }
 
   /* hidden YT iframe */
   #ytHiddenFrame { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; left: -9999px; }
+
+  /* ── NOTES SIDE TAB ── */
+  .notes-tab {
+    position: fixed;
+    left: 0;
+    top: 640px;
+    z-index: 1000;
+    display: flex;
+    align-items: stretch;
+    animation: fadeIn 0.5s ease both;
+    animation-delay: 1.2s;
+  }
+  .notes-tab-btn {
+    background: #16161c;
+    border: 1px solid var(--border);
+    border-left: none;
+    border-radius: 0 4px 4px 0;
+    color: var(--muted);
+    cursor: pointer;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 14px 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .notes-tab-btn:hover, .notes-tab-btn.open { border-color: var(--muted); color: var(--text); }
+  .notes-tab-btn .notes-icon { font-size: 14px; writing-mode: horizontal-tb; }
+  .notes-side-panel {
+    background: #111115;
+    border: 1px solid var(--border);
+    border-left: none;
+    width: 0;
+    overflow: hidden;
+    transition: width 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-self: flex-start;
+  }
+  .notes-side-panel.open { width: 280px; border-color: var(--muted); }
+  .notes-side-panel-inner {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 280px;
+    flex: 1;
+  }
+  .notes-side-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+  .notes-side-textarea {
+    flex: 1;
+    min-height: 260px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    line-height: 1.6;
+    padding: 10px;
+    outline: none;
+    resize: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .notes-side-textarea:hover { border-color: rgba(216,208,200,0.25); box-shadow: 0 0 6px rgba(216,208,200,0.06); }
+  .notes-side-textarea:focus { border-color: var(--muted); box-shadow: 0 0 8px rgba(216,208,200,0.1); }
+  .notes-side-textarea::placeholder { color: var(--muted); font-size: 11px; }
+  body.light .notes-side-textarea { background: rgba(0,0,0,0.02); }
+
+  /* ── SETTINGS SIDE TAB ── */
+  .settings-tab {
+    position: fixed;
+    left: 0;
+    top: 20px;
+    z-index: 1000;
+    display: flex;
+    align-items: stretch;
+    animation: fadeIn 0.5s ease both;
+    animation-delay: 1.3s;
+  }
+  .settings-tab-btn {
+    background: #16161c;
+    border: 1px solid var(--border);
+    border-left: none;
+    border-radius: 0 4px 4px 0;
+    color: var(--muted);
+    cursor: pointer;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 14px 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .settings-tab-btn:hover, .settings-tab-btn.open { border-color: var(--yellow); color: var(--yellow); }
+  .settings-tab-btn .settings-icon { font-size: 14px; writing-mode: horizontal-tb; }
+  .settings-side-panel {
+    background: #111115;
+    border: 1px solid var(--border);
+    border-left: none;
+    width: 0;
+    overflow: hidden;
+    transition: width 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-self: flex-start;
+  }
+  .settings-side-panel.open { width: 220px; border-color: rgba(240,192,64,0.3); }
+  .settings-side-panel-inner {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 220px;
+  }
+  .settings-side-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--yellow);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+  .settings-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .settings-label {
+    font-size: 8px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .settings-color-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .settings-color-input {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: none;
+    cursor: pointer;
+    padding: 2px;
+  }
+  .settings-color-input::-webkit-color-swatch-wrapper { padding: 0; }
+  .settings-color-input::-webkit-color-swatch { border: none; border-radius: 2px; }
+  .settings-color-hex {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .settings-color-reset {
+    font-size: 8px;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--border);
+    padding: 3px 7px;
+    cursor: pointer;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 1px;
+    border-radius: 2px;
+    transition: all 0.2s;
+    margin-left: auto;
+  }
+  .settings-color-reset:hover { border-color: var(--yellow); color: var(--yellow); }
+  /* Toggle switch */
+  .settings-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .settings-toggle-label {
+    font-size: 10px;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .settings-toggle-label small {
+    display: block;
+    font-size: 8px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+  .toggle-switch {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    left: 3px;
+    top: 3px;
+    background: var(--muted);
+    border-radius: 50%;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .toggle-switch input:checked + .toggle-slider { background: rgba(240,192,64,0.2); border: 1px solid var(--yellow); }
+  .toggle-switch input:checked + .toggle-slider::before { transform: translateX(16px); background: var(--yellow); }
+
+  /* ── INVESTIGATOR GATE ── */
+  #investigatorGate {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(var(--accent-rgb),0.1) 0%, transparent 60%),
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.015) 39px, rgba(255,255,255,0.015) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.015) 39px, rgba(255,255,255,0.015) 40px);
+    animation: fadeSlideDown 0.6s ease both;
+  }
+
+  #investigatorGate.gate-exit {
+    animation: gateExit 0.5s ease forwards;
+  }
+
+  @keyframes gateExit {
+    from { opacity: 1; transform: scale(1); }
+    to   { opacity: 0; transform: scale(1.03); pointer-events: none; }
+  }
+
+  .gate-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+  }
+
+  .gate-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(52px, 12vw, 80px);
+    letter-spacing: 10px;
+    color: var(--accent);
+    text-shadow: 0 0 40px rgba(var(--accent-rgb), 0.5), 0 0 80px rgba(var(--accent-rgb), 0.2);
+    animation: flicker 6s infinite;
+    line-height: 1;
+  }
+
+  .gate-subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    margin-top: -20px;
+    text-transform: uppercase;
+  }
+
+  .gate-divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), transparent);
+  }
+
+  .gate-prompt {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .gate-input-wrap {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .gate-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  .gate-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid rgba(var(--accent-rgb), 0.45);
+    color: var(--text);
+    font-family: 'Special Elite', cursive;
+    font-size: 20px;
+    padding: 6px 2px;
+    outline: none;
+    transition: border-color 0.2s, text-shadow 0.3s;
+    text-align: center;
+  }
+  .gate-input:focus {
+    border-bottom-color: var(--accent);
+    text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.3);
+  }
+  .gate-input::placeholder { color: var(--muted); font-size: 15px; }
+
+  .gate-error {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--red);
+    letter-spacing: 2px;
+    min-height: 14px;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .gate-error.visible { opacity: 1; }
+
+  .gate-enter-btn {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 1px solid rgba(var(--accent-rgb), 0.5);
+    color: var(--accent);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .gate-enter-btn:hover {
+    background: rgba(var(--accent-rgb), 0.1);
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.2);
+  }
+
+  .gate-footer {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: #2a2a35;
+    text-align: center;
+  }
+
+  /* Hide main content until gate is cleared */
+  body.gate-locked > *:not(#investigatorGate) {
+    visibility: hidden;
+    pointer-events: none;
+  }
 </style>
 </head>
-<body>
+<body class="gate-locked">
+
+<!-- INVESTIGATOR GATE -->
+<div id="investigatorGate">
+  <div class="gate-box">
+    <div class="gate-logo">CARNAGE</div>
+    <div class="gate-subtitle">Trial Dossier System</div>
+    <div class="gate-divider"></div>
+    <div class="gate-prompt">Identify yourself to access this dossier</div>
+    <div class="gate-input-wrap">
+      <div class="gate-label">Investigator Name</div>
+      <input
+        id="gateInput"
+        class="gate-input"
+        type="text"
+        placeholder="Enter your username..."
+        autocomplete="off"
+        spellcheck="false"
+        maxlength="40"
+      />
+      <div class="gate-error" id="gateError">⚠ NAME REQUIRED TO PROCEED</div>
+    </div>
+    <button class="gate-enter-btn" id="gateEnterBtn">ACCESS DOSSIER</button>
+    <div class="gate-footer">AUTHORIZED PERSONNEL ONLY</div>
+  </div>
+</div>
 
 <!-- RADIO PANEL -->
 <div id="ytHiddenFrame"></div>
 <div class="radio-tab" id="radioTab">
-  <div class="radio-panel open" id="radioPanel">
+  <div class="radio-panel" id="radioPanel">
     <div class="radio-panel-inner">
       <div class="radio-panel-title">📻 RADIO</div>
 
@@ -2450,9 +2863,72 @@
       </div>
     </div>
   </div>
-  <button class="radio-tab-btn open" id="radioTabBtn" onclick="toggleRadio()">
+  <button class="radio-tab-btn" id="radioTabBtn" onclick="toggleRadio()">
     <span class="radio-icon">📻</span>
     RADIO
+  </button>
+</div>
+
+<!-- NOTES SIDE TAB -->
+<div class="notes-tab" id="notesTab">
+  <div class="notes-side-panel" id="notesSidePanel">
+    <div class="notes-side-panel-inner">
+      <div class="notes-side-title">📝 MISC NOTES</div>
+      <textarea class="misc-notes-area notes-side-textarea" placeholder="Alibi checks, general observations, anything that doesn't fit elsewhere..."></textarea>
+    </div>
+  </div>
+  <button class="notes-tab-btn" id="notesTabBtn" onclick="toggleNotesTab()">
+    <span class="notes-icon">📝</span>
+    NOTES
+  </button>
+</div>
+
+<!-- SETTINGS SIDE TAB -->
+<div class="settings-tab" id="settingsTab">
+  <div class="settings-side-panel" id="settingsSidePanel">
+    <div class="settings-side-panel-inner">
+      <div class="settings-side-title">⚙ SETTINGS</div>
+
+      <!-- Accent color -->
+      <div class="settings-row">
+        <div class="settings-label">Accent Color</div>
+        <div class="settings-color-row">
+          <input type="color" class="settings-color-input" id="accentColorPicker" value="#e03030" oninput="applyAccentColor(this.value)" />
+          <span class="settings-color-hex" id="accentColorHex">#e03030</span>
+          <button class="settings-color-reset" onclick="resetAccentColor()">RESET</button>
+        </div>
+      </div>
+
+      <!-- Background color -->
+      <div class="settings-row">
+        <div class="settings-label">Background Color</div>
+        <div class="settings-color-row">
+          <input type="color" class="settings-color-input" id="bgColorPicker" value="#0a0a0c" oninput="applyBgColor(this.value)" />
+          <span class="settings-color-hex" id="bgColorHex">#0a0a0c</span>
+          <button class="settings-color-reset" onclick="resetBgColor()">RESET</button>
+        </div>
+      </div>
+
+      <!-- Ultimate / SHSL toggle -->
+      <div class="settings-row">
+        <div class="settings-label">Talent Prefix</div>
+        <div class="settings-toggle-row">
+          <div class="settings-toggle-label">
+            SHSL mode
+            <small id="prefixPreview">currently: Ultimate</small>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="shslToggle" onchange="applyTalentPrefix(this.checked)" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <button class="settings-tab-btn" id="settingsTabBtn" onclick="toggleSettingsTab()">
+    <span class="settings-icon">⚙</span>
+    SETTINGS
   </button>
 </div>
 
@@ -2479,7 +2955,7 @@
     </div>
     <div class="meta-field">
       <span class="meta-label">INVESTIGATOR</span>
-      <input class="meta-input" placeholder="Insert player handle/username..." />
+      <input class="meta-input" id="investigatorInput" placeholder="player @ username" style="text-align:center;" />
     </div>
   </div>
 </div>
@@ -2499,9 +2975,9 @@
 
   <div class="panel-draggable" id="panel-participants">
   <!-- SUSPECTS -->
-  <div class="panel" style="grid-column: 1 / -1; --accent: var(--red); border-top: 2px solid var(--red);">
+  <div class="panel" style="grid-column: 1 / -1; border-top: 2px solid var(--accent);">
     <div class="panel-header" onclick="toggleParticipantsPanel()" style="cursor:pointer;">
-      <span class="drag-handle" title="Drag to reorder">⠿</span><span class="panel-title" style="color:var(--red);">👁 PARTICIPANTS</span>
+      <span class="drag-handle" title="Drag to reorder">⠿</span><span class="panel-title" style="color:var(--accent);">👁 PARTICIPANTS</span>
       <span style="display:flex;align-items:center;gap:10px;">
         <span class="panel-count" id="suspectCount">0 under review · 0 cleared · 0 suspects</span>
         <span class="bulk-import-arrow" id="participantsPanelArrow">▼</span>
@@ -2640,19 +3116,6 @@
     <div class="panel-body" id="timelinePanelBody" style="display:none;">
       <div class="timeline" id="timeline"></div>
       <button class="add-btn" onclick="addEvent()">+ ADD EVENT</button>
-    </div>
-  </div>
-
-  </div>
-  <div class="panel-draggable" id="panel-misc">
-  <!-- MISC NOTES -->
-  <div class="panel" style="grid-column: 1 / -1; border-top: 2px solid var(--muted);">
-    <div class="panel-header" onclick="toggleMiscPanel()" style="cursor:pointer;">
-      <span class="drag-handle" title="Drag to reorder">⠿</span><span class="panel-title" style="color:var(--muted);">📝 MISC NOTES</span>
-      <span class="bulk-import-arrow" id="miscPanelArrow">▶</span>
-    </div>
-    <div class="panel-body" id="miscPanelBody" style="display:none;">
-      <textarea class="misc-notes-area" placeholder="Alibi checks, general observations, anything that doesn't fit elsewhere..."></textarea>
     </div>
   </div>
 
@@ -2862,7 +3325,7 @@
             </div>
             <span class="display-name-tag" style="display:${s.displayName ? 'inline' : 'none'}">${s.displayName || ''}</span>
             <div class="talent-row">
-              <span class="talent-prefix">Ultimate</span>
+              <span class="talent-prefix">${useShsl ? 'SHSL' : 'Ultimate'}</span>
               <input class="talent-input" value="${s.talent}" placeholder="talent..."
                 onchange="updateSuspectTalent(${s.id}, this.value)" />
             </div>
@@ -2942,9 +3405,107 @@
   let miscPanelOpen = false;
   function toggleMiscPanel() {
     miscPanelOpen = !miscPanelOpen;
-    document.getElementById('miscPanelBody').style.display = miscPanelOpen ? 'block' : 'none';
-    document.getElementById('miscPanelArrow').textContent = miscPanelOpen ? '▼' : '▶';
+    document.getElementById('miscPanelBody') && (document.getElementById('miscPanelBody').style.display = miscPanelOpen ? 'block' : 'none');
+    document.getElementById('miscPanelArrow') && (document.getElementById('miscPanelArrow').textContent = miscPanelOpen ? '▼' : '▶');
   }
+
+  let notesTabOpen = false;
+  function toggleNotesTab() {
+    notesTabOpen = !notesTabOpen;
+    if (notesTabOpen) { closeSettingsTab(); }
+    document.getElementById('notesSidePanel').classList.toggle('open', notesTabOpen);
+    document.getElementById('notesTabBtn').classList.toggle('open', notesTabOpen);
+  }
+
+  let settingsTabOpen = false;
+  function toggleSettingsTab() {
+    settingsTabOpen = !settingsTabOpen;
+    if (settingsTabOpen) { closeNotesTab(); }
+    document.getElementById('settingsSidePanel').classList.toggle('open', settingsTabOpen);
+    document.getElementById('settingsTabBtn').classList.toggle('open', settingsTabOpen);
+  }
+  function closeNotesTab() {
+    notesTabOpen = false;
+    document.getElementById('notesSidePanel').classList.remove('open');
+    document.getElementById('notesTabBtn').classList.remove('open');
+  }
+  function closeSettingsTab() {
+    settingsTabOpen = false;
+    document.getElementById('settingsSidePanel').classList.remove('open');
+    document.getElementById('settingsTabBtn').classList.remove('open');
+  }
+
+  function hexToRgb(hex) {
+    const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    return {r,g,b};
+  }
+  function dimColor(hex, factor=0.4) {
+    const {r,g,b} = hexToRgb(hex);
+    return `#${Math.round(r*factor).toString(16).padStart(2,'0')}${Math.round(g*factor).toString(16).padStart(2,'0')}${Math.round(b*factor).toString(16).padStart(2,'0')}`;
+  }
+
+  function applyAccentColor(hex) {
+    const rgb = hexToRgb(hex);
+    document.documentElement.style.setProperty('--accent-rgb', rgb);
+    document.documentElement.style.setProperty('--accent', hex);
+    // Update body background (radial glow) dynamically via inline style
+    document.body.style.backgroundImage = `
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(${rgb},0.08) 0%, transparent 60%),
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.015) 39px, rgba(255,255,255,0.015) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.015) 39px, rgba(255,255,255,0.015) 40px)
+    `.trim();
+    // Update weapon select SVG arrow color
+    const encodedHex = encodeURIComponent(hex);
+    const arrowSvg = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='${encodedHex}'/%3E%3C/svg%3E")`;
+    document.querySelectorAll('.crime-weapon-select').forEach(el => {
+      el.style.backgroundImage = arrowSvg;
+    });
+    document.getElementById('accentColorHex').textContent = hex;
+    try { localStorage.setItem('carnage_accent', hex); } catch(e){}
+  }
+  function hexToRgb(hex) {
+    hex = hex.replace('#','');
+    if (hex.length === 3) hex = hex.split('').map(c=>c+c).join('');
+    const n = parseInt(hex, 16);
+    return `${(n>>16)&255}, ${(n>>8)&255}, ${n&255}`;
+  }
+  function resetAccentColor() {
+    const def = '#e03030';
+    document.getElementById('accentColorPicker').value = def;
+    applyAccentColor(def);
+  }
+
+  function applyBgColor(hex) {
+    document.documentElement.style.setProperty('--bg', hex);
+    document.getElementById('bgColorHex').textContent = hex;
+    try { localStorage.setItem('carnage_bg', hex); } catch(e){}
+  }
+  function resetBgColor() {
+    const def = '#0a0a0c';
+    document.getElementById('bgColorPicker').value = def;
+    applyBgColor(def);
+  }
+
+  let useShsl = false;
+  function applyTalentPrefix(shsl) {
+    useShsl = shsl;
+    const prefix = shsl ? 'SHSL' : 'Ultimate';
+    document.querySelectorAll('.talent-prefix').forEach(el => el.textContent = prefix);
+    document.getElementById('prefixPreview').textContent = `currently: ${prefix}`;
+    try { localStorage.setItem('carnage_shsl', shsl ? '1' : '0'); } catch(e){}
+  }
+
+  // Restore settings on load
+  window.addEventListener('DOMContentLoaded', () => {
+    try {
+      const accent = localStorage.getItem('carnage_accent');
+      if (accent) { document.getElementById('accentColorPicker').value = accent; applyAccentColor(accent); }
+      const bg = localStorage.getItem('carnage_bg');
+      if (bg) { document.getElementById('bgColorPicker').value = bg; applyBgColor(bg); }
+      const shsl = localStorage.getItem('carnage_shsl');
+      if (shsl === '1') { document.getElementById('shslToggle').checked = true; applyTalentPrefix(true); }
+    } catch(e){}
+  });
 
   let participantsPanelOpen = true;
   function toggleParticipantsPanel() {
@@ -3354,28 +3915,27 @@
       `).join('');
       card.innerHTML = `
         <div class="suspect-item">
-          <div class="num-dot-col">
-            <span class="participant-num" style="color:#c060c0;opacity:0.6;">#${(s._order ?? 0) + 1}</span>
-            <div class="status-dot" style="background:#c060c0;box-shadow:0 0 6px #c060c0;"></div>
-          </div>
+          <span class="participant-num" style="color:#c060c0;opacity:0.6;">#${(s._order ?? 0) + 1}</span>
+          <div class="status-dot" style="background:#c060c0;box-shadow:0 0 6px #c060c0;"></div>
           <div class="avatar-wrap deceased-x" style="border-color:rgba(150,0,150,0.3);">${avatarHtml}</div>
           <div class="name-talent-col">
-            ${s.nickname ? `<div class="name-row"><input class="nickname-input" value="${s.nickname}" placeholder="nickname..." onchange="updateDeceasedNickname(${s.id}, this.value)" /></div>` : ''}
             <div class="name-row">
               <input class="suspect-name" value="${s.name}" placeholder="Insert player handle/username..."
                 style="color:${s.nameColor || 'var(--muted)'}; text-decoration: line-through; opacity:0.7;"
                 onchange="updateDeceasedName(${s.id}, this.value)" />
             </div>
-            <span class="display-name-tag" style="display:${s.displayName ? 'inline' : 'none'}">${s.displayName || ''}</span>
+            ${s.displayName ? `<span class="display-name-tag" style="display:inline">${s.displayName}</span>` : ''}
             ${s.deathNote ? `<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);opacity:0.7;letter-spacing:0.5px;">${s.deathNote}</span>` : ''}
             <div class="talent-row">
-              <span class="talent-prefix">Ultimate</span>
+              <span class="talent-prefix">${useShsl ? 'SHSL' : 'Ultimate'}</span>
               <input class="talent-input" value="${s.talent || ''}" placeholder="talent..."
                 style="color:var(--yellow); border-bottom-color:rgba(240,192,64,0.3);"
                 onchange="updateDeceasedTalent(${s.id}, this.value)" />
             </div>
           </div>
           <div class="suspect-actions">
+            <button class="tag-btn clr ${s.status==='cleared'?'active':''}" onclick="setDeceasedStatus(${s.id},'cleared')">CLR</button>
+            <button class="tag-btn glt ${s.status==='guilty'?'active':''}" onclick="setDeceasedStatus(${s.id},'guilty')">SUS</button>
             <button class="tag-btn revive" onclick="reviveSuspect(${s.id})" title="Move back to participants">↩ ALIVE</button>
           </div>
           <button class="del-btn" onclick="removeDeceased(${s.id})">×</button>
@@ -3390,11 +3950,6 @@
   function updateDeceasedName(id, val) {
     const d = deceased.find(x => x.id === id);
     if (d) d.name = val;
-  }
-
-  function updateDeceasedNickname(id, val) {
-    const d = deceased.find(x => x.id === id);
-    if (d) d.nickname = val;
   }
 
   function updateDeceasedTalent(id, val) {
@@ -3443,7 +3998,7 @@
           </div>
           <span class="display-name-tag victim-dn" style="display:${v.displayName ? 'inline' : 'none'}">${v.displayName || ''}</span>
           <div class="talent-row">
-            <span class="talent-prefix">Ultimate</span>
+            <span class="talent-prefix">${useShsl ? 'SHSL' : 'Ultimate'}</span>
             <input class="talent-input victim-talent" value="${v.talent}" placeholder="talent..."
               onchange="updateVictimTalent(${v.id}, this.value)" />
           </div>
@@ -3863,11 +4418,11 @@
     const victimTalent = victims[0]?.talent?.trim() || '';
 
     // Collect ALL named victims
-    const allVictims = victims.map(v => ({ name: v.name?.trim() || '', talent: v.talent?.trim() || '', nickname: v.nickname?.trim() || '', avatarUrl: v.avatarUrl || null })).filter(v => v.name);
+    const allVictims = victims.map(v => ({ name: v.name?.trim() || '', talent: v.talent?.trim() || '', nickname: v.nickname?.trim() || '' })).filter(v => v.name);
 
     const accusedEl  = document.querySelector('.verdict-name-input.murderer-input');
     const accused    = accusedEl ? accusedEl.value.trim() : '';
-    // Find accused's talent, nickname and avatar from suspects or deceased arrays
+    // Find accused's talent and nickname from suspects or deceased arrays
     const accusedTalent = (() => {
       const name = accused.toLowerCase();
       const match = [...suspects, ...deceased].find(s => s.name.trim().toLowerCase() === name);
@@ -3877,11 +4432,6 @@
       const name = accused.toLowerCase();
       const match = [...suspects, ...deceased].find(s => s.name.trim().toLowerCase() === name);
       return match?.nickname?.trim() || '';
-    })();
-    const accusedAvatarUrl = (() => {
-      const name = accused.toLowerCase();
-      const match = [...suspects, ...deceased].find(s => s.name.trim().toLowerCase() === name);
-      return match?.avatarUrl || null;
     })();
     const realEl     = document.getElementById('realMurdererInput');
     const realMurderer = realEl ? realEl.value.trim() : '';
@@ -3902,7 +4452,6 @@
       accused,
       accusedTalent,
       accusedNickname,
-      accusedAvatarUrl,
       murderWeapon,
       realMurderer: isWrong ? realMurderer : '',
       isWrong,
@@ -3981,20 +4530,10 @@
         : `<div class="trial-card-role">🩸 VICTIM</div>
            ${(t.allVictims?.[0]?.nickname) ? `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--blue);letter-spacing:0.5px;">${t.allVictims[0].nickname}</div>` : ''}
            <div class="trial-card-name victim">${t.victimName || '—'}</div>
-           ${t.victimTalent ? `<div class="trial-card-talent">Ultimate ${t.victimTalent}</div>` : ''}`;
+           ${t.victimTalent ? `<div class="trial-card-talent">${useShsl ? 'SHSL' : 'Ultimate'} ${t.victimTalent}</div>` : ''}`;
 
       const timeRow = t.trialTime && t.trialTime !== '00:00:00'
         ? `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-align:center;padding:3px 0 1px;border-top:1px solid var(--border);margin-top:3px;">⏱ ${t.trialTime}</div>`
-        : '';
-
-      const victimAvatarUrl = t.allVictims?.[0]?.avatarUrl || null;
-      const accusedAvatarUrl = t.accusedAvatarUrl || null;
-
-      const victimBg = victimAvatarUrl
-        ? `background-image:url('${victimAvatarUrl}');background-size:cover;background-position:center;`
-        : '';
-      const accusedBg = accusedAvatarUrl
-        ? `background-image:url('${accusedAvatarUrl}');background-size:cover;background-position:center;`
         : '';
 
       wrap.innerHTML = `
@@ -4007,24 +4546,18 @@
           </div>
           <div style="display:flex;flex-direction:column;flex:1;">
             <div class="trial-card-body">
-              <div class="trial-card-side" style="position:relative;overflow:hidden;${victimBg}">
-                ${victimAvatarUrl ? `<div style="position:absolute;inset:0;background:rgba(13,13,27,0.78);"></div>` : ''}
-                <div style="position:relative;z-index:1;">
-                  ${victimSideHtml}
-                </div>
+              <div class="trial-card-side">
+                ${victimSideHtml}
               </div>
               <div class="trial-card-arrow" style="display:flex;flex-direction:column;align-items:center;gap:3px;">
                 ${t.murderWeapon ? `<span style="font-family:'Special Elite',cursive;font-size:10px;color:var(--red);letter-spacing:1px;opacity:0.85;white-space:nowrap;">🗡 ${t.murderWeapon}</span>` : ''}
                 →
               </div>
-              <div class="trial-card-side" style="position:relative;overflow:hidden;${accusedBg}">
-                ${accusedAvatarUrl ? `<div style="position:absolute;inset:0;background:rgba(13,13,27,0.78);"></div>` : ''}
-                <div style="position:relative;z-index:1;">
-                  <div class="trial-card-role">🔪 ACCUSED MURDERER</div>
-                  ${t.accusedNickname ? `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--blue);letter-spacing:0.5px;">${t.accusedNickname}</div>` : ''}
-                  <div class="trial-card-name murderer">${t.accused || '—'}</div>
-                  ${t.accusedTalent ? `<div class="trial-card-talent">Ultimate ${t.accusedTalent}</div>` : ''}
-                </div>
+              <div class="trial-card-side">
+                <div class="trial-card-role">🔪 ACCUSED MURDERER</div>
+                ${t.accusedNickname ? `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--blue);letter-spacing:0.5px;">${t.accusedNickname}</div>` : ''}
+                <div class="trial-card-name murderer">${t.accused || '—'}</div>
+                ${t.accusedTalent ? `<div class="trial-card-talent">${useShsl ? 'SHSL' : 'Ultimate'} ${t.accusedTalent}</div>` : ''}
               </div>
               <div class="trial-card-verdict">${verdictHtml}</div>
             </div>
@@ -4335,7 +4868,7 @@
 
       ctx.fillStyle = s.nameColor || COL; ctx.font = '15px "Special Elite", cursive'; ctx.textAlign = 'left';
       ctx.fillText(truncate(ctx, s.name, PW-16), px+10, py+22);
-      if (s.talent) { ctx.fillStyle = YELLOW; ctx.font = '9px "Share Tech Mono", monospace'; ctx.fillText(truncate(ctx, 'Ultimate ' + s.talent, PW-16), px+10, py+36); }
+      if (s.talent) { ctx.fillStyle = YELLOW; ctx.font = '9px "Share Tech Mono", monospace'; ctx.fillText(truncate(ctx, (useShsl ? 'SHSL' : 'Ultimate') + ' ' + s.talent, PW-16), px+10, py+36); }
       ctx.textAlign = 'left';
     });
     y += H_PART;
@@ -4353,7 +4886,7 @@
         const px = PAD+8+col*(PW+6), py = y+30+row*56;
         ctx.fillStyle='#c060c0'; ctx.font='14px "Special Elite", cursive';
         ctx.fillText(truncate(ctx,d.name,PW-20), px, py+14);
-        if (d.talent) { ctx.fillStyle=YELLOW; ctx.font='9px "Share Tech Mono", monospace'; ctx.fillText(truncate(ctx,'Ultimate '+d.talent,PW-20), px, py+27); }
+        if (d.talent) { ctx.fillStyle=YELLOW; ctx.font='9px "Share Tech Mono", monospace'; ctx.fillText(truncate(ctx,(useShsl ? 'SHSL' : 'Ultimate')+' '+d.talent,PW-20), px, py+27); }
       });
       y += H_DEAD;
     }
@@ -4863,10 +5396,11 @@
   document.getElementById('viewToggleBtn').textContent = '⊞ COMPACT';
 
   // ─── RADIO PANEL ────────────────────────────────────────────
-  let radioOpen = true;
+  let radioOpen = false;
 
   function toggleRadio() {
     radioOpen = !radioOpen;
+    if (radioOpen) { closeNotesTab(); closeSettingsTab(); }
     document.getElementById('radioPanel').classList.toggle('open', radioOpen);
     document.getElementById('radioTabBtn').classList.toggle('open', radioOpen);
   }
@@ -4896,7 +5430,7 @@
     else icon.textContent = '🔊';
     // Update slider fill
     const slider = document.getElementById('radioVolSlider');
-    slider.style.background = `linear-gradient(to right, #e03030 0%, #e03030 ${radioVolume}%, #2a2a35 ${radioVolume}%, #2a2a35 100%)`;
+    slider.style.background = `linear-gradient(to right, var(--accent) 0%, var(--accent) ${radioVolume}%, #2a2a35 ${radioVolume}%, #2a2a35 100%)`;
   }
 
   // Initialize slider fill on load
@@ -4955,7 +5489,7 @@
       document.getElementById('radioNpTitle').textContent = '— Queue empty —';
       document.getElementById('radioNpDur').textContent = '';
       document.getElementById('radioElapsed').textContent = '0:00';
-      document.getElementById('radioSeekSlider').value = 0; document.getElementById('radioSeekSlider').style.background = 'linear-gradient(to right, var(--red) 0%, var(--red) 0%, #2a2a35 0%, #2a2a35 100%)';
+      document.getElementById('radioSeekSlider').value = 0; document.getElementById('radioSeekSlider').style.background = 'linear-gradient(to right, var(--accent) 0%, var(--accent) 0%, #2a2a35 0%, #2a2a35 100%)';
       radioCurrentTrack = null;
       radioRenderQueue();
       return;
@@ -4966,7 +5500,7 @@
     document.getElementById('radioNpDur').textContent = radioCurrentTrack.duration ? radioFmtTime(radioCurrentTrack.duration) : '—';
     document.getElementById('radioElapsed').textContent = '0:00';
     document.getElementById('radioSeekSlider').value = 0;
-    document.getElementById('radioSeekSlider').style.background = `linear-gradient(to right, var(--red) 0%, var(--red) 0%, #2a2a35 0%, #2a2a35 100%)`;
+    document.getElementById('radioSeekSlider').style.background = `linear-gradient(to right, var(--accent) 0%, var(--accent) 0%, #2a2a35 0%, #2a2a35 100%)`;
     if (ytPlayer && ytPlayer.loadVideoById) {
       ytPlayer.loadVideoById(radioCurrentTrack.videoId);
     }
@@ -5003,7 +5537,7 @@
         const pct = Math.min(100, (radioElapsedSec / dur) * 100);
         const slider = document.getElementById('radioSeekSlider');
         slider.value = pct;
-        slider.style.background = `linear-gradient(to right, var(--red) 0%, var(--red) ${pct}%, #2a2a35 ${pct}%, #2a2a35 100%)`;
+        slider.style.background = `linear-gradient(to right, var(--accent) 0%, var(--accent) ${pct}%, #2a2a35 ${pct}%, #2a2a35 100%)`;
       }
     }, 1000);
   }
@@ -5015,7 +5549,7 @@
     radioElapsedSec = Math.floor(seekTo);
     document.getElementById('radioElapsed').textContent = radioFmtTime(radioElapsedSec);
     const slider = document.getElementById('radioSeekSlider');
-    slider.style.background = `linear-gradient(to right, var(--red) 0%, var(--red) ${pct}%, #2a2a35 ${pct}%, #2a2a35 100%)`;
+    slider.style.background = `linear-gradient(to right, var(--accent) 0%, var(--accent) ${pct}%, #2a2a35 ${pct}%, #2a2a35 100%)`;
   }
 
   function radioFmtTime(sec) {
@@ -5086,7 +5620,7 @@
   radioRenderQueue();
   (function() {
     const grid = document.querySelector('.main-grid');
-    const DEFAULT_ORDER = ['panel-participants','panel-photos','panel-timeline','panel-misc','panel-verdict'];
+    const DEFAULT_ORDER = ['panel-participants','panel-photos','panel-timeline','panel-verdict'];
     let dragEl = null;
     let activeIndicator = null;
 
@@ -5170,7 +5704,70 @@
     });
   })();
 
-  // ── UNSAVED WARNING ──
+  // ── INVESTIGATOR GATE ──
+  (function() {
+    const gate      = document.getElementById('investigatorGate');
+    const input     = document.getElementById('gateInput');
+    const btn       = document.getElementById('gateEnterBtn');
+    const errEl     = document.getElementById('gateError');
+
+    function tryEnter() {
+      const name = input.value.trim();
+      if (!name) {
+        errEl.classList.add('visible');
+        input.focus();
+        return;
+      }
+      errEl.classList.remove('visible');
+
+      // Store investigator name for use elsewhere on the page
+      window.investigatorName = name;
+
+      // Auto-fill the investigator field on the main page
+      const invField = document.getElementById('investigatorInput');
+      if (invField && !invField.value) invField.value = name;
+
+      // Unlock main content, animate gate out
+      gate.classList.add('gate-exit');
+      gate.addEventListener('animationend', () => {
+        gate.remove();
+        document.body.classList.remove('gate-locked');
+        startMenuMusic();
+      }, { once: true });
+    }
+
+    btn.addEventListener('click', tryEnter);
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') tryEnter();
+      if (errEl.classList.contains('visible')) errEl.classList.remove('visible');
+    });
+
+    // Auto-focus input
+    setTimeout(() => input.focus(), 400);
+  })();
+
+  // 25002500 MENU BACKGROUND MUSIC 25002500
+  let menuMusicPlayer = null;
+
+  function startMenuMusic() {
+    if (menuMusicPlayer || !window.YT || !YT.Player) {
+      if (!window.YT) { setTimeout(startMenuMusic, 300); return; }
+    }
+    const div = document.createElement('div');
+    div.id = 'menuMusicPlayer';
+    div.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px;';
+    document.body.appendChild(div);
+    menuMusicPlayer = new YT.Player('menuMusicPlayer', {
+      width: 1, height: 1,
+      videoId: 'GnsJdmjlSjc',
+      playerVars: { autoplay: 1, loop: 1, playlist: 'GnsJdmjlSjc', controls: 0 },
+      events: {
+        onReady: function(e) { e.target.setVolume(12); e.target.playVideo(); }
+      }
+    });
+  }
+
+  // 25002500 UNSAVED WARNING 25002500
   window.addEventListener('beforeunload', e => {
     e.preventDefault();
     e.returnValue = '';
