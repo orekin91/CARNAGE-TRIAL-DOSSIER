@@ -3122,7 +3122,6 @@
             HOST-ONLY QUEUE (lock adding for listeners)
           </label>
           <div class="radio-room-actions">
-            <button class="radio-room-btn" style="flex:1;" id="radioRoomHostBtn" onclick="radioRoomToggleHost()">TAKE HOST</button>
             <button class="radio-room-btn" style="flex:1;color:var(--red);border-color:var(--red);" onclick="radioLeaveRoom()">LEAVE</button>
           </div>
         </div>
@@ -6417,10 +6416,8 @@
   }
 
   function radioRoomApplyHostUI(isHost) {
-    const hostBtn = document.getElementById('radioRoomHostBtn');
     const lockRow = document.getElementById('radioRoomLockRow');
     const lockChk = document.getElementById('radioRoomLockQueue');
-    if (hostBtn) hostBtn.style.display = isHost ? 'none' : 'block';
     if (lockRow) {
       lockRow.classList.toggle('disabled', !isHost);
       if (lockChk) lockChk.disabled = !isHost;
