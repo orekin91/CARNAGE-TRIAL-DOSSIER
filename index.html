@@ -6347,6 +6347,24 @@
   });
   const rtdb = firebase.database();
 
+  // ── ROOM EXPIRY CLEANUP (runs once per page load) ──
+  (function radioRoomCleanup() {
+    const EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
+    rtdb.ref('rooms').once('value').then(snap => {
+      if (!snap.exists()) return;
+      const now = Date.now();
+      const updates = {};
+      snap.forEach(child => {
+        const created = child.val().created;
+        if (created && (now - created) > EXPIRY_MS) {
+          updates['rooms/' + child.key] = null;
+        }
+      });
+      if (Object.keys(updates).length) rtdb.ref().update(updates);
+    }).catch(() => {});
+  })();
+
+
   let roomCode = null, roomRef = null, roomQueueRef = null;
   let roomIsHost = false, roomLockQueue = false;
   let roomListenerMuted = false; // listener's personal mute (their "pause")
@@ -6442,16 +6460,55 @@
     radioRoomUpdateListenerUI(); // restore controls
   }
 
+  // ── ROOM RATE LIMITING ──
+  const ROOM_CLIENT_ID_KEY = 'carnage_client_id';
+  const ROOM_LAST_CREATED_KEY = 'carnage_last_room_created';
+  const ROOM_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
+  const ROOM_MAX_ACTIVE = 3;
+
+  function radioRoomGetClientId() {
+    let id = localStorage.getItem(ROOM_CLIENT_ID_KEY);
+    if (!id) {
+      id = 'cid_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+      localStorage.setItem(ROOM_CLIENT_ID_KEY, id);
+    }
+    return id;
+  }
+
+  async function radioRoomCheckRateLimit() {
+    // Cooldown check
+    const lastCreated = parseInt(localStorage.getItem(ROOM_LAST_CREATED_KEY) || '0');
+    const remaining = ROOM_COOLDOWN_MS - (Date.now() - lastCreated);
+    if (remaining > 0) {
+      const mins = Math.ceil(remaining / 60000);
+      radioRoomSetStatus('Wait ' + mins + 'm before creating another room', 'error');
+      return false;
+    }
+    // Active room cap check
+    const clientId = radioRoomGetClientId();
+    const snap = await rtdb.ref('rooms').orderByChild('clientId').equalTo(clientId).once('value');
+    if (snap.exists() && Object.keys(snap.val()).length >= ROOM_MAX_ACTIVE) {
+      radioRoomSetStatus('Max ' + ROOM_MAX_ACTIVE + ' active rooms reached', 'error');
+      return false;
+    }
+    return true;
+  }
+
   async function radioCreateRoom() {
-    const code = radioRoomGenCode();
-    radioRoomSetStatus('Creating...', 'connecting');
+    radioRoomSetStatus('Checking...', 'connecting');
     try {
+      const allowed = await radioRoomCheckRateLimit();
+      if (!allowed) return;
+      const code = radioRoomGenCode();
+      const clientId = radioRoomGetClientId();
       await rtdb.ref('rooms/' + code).set({
         created: Date.now(),
+        clientId,
         queue: [],
         state: null,
         settings: { lockQueue: true }
       });
+      localStorage.setItem(ROOM_LAST_CREATED_KEY, Date.now().toString());
       await radioRoomConnect(code, true);
     } catch(e) {
       radioRoomSetStatus('Failed', 'error');
