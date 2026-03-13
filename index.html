@@ -6453,7 +6453,7 @@
         created: Date.now(),
         queue: [],
         state: null,
-        settings: { lockQueue: false }
+        settings: { lockQueue: true }
       });
       await radioRoomConnect(code, true);
     } catch(e) {
@@ -6563,7 +6563,10 @@
 
     radioRoomShowActive(code);
     radioRoomApplyHostUI(isHost);
-    if (isHost) await radioRoomPushQueue();
+    if (isHost) {
+      await roomRef.child('settings/lockQueue').set(true);
+      await radioRoomPushQueue();
+    }
   }
 
   function radioRoomStartHostTick() {
@@ -6604,6 +6607,7 @@
     // Restore full controls and unmute
     if (ytPlayer) ytPlayer.unMute();
     roomListenerMuted = false;
+    await roomRef.child('settings/lockQueue').set(true);
     radioRoomApplyHostUI(true);
     radioRoomStartHostTick();
     await radioRoomPushQueue();
