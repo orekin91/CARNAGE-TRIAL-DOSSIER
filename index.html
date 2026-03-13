@@ -5717,7 +5717,7 @@
     { videoId: 'Qw0ARn68WMY', title: null, duration: null },
   ];
 
-  let radioQueue = [];
+  let radioQueue = [...RADIO_DEFAULT_QUEUE];
   let radioCurrentTrack = null;
   let ytPlayer = null;
   let ytApiReady = false;
@@ -6350,8 +6350,10 @@
 
   let roomCode = null, roomRef = null, roomQueueRef = null;
   let roomIsHost = false, roomLockQueue = false;
+  let roomListenerMuted = false; // listener's personal mute (their "pause")
   let roomPresenceRef = null;
   let roomQueueListener = null, roomStateListener = null, roomPresenceListener = null, roomSettingsListener = null;
+  let roomHostTickInterval = null; // host broadcasts timestamp every 3s
 
   function radioRoomGenCode() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -6387,6 +6389,26 @@
     }
   }
 
+  // Disable/enable listener controls based on room membership
+  function radioRoomUpdateListenerUI() {
+    const isListener = roomCode && !roomIsHost;
+    const skipBtn = document.querySelector('.radio-ctrl-btn[onclick="radioSkip()"]');
+    const loopBtn = document.getElementById('radioLoopBtn');
+    const seekSlider = document.getElementById('radioSeekSlider');
+    const playBtn = document.getElementById('radioPlayPauseBtn');
+
+    if (isListener) {
+      if (skipBtn) { skipBtn.disabled = true; skipBtn.style.opacity = '0.3'; skipBtn.title = 'Host only'; }
+      if (loopBtn) { loopBtn.disabled = true; loopBtn.style.opacity = '0.3'; loopBtn.title = 'Host only'; }
+      if (seekSlider) { seekSlider.disabled = true; seekSlider.style.opacity = '0.3'; }
+      if (playBtn) playBtn.textContent = roomListenerMuted ? '▶ UNMUTE' : '🔇 MUTE';
+    } else {
+      if (skipBtn) { skipBtn.disabled = false; skipBtn.style.opacity = ''; skipBtn.title = ''; }
+      if (loopBtn) { loopBtn.disabled = false; loopBtn.style.opacity = ''; loopBtn.title = 'Loop current track'; }
+      if (seekSlider) { seekSlider.disabled = false; seekSlider.style.opacity = ''; }
+    }
+  }
+
   function radioRoomToggleLock(checked) {
     if (!roomIsHost || !roomRef) return;
     roomLockQueue = checked;
@@ -6403,8 +6425,9 @@
       lockRow.classList.toggle('disabled', !isHost);
       if (lockChk) lockChk.disabled = !isHost;
     }
-    radioRoomSetStatus(isHost ? 'You are the host' : 'Listening', 'connected');
+    radioRoomSetStatus(isHost ? 'You are the host' : 'Listening — pause mutes only you', 'connected');
     radioRoomUpdateAddUI();
+    radioRoomUpdateListenerUI();
   }
 
   function radioRoomShowActive(code) {
@@ -6419,6 +6442,7 @@
     document.getElementById('radioRoomActive').style.display = 'none';
     document.getElementById('radioRoomCodeInput').value = '';
     document.querySelector('.radio-add-row').classList.remove('locked');
+    radioRoomUpdateListenerUI(); // restore controls
   }
 
   async function radioCreateRoom() {
@@ -6428,7 +6452,7 @@
       await rtdb.ref('rooms/' + code).set({
         created: Date.now(),
         queue: [],
-        currentTrack: null,
+        state: null,
         settings: { lockQueue: false }
       });
       await radioRoomConnect(code, true);
@@ -6452,7 +6476,7 @@
 
   async function radioRoomConnect(code, isHost) {
     if (roomCode) radioLeaveRoom(true);
-    roomCode = code; roomIsHost = isHost;
+    roomCode = code; roomIsHost = isHost; roomListenerMuted = false;
     roomRef = rtdb.ref('rooms/' + code);
     roomQueueRef = rtdb.ref('rooms/' + code + '/queue');
 
@@ -6468,7 +6492,7 @@
       if (el) el.textContent = n + ' listener' + (n !== 1 ? 's' : '') + ' in room';
     });
 
-    // Settings (lockQueue)
+    // Settings
     roomSettingsListener = rtdb.ref('rooms/' + code + '/settings').on('value', snap => {
       if (!snap.exists()) return;
       const s = snap.val();
@@ -6478,36 +6502,77 @@
       radioRoomUpdateAddUI();
     });
 
-    // Queue sync (listeners only)
-    roomQueueListener = roomQueueRef.on('value', snap => {
-      if (roomIsHost) return;
-      const data = snap.val();
-      if (!Array.isArray(data)) return;
-      radioQueue = data.map(t => ({ ...t }));
-      radioRenderQueue();
-      if (!radioCurrentTrack && radioQueue.length && ytPlayer && ytApiReady) radioPlayNext();
-    });
+    if (!isHost) {
+      // ── LISTENER: mirror host state ──
 
-    // Current track sync (listeners only)
-    roomStateListener = rtdb.ref('rooms/' + code + '/state').on('value', snap => {
-      if (roomIsHost || !snap.exists()) return;
-      const state = snap.val();
-      if (!state || !state.videoId) return;
-      if (!radioCurrentTrack || radioCurrentTrack.videoId !== state.videoId) {
-        radioCurrentTrack = { videoId: state.videoId, title: state.title || state.videoId, duration: state.duration || 0 };
-        document.getElementById('radioNpTitle').textContent = radioCurrentTrack.title;
-        document.getElementById('radioNpDur').textContent = radioCurrentTrack.duration ? radioFmtTime(radioCurrentTrack.duration) : '—';
-        if (ytPlayer && ytPlayer.loadVideoById) {
-          radioManualLoad = true;
-          ytPlayer.loadVideoById(state.videoId);
-          setTimeout(() => { radioManualLoad = false; }, 300);
+      // Queue sync
+      roomQueueListener = roomQueueRef.on('value', snap => {
+        const data = snap.val();
+        if (!Array.isArray(data)) return;
+        radioQueue = data.map(t => ({ ...t }));
+        radioRenderQueue();
+      });
+
+      // State sync — track + seek position
+      roomStateListener = rtdb.ref('rooms/' + code + '/state').on('value', snap => {
+        if (!snap.exists()) return;
+        const state = snap.val();
+        if (!state || !state.videoId) return;
+
+        const trackChanged = !radioCurrentTrack || radioCurrentTrack.videoId !== state.videoId;
+
+        if (trackChanged) {
+          radioCurrentTrack = { videoId: state.videoId, title: state.title || state.videoId, duration: state.duration || 0 };
+          document.getElementById('radioNpTitle').textContent = radioCurrentTrack.title;
+          document.getElementById('radioNpDur').textContent = radioCurrentTrack.duration ? radioFmtTime(radioCurrentTrack.duration) : '—';
+          if (ytPlayer && ytPlayer.loadVideoById) {
+            radioManualLoad = true;
+            // Load and seek to host's current position
+            const seekTo = state.elapsed || 0;
+            ytPlayer.loadVideoById({ videoId: state.videoId, startSeconds: seekTo });
+            setTimeout(() => {
+              radioManualLoad = false;
+              if (roomListenerMuted) ytPlayer.mute();
+              else ytPlayer.unMute();
+              // Respect host pause state on join
+              if (state.playing === false) ytPlayer.pauseVideo();
+            }, 300);
+          }
+        } else if (state.elapsed !== undefined && ytPlayer && ytPlayer.getCurrentTime) {
+          // Resync position if listener has drifted more than 5 seconds from host
+          const listenerPos = ytPlayer.getCurrentTime();
+          const drift = Math.abs(listenerPos - state.elapsed);
+          if (drift > 5) {
+            ytPlayer.seekTo(state.elapsed, true);
+          }
         }
-      }
-    });
+        // Keep listener in sync with host play/pause state
+        if (ytPlayer && !radioManualLoad) {
+          if (state.playing === false && ytPlayer.getPlayerState() === 1) {
+            ytPlayer.pauseVideo();
+          } else if (state.playing === true && ytPlayer.getPlayerState() !== 1) {
+            ytPlayer.playVideo();
+          }
+        }
+      });
+
+    } else {
+      // ── HOST: broadcast position every 3s ──
+      radioRoomStartHostTick();
+    }
 
     radioRoomShowActive(code);
     radioRoomApplyHostUI(isHost);
     if (isHost) await radioRoomPushQueue();
+  }
+
+  function radioRoomStartHostTick() {
+    clearInterval(roomHostTickInterval);
+    roomHostTickInterval = setInterval(() => {
+      if (!roomIsHost || !roomRef || !radioCurrentTrack) return;
+      const elapsed = ytPlayer && ytPlayer.getCurrentTime ? Math.floor(ytPlayer.getCurrentTime()) : radioElapsedSec;
+      roomRef.child('state').update({ elapsed, playing: radioPlaying, updatedAt: Date.now() });
+    }, 3000);
   }
 
   async function radioRoomPushQueue() {
@@ -6517,20 +6582,35 @@
 
   async function radioRoomPushState(track) {
     if (!roomIsHost || !roomRef || !track) return;
-    await roomRef.child('state').set({ videoId: track.videoId, title: track.title || null, duration: track.duration || null, updatedAt: Date.now() });
+    const elapsed = ytPlayer && ytPlayer.getCurrentTime ? Math.floor(ytPlayer.getCurrentTime()) : 0;
+    await roomRef.child('state').set({
+      videoId: track.videoId,
+      title: track.title || null,
+      duration: track.duration || null,
+      elapsed,
+      playing: radioPlaying,
+      updatedAt: Date.now()
+    });
   }
 
   async function radioRoomToggleHost() {
     if (!roomCode || roomIsHost) return;
     roomIsHost = true;
+    clearInterval(roomHostTickInterval);
     await roomRef.child('host').set('taken_' + Date.now());
+    // Stop listener mirrors
     if (roomQueueListener) { roomQueueRef.off('value', roomQueueListener); roomQueueListener = null; }
     if (roomStateListener) { rtdb.ref('rooms/' + roomCode + '/state').off('value', roomStateListener); roomStateListener = null; }
+    // Restore full controls and unmute
+    if (ytPlayer) ytPlayer.unMute();
+    roomListenerMuted = false;
     radioRoomApplyHostUI(true);
+    radioRoomStartHostTick();
     await radioRoomPushQueue();
   }
 
   function radioLeaveRoom(silent) {
+    clearInterval(roomHostTickInterval);
     if (roomPresenceRef) roomPresenceRef.remove();
     if (roomQueueRef && roomQueueListener) { roomQueueRef.off('value', roomQueueListener); roomQueueListener = null; }
     if (roomCode) {
@@ -6538,23 +6618,43 @@
       if (roomPresenceListener) { rtdb.ref('rooms/' + roomCode + '/presence').off('value', roomPresenceListener); roomPresenceListener = null; }
       if (roomSettingsListener) { rtdb.ref('rooms/' + roomCode + '/settings').off('value', roomSettingsListener); roomSettingsListener = null; }
     }
+    // Restore listener controls and unmute
+    if (ytPlayer) ytPlayer.unMute();
+    roomListenerMuted = false;
     roomCode = null; roomRef = null; roomQueueRef = null; roomIsHost = false; roomLockQueue = false; roomPresenceRef = null;
     if (!silent) radioRoomShowIdle();
   }
 
+  // Override togglePlay for listeners: mute/unmute only
+  const _origTogglePlay = radioTogglePlay;
+  radioTogglePlay = function() {
+    if (roomCode && !roomIsHost) {
+      // Listener: toggle mute instead of pause
+      roomListenerMuted = !roomListenerMuted;
+      if (ytPlayer) {
+        if (roomListenerMuted) ytPlayer.mute();
+        else ytPlayer.unMute();
+      }
+      const btn = document.getElementById('radioPlayPauseBtn');
+      if (btn) btn.textContent = roomListenerMuted ? '▶ UNMUTE' : '🔇 MUTE';
+      return;
+    }
+    _origTogglePlay();
+  };
+
   // Hook into radioAddToQueue to block locked listeners and sync host additions
   const _origAddToQueue = radioAddToQueue;
   radioAddToQueue = function() {
-    if (roomCode && roomLockQueue && !roomIsHost) return; // blocked
+    if (roomCode && roomLockQueue && !roomIsHost) return;
     _origAddToQueue();
     if (roomIsHost) setTimeout(radioRoomPushQueue, 150);
   };
 
-  // Hook into radioPlayNext to sync current track for host
+  // Hook into radioPlayNext to push new state for host
   const _origPlayNext = radioPlayNext;
   radioPlayNext = function() {
     _origPlayNext();
-    if (roomIsHost && radioCurrentTrack) setTimeout(() => radioRoomPushState(radioCurrentTrack), 200);
+    if (roomIsHost) setTimeout(() => radioRoomPushState(radioCurrentTrack), 200);
   };
 
 </script>
