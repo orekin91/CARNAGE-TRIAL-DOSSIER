@@ -2659,6 +2659,26 @@
   @keyframes toastIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
   @keyframes toastOut { from { opacity:1; transform:translateY(0); } to { opacity:0; transform:translateY(8px); } }
 
+  /* ── EASTER EGG JUMPSCARE ── */
+  #jumpscareOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    background: #000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  #jumpscareOverlay.active { display: flex; }
+  #jumpscareOverlay img {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    image-rendering: pixelated;
+  }
+
   /* hidden YT iframe */
   #ytHiddenFrame { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; left: -9999px; }
 
@@ -6507,6 +6527,55 @@
     }, ms);
   }
 
+
+  // ── EASTER EGG ──
+  let _spamCount = 0;
+  let _spamTimer = null;
+  let _warned = false;
+  let _jumpscareActive = false;
+
+  function radioRoomSpamCheck() {
+    _spamCount++;
+    clearTimeout(_spamTimer);
+    _spamTimer = setTimeout(() => { _spamCount = 0; _warned = false; }, 4000);
+
+    if (_jumpscareActive) return;
+
+    if (!_warned && _spamCount >= 5) {
+      _warned = true;
+      showToast('Keep spamming me and see what happens.', '', 3000);
+    } else if (_warned && _spamCount >= 10) {
+      _triggerJumpscare();
+    }
+  }
+
+  function _triggerJumpscare() {
+    if (_jumpscareActive) return;
+    _jumpscareActive = true;
+    _spamCount = 0; _warned = false;
+
+    // Load and play sound via hidden YT player
+    const sfxDiv = document.createElement('div');
+    sfxDiv.id = 'jumpscareYT';
+    document.body.appendChild(sfxDiv);
+    const sfxPlayer = new YT.Player('jumpscareYT', {
+      width: 1, height: 1,
+      videoId: 'wKlNdWFq4VE',
+      playerVars: { autoplay: 1, start: 0 },
+      events: { onReady: e => { e.target.setVolume(100); e.target.playVideo(); } }
+    });
+
+    const overlay = document.getElementById('jumpscareOverlay');
+    overlay.classList.add('active');
+
+    setTimeout(() => {
+      overlay.classList.remove('active');
+      _jumpscareActive = false;
+      if (sfxPlayer && sfxPlayer.stopVideo) sfxPlayer.stopVideo();
+      sfxDiv.remove();
+    }, 6000);
+  }
+
   // ── ROOM RATE LIMITING ──
   const ROOM_CLIENT_ID_KEY = 'carnage_client_id';
   const ROOM_LAST_CREATED_KEY = 'carnage_last_room_created';
@@ -6532,6 +6601,7 @@
       const label = remaining < 60000 ? secs + 's' : mins + 'm';
       radioRoomSetStatus('Cooldown active', 'error');
       showToast('⏳ Please wait ' + label + ' before creating a new room', 'error', 4000);
+      radioRoomSpamCheck();
       return false;
     }
     // Active room cap check — fail open if query errors (don't block creation)
@@ -6770,6 +6840,7 @@
 </script>
 
 <div id="toastContainer"></div>
+<div id="jumpscareOverlay"><img src="https://64.media.tumblr.com/54218ea981fb96ebc914787d5f0db6be/tumblr_inline_ok0dn8QFzQ1tzs2po_500.jpg" alt="" /></div>
 
 <div style="text-align:center; padding: 12px 20px 20px; font-family:'Share Tech Mono',monospace; font-size:10px; color:#3a3a45; letter-spacing:1px;">
   found a bug? dm <span style="color:#4a4a58;">h0stile</span> on discord
