@@ -6612,10 +6612,16 @@
 
     setTimeout(() => {
       sfx2.pause(); sfx2.currentTime = 0;
-      overlay.classList.remove('active');
-      _jumpscareActive = false;
-      _jumpscareStage = 0;
-      window.location.reload();
+      txt.textContent = 'I TOLD YOU TO STOP CLICKING THE DAMN BUTTON.';
+      txt.style.display = 'block';
+      setTimeout(() => {
+        overlay.classList.remove('active');
+        txt.style.display = 'none';
+        _jumpscareActive = false;
+        _jumpscareStage = 0;
+        window.onbeforeunload = null;
+        window.location.reload();
+      }, 2500);
     }, 6000);
   }
 
