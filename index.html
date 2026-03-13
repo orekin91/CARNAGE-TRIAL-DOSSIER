@@ -2535,10 +2535,11 @@
   /* ── NOTES SIDE TAB ── */
   .notes-tab {
     position: fixed;
-    left: 0;
-    top: 520px;
+    right: 0;
+    top: 385px;
     z-index: 1000;
     display: flex;
+    flex-direction: row-reverse;
     align-items: stretch;
     animation: fadeIn 0.5s ease both;
     animation-delay: 1.2s;
@@ -2546,8 +2547,8 @@
   .notes-tab-btn {
     background: #16161c;
     border: 1px solid var(--border);
-    border-left: none;
-    border-radius: 0 4px 4px 0;
+    border-right: none;
+    border-radius: 4px 0 0 4px;
     color: var(--muted);
     cursor: pointer;
     writing-mode: vertical-rl;
@@ -2567,7 +2568,7 @@
   .notes-side-panel {
     background: #111115;
     border: 1px solid var(--border);
-    border-left: none;
+    border-right: none;
     width: 0;
     overflow: hidden;
     transition: width 0.3s ease;
@@ -3319,6 +3320,18 @@
   </div>
 </div>
 
+</div>
+
+<!-- END TRIAL CONFIRM MODAL -->
+<div id="endTrialConfirmModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#16161c;border:1px solid #e03030;border-radius:2px;padding:32px 36px;max-width:360px;width:90%;text-align:center;">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:4px;color:#e03030;margin-bottom:8px;">⚰ END TRIAL?</div>
+    <div style="font-size:11px;color:#706a60;letter-spacing:2px;margin-bottom:24px;">This will archive the current trial and reset the dossier. This cannot be undone.</div>
+    <div style="display:flex;gap:12px;justify-content:center;">
+      <button onclick="endTrialConfirmed()" style="background:transparent;border:1px solid #e03030;color:#e03030;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;padding:10px 22px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(224,48,48,0.12)'" onmouseout="this.style.background='transparent'">⚰ CONFIRM</button>
+      <button onclick="document.getElementById('endTrialConfirmModal').style.display='none'" style="background:transparent;border:1px solid #2a2a35;color:#706a60;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;padding:10px 22px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.background='transparent'">✕ CANCEL</button>
+    </div>
+  </div>
 </div>
 
 <!-- END TRIAL MODAL -->
@@ -4534,7 +4547,13 @@
   }
 
   function endTrial() {
-    // Run the save logic first
+    // Show confirmation first — do NOT save yet
+    document.getElementById('endTrialConfirmModal').style.display = 'flex';
+  }
+
+  function endTrialConfirmed() {
+    document.getElementById('endTrialConfirmModal').style.display = 'none';
+    // Now run the save logic
     const saved = saveTrial(true);
     if (!saved) return;
     // Show end trial modal
@@ -5622,6 +5641,7 @@
         },
         onStateChange: e => {
           if (e.data === YT.PlayerState.ENDED) {
+            if (radioManualLoad) return; // ignore ENDED fired by stopVideo during playlist load
             if (radioLoop && radioCurrentTrack) {
               ytPlayer.seekTo(0); ytPlayer.playVideo();
             } else {
@@ -5695,6 +5715,7 @@
   }
 
   let radioLoop = false;
+  let radioManualLoad = false; // suppresses ENDED auto-advance during manual playlist loads
 
   function radioToggleLoop() {
     radioLoop = !radioLoop;
@@ -5831,7 +5852,8 @@
     const playlists = radioLoadPlaylists();
     const pl = playlists[idx];
     if (!pl) return;
-    // Stop current, replace queue
+    // Set flag so stray ENDED event from stopVideo doesn't auto-advance
+    radioManualLoad = true;
     if (ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
     clearInterval(radioElapsedTimer);
     radioCurrentTrack = null;
@@ -5839,7 +5861,11 @@
     radioQueue = pl.tracks.map(t => ({ ...t }));
     radioRenderQueue();
     radioRenderPlaylists();
-    if (ytPlayer) radioPlayNext();
+    // Use setTimeout to let any pending state-change events fire before we clear the flag and play
+    setTimeout(() => {
+      radioManualLoad = false;
+      if (ytPlayer) radioPlayNext();
+    }, 50);
   }
 
   function radioDeletePlaylist(idx, e) {
