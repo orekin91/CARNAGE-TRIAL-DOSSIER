@@ -6573,6 +6573,9 @@
     txt.textContent = 'STOP SPAMMING THE DAMN BUTTON.';
     txt.style.display = 'block';
 
+    // Mute radio during jumpscare
+    if (ytPlayer && ytPlayer.mute) ytPlayer.mute();
+
     // Play first 4s of audio
     const sfx = new Audio(JUMPSCARE_SFX);
     sfx.volume = 1.0;
@@ -6585,6 +6588,7 @@
       overlay.removeEventListener('animationend', onEnd);
       overlay.classList.remove('active', 'flicker');
       txt.style.display = 'none';
+      if (ytPlayer && ytPlayer.unMute) ytPlayer.unMute();
       _jumpscareActive = false;
       _jumpscareStage = 1;
       _spamCount = 0; _warned = false;
@@ -6607,6 +6611,9 @@
     setTimeout(() => {
       img.src = 'https://64.media.tumblr.com/54218ea981fb96ebc914787d5f0db6be/tumblr_inline_ok0dn8QFzQ1tzs2po_500.jpg';
     }, 120);
+
+    // Mute radio during jumpscare
+    if (ytPlayer && ytPlayer.mute) ytPlayer.mute();
 
     const sfx2 = new Audio(JUMPSCARE_SFX2);
     sfx2.volume = 1.0;
