@@ -2627,6 +2627,38 @@
   }
   .radio-add-row { position: relative; }
 
+  /* ── TOAST NOTIFICATIONS ── */
+  #toastContainer {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    z-index: 99999;
+    pointer-events: none;
+  }
+  .toast {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 8px 16px;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    pointer-events: none;
+    animation: toastIn 0.2s ease forwards;
+    white-space: nowrap;
+  }
+  .toast.error { border-color: var(--red); color: var(--red); }
+  .toast.success { border-color: var(--green); color: var(--green); }
+  .toast.fade-out { animation: toastOut 0.3s ease forwards; }
+  @keyframes toastIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes toastOut { from { opacity:1; transform:translateY(0); } to { opacity:0; transform:translateY(8px); } }
+
   /* hidden YT iframe */
   #ytHiddenFrame { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; left: -9999px; }
 
@@ -6460,10 +6492,25 @@
     radioRoomUpdateListenerUI(); // restore controls
   }
 
+
+  function showToast(msg, type, duration) {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    const el = document.createElement('div');
+    el.className = 'toast' + (type ? ' ' + type : '');
+    el.textContent = msg;
+    container.appendChild(el);
+    const ms = duration || 3000;
+    setTimeout(() => {
+      el.classList.add('fade-out');
+      el.addEventListener('animationend', () => el.remove());
+    }, ms);
+  }
+
   // ── ROOM RATE LIMITING ──
   const ROOM_CLIENT_ID_KEY = 'carnage_client_id';
   const ROOM_LAST_CREATED_KEY = 'carnage_last_room_created';
-  const ROOM_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
+  const ROOM_COOLDOWN_MS = 2 * 60 * 1000; // 2 minutes
   const ROOM_MAX_ACTIVE = 3;
 
   function radioRoomGetClientId() {
@@ -6481,7 +6528,10 @@
     const remaining = ROOM_COOLDOWN_MS - (Date.now() - lastCreated);
     if (remaining > 0) {
       const mins = Math.ceil(remaining / 60000);
-      radioRoomSetStatus('Wait ' + mins + 'm before creating another room', 'error');
+      const secs = Math.ceil(remaining / 1000);
+      const label = remaining < 60000 ? secs + 's' : mins + 'm';
+      radioRoomSetStatus('Cooldown active', 'error');
+      showToast('⏳ Please wait ' + label + ' before creating a new room', 'error', 4000);
       return false;
     }
     // Active room cap check — fail open if query errors (don't block creation)
@@ -6718,6 +6768,8 @@
   };
 
 </script>
+
+<div id="toastContainer"></div>
 
 <div style="text-align:center; padding: 12px 20px 20px; font-family:'Share Tech Mono',monospace; font-size:10px; color:#3a3a45; letter-spacing:1px;">
   found a bug? dm <span style="color:#4a4a58;">h0stile</span> on discord
