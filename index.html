@@ -2529,6 +2529,104 @@
     padding: 6px 0;
   }
 
+  /* ── SHARED ROOM STYLES ── */
+  .radio-room-section {
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .radio-room-label {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+  }
+  .radio-room-row { display: flex; gap: 6px; }
+  .radio-room-input {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    padding: 5px 8px;
+    outline: none;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: border-color 0.2s;
+    min-width: 0;
+  }
+  .radio-room-input:focus { border-color: var(--accent); }
+  .radio-room-input::placeholder { color: var(--muted); text-transform: none; letter-spacing: 0; }
+  .radio-room-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    padding: 5px 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .radio-room-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .radio-room-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(var(--accent-rgb),0.08); }
+  .radio-room-status {
+    font-size: 9px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 14px;
+  }
+  .radio-room-status .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--muted);
+    flex-shrink: 0;
+  }
+  .radio-room-status .dot.connected { background: var(--green); box-shadow: 0 0 4px var(--green); }
+  .radio-room-status .dot.connecting { background: var(--yellow); animation: pulse-dot 1s infinite; }
+  .radio-room-status .dot.error { background: var(--red); }
+  @keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+  .radio-room-code-display {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-align: center;
+    padding: 4px 0;
+    cursor: pointer;
+  }
+  .radio-room-listeners { font-size: 9px; color: var(--muted); text-align: center; }
+  .radio-room-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .radio-room-lock-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 9px;
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+  }
+  .radio-room-lock-row input[type=checkbox] { accent-color: var(--accent); cursor: pointer; }
+  .radio-room-lock-row.disabled { opacity: 0.35; pointer-events: none; }
+  .radio-add-row.locked { opacity: 0.4; pointer-events: none; }
+  .radio-add-row.locked::after {
+    content: '🔒 HOST ONLY';
+    position: absolute;
+    font-size: 8px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    right: 0;
+    top: -14px;
+  }
+  .radio-add-row { position: relative; }
+
   /* hidden YT iframe */
   #ytHiddenFrame { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; left: -9999px; }
 
@@ -3002,6 +3100,32 @@
           <button class="radio-playlist-save-btn" onclick="radioSavePlaylist()">SAVE</button>
         </div>
         <div class="radio-playlist-list" id="radioPlaylistList"></div>
+      </div>
+      <!-- SHARED ROOM -->
+      <div class="radio-room-section">
+        <div class="radio-room-label">📡 SHARED ROOM</div>
+        <div id="radioRoomIdle">
+          <div class="radio-room-row" style="margin-bottom:6px;">
+            <input class="radio-room-input" id="radioRoomCodeInput" placeholder="Enter room code..." maxlength="8" onkeydown="if(event.key==='Enter') radioJoinRoom()" />
+            <button class="radio-room-btn" onclick="radioJoinRoom()">JOIN</button>
+          </div>
+          <div class="radio-room-row">
+            <button class="radio-room-btn" style="flex:1;" onclick="radioCreateRoom()">+ CREATE ROOM</button>
+          </div>
+        </div>
+        <div id="radioRoomActive" style="display:none; flex-direction:column; gap:6px;">
+          <div class="radio-room-code-display" id="radioRoomCodeDisplay" onclick="radioRoomCopyCode()" title="Click to copy"></div>
+          <div class="radio-room-listeners" id="radioRoomListeners"></div>
+          <div class="radio-room-status"><span class="dot" id="radioRoomDot"></span><span id="radioRoomStatusText"></span></div>
+          <label class="radio-room-lock-row disabled" id="radioRoomLockRow" title="Only the host can change this">
+            <input type="checkbox" id="radioRoomLockQueue" onchange="radioRoomToggleLock(this.checked)" disabled />
+            HOST-ONLY QUEUE (lock adding for listeners)
+          </label>
+          <div class="radio-room-actions">
+            <button class="radio-room-btn" style="flex:1;" id="radioRoomHostBtn" onclick="radioRoomToggleHost()">TAKE HOST</button>
+            <button class="radio-room-btn" style="flex:1;color:var(--red);border-color:var(--red);" onclick="radioLeaveRoom()">LEAVE</button>
+          </div>
+        </div>
       </div>
       </div>
     </div>
@@ -4402,7 +4526,7 @@
       setTimeout(() => {
         document.getElementById('guiltyStamp').classList.add('show');
         syncVictimGuiltyStamp();
-      }, 50);
+      }, 300);
       document.getElementById('realMurdererInput').focus();
     }
   }
@@ -5593,7 +5717,7 @@
     { videoId: 'Qw0ARn68WMY', title: null, duration: null },
   ];
 
-  let radioQueue = [...RADIO_DEFAULT_QUEUE]; // queue of {videoId, title, duration}
+  let radioQueue = [];
   let radioCurrentTrack = null;
   let ytPlayer = null;
   let ytApiReady = false;
@@ -5645,10 +5769,10 @@
         },
         onStateChange: e => {
           if (e.data === YT.PlayerState.ENDED) {
-            if (radioManualLoad) return; // ignore ENDED fired by stopVideo during playlist load
+            if (radioManualLoad) return;
             if (radioLoop && radioCurrentTrack) {
               ytPlayer.seekTo(0); ytPlayer.playVideo();
-            } else {
+            } else if (radioCurrentTrack) {
               radioSkip();
             }
           }
@@ -5708,14 +5832,17 @@
   }
 
   function radioSkip() {
+    radioManualLoad = true;
     if (ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
     clearInterval(radioElapsedTimer);
     radioElapsedSec = 0;
-    // Skip ignores loop — always advance
     const loopWas = radioLoop;
     radioLoop = false;
-    radioPlayNext();
-    radioLoop = loopWas;
+    setTimeout(() => {
+      radioManualLoad = false;
+      radioPlayNext();
+      radioLoop = loopWas;
+    }, 100);
   }
 
   let radioLoop = false;
@@ -5869,7 +5996,7 @@
     setTimeout(() => {
       radioManualLoad = false;
       if (ytPlayer) radioPlayNext();
-    }, 50);
+    }, 300);
   }
 
   function radioDeletePlaylist(idx, e) {
@@ -6204,6 +6331,231 @@
       });
     });
   })();
+
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+  // ── FIREBASE + SHARED ROOM ──
+  firebase.initializeApp({
+    apiKey: "AIzaSyBKSUoTBiDpl10CzHJBwmbYLKM0MQjsk6M",
+    authDomain: "carnage-radio.firebaseapp.com",
+    databaseURL: "https://carnage-radio-default-rtdb.firebaseio.com",
+    projectId: "carnage-radio",
+    storageBucket: "carnage-radio.firebasestorage.app",
+    messagingSenderId: "1045504298612",
+    appId: "1:1045504298612:web:c516b79201654ff8630b21"
+  });
+  const rtdb = firebase.database();
+
+  let roomCode = null, roomRef = null, roomQueueRef = null;
+  let roomIsHost = false, roomLockQueue = false;
+  let roomPresenceRef = null;
+  let roomQueueListener = null, roomStateListener = null, roomPresenceListener = null, roomSettingsListener = null;
+
+  function radioRoomGenCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let c = '';
+    for (let i = 0; i < 6; i++) c += chars[Math.floor(Math.random() * chars.length)];
+    return c;
+  }
+
+  function radioRoomSetStatus(msg, state) {
+    const dot = document.getElementById('radioRoomDot');
+    const txt = document.getElementById('radioRoomStatusText');
+    if (dot) dot.className = 'dot ' + (state || '');
+    if (txt) txt.textContent = msg;
+  }
+
+  function radioRoomCopyCode() {
+    if (!roomCode) return;
+    navigator.clipboard.writeText(roomCode).catch(() => {});
+    const el = document.getElementById('radioRoomCodeDisplay');
+    if (!el) return;
+    const orig = el.textContent;
+    el.textContent = 'COPIED!';
+    setTimeout(() => { el.textContent = orig; }, 1200);
+  }
+
+  function radioRoomUpdateAddUI() {
+    const addRow = document.querySelector('.radio-add-row');
+    if (!addRow) return;
+    if (roomCode && roomLockQueue && !roomIsHost) {
+      addRow.classList.add('locked');
+    } else {
+      addRow.classList.remove('locked');
+    }
+  }
+
+  function radioRoomToggleLock(checked) {
+    if (!roomIsHost || !roomRef) return;
+    roomLockQueue = checked;
+    roomRef.child('settings/lockQueue').set(checked);
+    radioRoomUpdateAddUI();
+  }
+
+  function radioRoomApplyHostUI(isHost) {
+    const hostBtn = document.getElementById('radioRoomHostBtn');
+    const lockRow = document.getElementById('radioRoomLockRow');
+    const lockChk = document.getElementById('radioRoomLockQueue');
+    if (hostBtn) hostBtn.style.display = isHost ? 'none' : 'block';
+    if (lockRow) {
+      lockRow.classList.toggle('disabled', !isHost);
+      if (lockChk) lockChk.disabled = !isHost;
+    }
+    radioRoomSetStatus(isHost ? 'You are the host' : 'Listening', 'connected');
+    radioRoomUpdateAddUI();
+  }
+
+  function radioRoomShowActive(code) {
+    document.getElementById('radioRoomIdle').style.display = 'none';
+    const active = document.getElementById('radioRoomActive');
+    active.style.display = 'flex';
+    document.getElementById('radioRoomCodeDisplay').textContent = code;
+  }
+
+  function radioRoomShowIdle() {
+    document.getElementById('radioRoomIdle').style.display = 'block';
+    document.getElementById('radioRoomActive').style.display = 'none';
+    document.getElementById('radioRoomCodeInput').value = '';
+    document.querySelector('.radio-add-row').classList.remove('locked');
+  }
+
+  async function radioCreateRoom() {
+    const code = radioRoomGenCode();
+    radioRoomSetStatus('Creating...', 'connecting');
+    try {
+      await rtdb.ref('rooms/' + code).set({
+        created: Date.now(),
+        queue: [],
+        currentTrack: null,
+        settings: { lockQueue: false }
+      });
+      await radioRoomConnect(code, true);
+    } catch(e) {
+      radioRoomSetStatus('Failed', 'error');
+    }
+  }
+
+  async function radioJoinRoom() {
+    const code = (document.getElementById('radioRoomCodeInput').value || '').trim().toUpperCase();
+    if (!code || code.length < 4) return;
+    radioRoomSetStatus('Connecting...', 'connecting');
+    try {
+      const snap = await rtdb.ref('rooms/' + code).once('value');
+      if (!snap.exists()) { radioRoomSetStatus('Room not found', 'error'); return; }
+      await radioRoomConnect(code, false);
+    } catch(e) {
+      radioRoomSetStatus('Failed', 'error');
+    }
+  }
+
+  async function radioRoomConnect(code, isHost) {
+    if (roomCode) radioLeaveRoom(true);
+    roomCode = code; roomIsHost = isHost;
+    roomRef = rtdb.ref('rooms/' + code);
+    roomQueueRef = rtdb.ref('rooms/' + code + '/queue');
+
+    // Presence
+    roomPresenceRef = rtdb.ref('rooms/' + code + '/presence/' + Date.now() + '_' + Math.random().toString(36).slice(2));
+    await roomPresenceRef.set({ joined: Date.now(), name: window.investigatorName || 'Unknown' });
+    roomPresenceRef.onDisconnect().remove();
+
+    // Listener count
+    roomPresenceListener = rtdb.ref('rooms/' + code + '/presence').on('value', snap => {
+      const el = document.getElementById('radioRoomListeners');
+      const n = snap.exists() ? Object.keys(snap.val()).length : 0;
+      if (el) el.textContent = n + ' listener' + (n !== 1 ? 's' : '') + ' in room';
+    });
+
+    // Settings (lockQueue)
+    roomSettingsListener = rtdb.ref('rooms/' + code + '/settings').on('value', snap => {
+      if (!snap.exists()) return;
+      const s = snap.val();
+      roomLockQueue = !!s.lockQueue;
+      const chk = document.getElementById('radioRoomLockQueue');
+      if (chk) chk.checked = roomLockQueue;
+      radioRoomUpdateAddUI();
+    });
+
+    // Queue sync (listeners only)
+    roomQueueListener = roomQueueRef.on('value', snap => {
+      if (roomIsHost) return;
+      const data = snap.val();
+      if (!Array.isArray(data)) return;
+      radioQueue = data.map(t => ({ ...t }));
+      radioRenderQueue();
+      if (!radioCurrentTrack && radioQueue.length && ytPlayer && ytApiReady) radioPlayNext();
+    });
+
+    // Current track sync (listeners only)
+    roomStateListener = rtdb.ref('rooms/' + code + '/state').on('value', snap => {
+      if (roomIsHost || !snap.exists()) return;
+      const state = snap.val();
+      if (!state || !state.videoId) return;
+      if (!radioCurrentTrack || radioCurrentTrack.videoId !== state.videoId) {
+        radioCurrentTrack = { videoId: state.videoId, title: state.title || state.videoId, duration: state.duration || 0 };
+        document.getElementById('radioNpTitle').textContent = radioCurrentTrack.title;
+        document.getElementById('radioNpDur').textContent = radioCurrentTrack.duration ? radioFmtTime(radioCurrentTrack.duration) : '—';
+        if (ytPlayer && ytPlayer.loadVideoById) {
+          radioManualLoad = true;
+          ytPlayer.loadVideoById(state.videoId);
+          setTimeout(() => { radioManualLoad = false; }, 300);
+        }
+      }
+    });
+
+    radioRoomShowActive(code);
+    radioRoomApplyHostUI(isHost);
+    if (isHost) await radioRoomPushQueue();
+  }
+
+  async function radioRoomPushQueue() {
+    if (!roomIsHost || !roomQueueRef) return;
+    await roomQueueRef.set(radioQueue.map(t => ({ videoId: t.videoId, title: t.title || null, duration: t.duration || null })));
+  }
+
+  async function radioRoomPushState(track) {
+    if (!roomIsHost || !roomRef || !track) return;
+    await roomRef.child('state').set({ videoId: track.videoId, title: track.title || null, duration: track.duration || null, updatedAt: Date.now() });
+  }
+
+  async function radioRoomToggleHost() {
+    if (!roomCode || roomIsHost) return;
+    roomIsHost = true;
+    await roomRef.child('host').set('taken_' + Date.now());
+    if (roomQueueListener) { roomQueueRef.off('value', roomQueueListener); roomQueueListener = null; }
+    if (roomStateListener) { rtdb.ref('rooms/' + roomCode + '/state').off('value', roomStateListener); roomStateListener = null; }
+    radioRoomApplyHostUI(true);
+    await radioRoomPushQueue();
+  }
+
+  function radioLeaveRoom(silent) {
+    if (roomPresenceRef) roomPresenceRef.remove();
+    if (roomQueueRef && roomQueueListener) { roomQueueRef.off('value', roomQueueListener); roomQueueListener = null; }
+    if (roomCode) {
+      if (roomStateListener) { rtdb.ref('rooms/' + roomCode + '/state').off('value', roomStateListener); roomStateListener = null; }
+      if (roomPresenceListener) { rtdb.ref('rooms/' + roomCode + '/presence').off('value', roomPresenceListener); roomPresenceListener = null; }
+      if (roomSettingsListener) { rtdb.ref('rooms/' + roomCode + '/settings').off('value', roomSettingsListener); roomSettingsListener = null; }
+    }
+    roomCode = null; roomRef = null; roomQueueRef = null; roomIsHost = false; roomLockQueue = false; roomPresenceRef = null;
+    if (!silent) radioRoomShowIdle();
+  }
+
+  // Hook into radioAddToQueue to block locked listeners and sync host additions
+  const _origAddToQueue = radioAddToQueue;
+  radioAddToQueue = function() {
+    if (roomCode && roomLockQueue && !roomIsHost) return; // blocked
+    _origAddToQueue();
+    if (roomIsHost) setTimeout(radioRoomPushQueue, 150);
+  };
+
+  // Hook into radioPlayNext to sync current track for host
+  const _origPlayNext = radioPlayNext;
+  radioPlayNext = function() {
+    _origPlayNext();
+    if (roomIsHost && radioCurrentTrack) setTimeout(() => radioRoomPushState(radioCurrentTrack), 200);
+  };
 
 </script>
 
