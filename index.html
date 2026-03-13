@@ -6254,10 +6254,8 @@
   })();
 
   // 25002500 UNSAVED WARNING 25002500
-  window.addEventListener('beforeunload', e => {
-    e.preventDefault();
-    e.returnValue = '';
-  });
+  function _beforeUnloadHandler(e) { e.preventDefault(); e.returnValue = ''; }
+  window.addEventListener('beforeunload', _beforeUnloadHandler);
 
   // ── GRID BEAT VISUALIZER ──
   let _gridRafId = null;
@@ -6602,9 +6600,13 @@
     const txt = document.getElementById('jumpscareText');
     const overlay = document.getElementById('jumpscareOverlay');
 
-    img.src = 'https://64.media.tumblr.com/54218ea981fb96ebc914787d5f0db6be/tumblr_inline_ok0dn8QFzQ1tzs2po_500.jpg';
+    // Flash image for a split second first
+    img.src = 'https://preview.redd.it/junko-enoshima-sprites-to-make-you-feel-potentially-v0-no2npoqnpg9c1.png?width=524&format=png&auto=webp&s=16b213730f70115923a4a5a3f3e9d8f7ed38ead4';
     txt.style.display = 'none';
     overlay.classList.add('active');
+    setTimeout(() => {
+      img.src = 'https://64.media.tumblr.com/54218ea981fb96ebc914787d5f0db6be/tumblr_inline_ok0dn8QFzQ1tzs2po_500.jpg';
+    }, 120);
 
     const sfx2 = new Audio(JUMPSCARE_SFX2);
     sfx2.volume = 1.0;
@@ -6619,6 +6621,7 @@
         txt.style.display = 'none';
         _jumpscareActive = false;
         _jumpscareStage = 0;
+        window.removeEventListener('beforeunload', _beforeUnloadHandler);
         window.onbeforeunload = null;
         window.location.reload();
       }, 2500);
