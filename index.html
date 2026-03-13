@@ -7046,7 +7046,43 @@
         "Don't lose hope, okay? I mean it.",
         "Every piece of evidence matters. Don't overlook anything.",
         "I'm scared too. But we have to keep going.",
-      ]
+      ],
+      lines_sus: [
+        "Someone here is acting really suspicious... keep a close eye on them.",
+        "I don't want to believe it, but the evidence is pointing somewhere...",
+        "Be careful who you trust right now. Someone isn't being honest.",
+        "I've been watching closely... and something feels off about this.",
+        "We can't ignore the signs. Something's wrong here.",
+        "My gut is telling me something. I hope I'm wrong.",
+        "Everyone seems nervous... but one person especially.",
+        "A liar in the group is the most dangerous thing. Stay sharp.",
+      ],
+      lines_victim: [
+        "We have to find the truth... for their sake. We owe them that.",
+        "Someone took everything from them. We can't let that go unanswered.",
+        "I keep thinking about them... I want to cry, but I have to stay focused.",
+        "The least we can do is find out what really happened.",
+        "They deserved better. Everyone here does.",
+        "I won't let their death be meaningless. I refuse.",
+        "It hurts. But falling apart won't help them now.",
+        "No matter what, we find the truth. For them.",
+      ],
+      lines_culprit: [
+        "You were accused... I hope it's not true. But I have to face the possibility.",
+        "I want to believe in you. But the evidence doesn't lie.",
+        "Even now, I can't bring myself to hate you. Why did it come to this?",
+        "Whatever drove you to this... it doesn't make it okay. Nothing does.",
+        "The worst part is I still care what happens to you.",
+        "I wish things had gone differently. I really do.",
+        "Was there no other way? Couldn't you have talked to someone?",
+        "Everyone has a reason. But a reason isn't an excuse.",
+      ],
+      lines_all_cleared: [
+        "Everyone's been cleared! I knew it — I just knew we'd all make it through!",
+        "No suspects... that's either really good or really scary. Stay alert!",
+        "All clear for now. But don't let your guard down yet.",
+        "I'm relieved... but also a little confused. Something still doesn't add up.",
+      ],
     }
   };
 
@@ -7058,10 +7094,32 @@
     const mascot = MASCOTS[_mascotActive];
     if (!mascot) return;
 
+    // Determine which line pool to draw from based on participant states
+    let pool = mascot.lines;
+    const allSuspects = (typeof suspects !== 'undefined' ? suspects : []);
+    const allVictims = (typeof victims !== 'undefined' ? victims : []);
+
+    const hasSus     = allSuspects.some(s => s.status === 'guilty' || s.status === 'sus');
+    const hasVictim  = allVictims.length > 0 || allSuspects.some(s => s.isVictim);
+    const hasCulprit = allSuspects.some(s => s.accused);
+    const hasAny     = allSuspects.length > 0 || allVictims.length > 0;
+    const allCleared = hasAny && allSuspects.every(s => s.status === 'cleared' || s.accused);
+
+    // Priority: culprit > victim > sus > all-cleared > generic
+    if (hasCulprit && mascot.lines_culprit) {
+      pool = mascot.lines_culprit;
+    } else if (hasVictim && mascot.lines_victim) {
+      pool = mascot.lines_victim;
+    } else if (hasSus && mascot.lines_sus) {
+      pool = mascot.lines_sus;
+    } else if (allCleared && mascot.lines_all_cleared) {
+      pool = mascot.lines_all_cleared;
+    }
+
     // Pick a line, avoid repeating
     let idx;
-    do { idx = Math.floor(Math.random() * mascot.lines.length); }
-    while (idx === _mascotLastLine && mascot.lines.length > 1);
+    do { idx = Math.floor(Math.random() * pool.length); }
+    while (idx === _mascotLastLine && pool.length > 1);
     _mascotLastLine = idx;
 
     const bubble = document.getElementById('mascotBubble');
@@ -7071,7 +7129,7 @@
     sprite.classList.remove('idle');
     void sprite.offsetWidth;
 
-    bubble.textContent = mascot.lines[idx];
+    bubble.textContent = pool[idx];
     bubble.classList.add('visible');
 
     clearTimeout(_mascotBubbleTimer);
