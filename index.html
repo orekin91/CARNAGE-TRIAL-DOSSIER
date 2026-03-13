@@ -6558,6 +6558,24 @@
         _triggerJumpscare2();
       }
     }
+
+    // After stage 1: flash Junko more aggressively the closer they get to stage 2
+    if (_jumpscareStage === 1 && _warned && !_jumpscareActive) {
+      const progress = Math.min(_spamCount / 10, 1); // 0→1 as clicks go 0→10
+      const flashDuration = 60 + progress * 220; // 60ms → 280ms
+      _flashJunko(flashDuration);
+    }
+  }
+
+  function _flashJunko(duration) {
+    const img = document.getElementById('jumpscareImg');
+    const overlay = document.getElementById('jumpscareOverlay');
+    if (overlay.classList.contains('active')) return;
+    img.src = 'https://preview.redd.it/junko-enoshima-sprites-to-make-you-feel-potentially-v0-no2npoqnpg9c1.png?width=524&format=png&auto=webp&s=16b213730f70115923a4a5a3f3e9d8f7ed38ead4';
+    overlay.classList.add('active');
+    setTimeout(() => {
+      overlay.classList.remove('active');
+    }, duration);
   }
 
   function _triggerJumpscare1() {
@@ -6610,7 +6628,7 @@
     overlay.classList.add('active');
     setTimeout(() => {
       img.src = 'https://64.media.tumblr.com/54218ea981fb96ebc914787d5f0db6be/tumblr_inline_ok0dn8QFzQ1tzs2po_500.jpg';
-    }, 120);
+    }, 200);
 
     // Mute radio during jumpscare
     if (ytPlayer && ytPlayer.mute) ytPlayer.mute();
