@@ -2131,6 +2131,15 @@
   }
   .radio-tab-btn:hover, .radio-tab-btn.open { border-color: var(--accent); color: var(--accent); }
   .radio-tab-btn .radio-icon { font-size: 14px; writing-mode: horizontal-tb; }
+  .radio-tab-btn::after, .notes-tab-btn::after, .settings-tab-btn::after {
+    content: '⠿';
+    font-size: 10px;
+    opacity: 0.3;
+    writing-mode: horizontal-tb;
+    display: block;
+    margin-top: 4px;
+    cursor: ns-resize;
+  }
 
   .radio-panel {
     background: #111115;
@@ -2419,6 +2428,107 @@
   }
   .radio-add-btn:hover { border-color: var(--accent); color: var(--accent); }
 
+  /* ── PLAYLIST STYLES ── */
+  .radio-playlist-section {
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .radio-playlist-label {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+  }
+  .radio-playlist-save-row {
+    display: flex;
+    gap: 6px;
+  }
+  .radio-playlist-name-input {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    padding: 5px 8px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .radio-playlist-name-input:focus { border-color: var(--accent); }
+  .radio-playlist-name-input::placeholder { color: var(--muted); }
+  .radio-playlist-save-btn {
+    background: transparent;
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    color: var(--accent);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    padding: 5px 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .radio-playlist-save-btn:hover { background: rgba(var(--accent-rgb),0.1); }
+  .radio-playlist-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 130px;
+    overflow-y: auto;
+  }
+  .radio-playlist-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .radio-playlist-item:hover { border-color: rgba(var(--accent-rgb),0.4); background: rgba(var(--accent-rgb),0.04); }
+  .radio-playlist-item-name {
+    flex: 1;
+    font-size: 10px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .radio-playlist-item-count {
+    font-size: 9px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .radio-playlist-item-load {
+    font-size: 9px;
+    color: var(--accent);
+    cursor: pointer;
+    padding: 2px 5px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .radio-playlist-item-load:hover { border-color: var(--accent); }
+  .radio-playlist-item-del {
+    font-size: 9px;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 2px 5px;
+    transition: color 0.2s;
+  }
+  .radio-playlist-item-del:hover { color: var(--red); }
+  .radio-playlist-empty {
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    padding: 6px 0;
+  }
+
   /* hidden YT iframe */
   #ytHiddenFrame { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; left: -9999px; }
 
@@ -2426,7 +2536,7 @@
   .notes-tab {
     position: fixed;
     left: 0;
-    top: 640px;
+    top: 520px;
     z-index: 1000;
     display: flex;
     align-items: stretch;
@@ -2506,7 +2616,7 @@
   .settings-tab {
     position: fixed;
     left: 0;
-    top: 20px;
+    top: 80px;
     z-index: 1000;
     display: flex;
     align-items: stretch;
@@ -2840,7 +2950,7 @@
 <div class="radio-tab" id="radioTab">
   <div class="radio-panel" id="radioPanel">
     <div class="radio-panel-inner">
-      <div class="radio-panel-title">📻 RADIO</div>
+      <div class="radio-panel-title">📻 RADIO <button id="radioMinBtn" onclick="toggleRadioMin()" style="float:right;background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:0;line-height:1;" title="Minimize">▾</button></div>
 
       <!-- NOW PLAYING -->
       <div class="radio-now-playing">
@@ -2857,8 +2967,10 @@
       <div class="radio-controls">
         <button class="radio-ctrl-btn primary" id="radioPlayPauseBtn" onclick="radioTogglePlay()">▶ PLAY</button>
         <button class="radio-ctrl-btn" onclick="radioSkip()">⏭ SKIP</button>
+        <button class="radio-ctrl-btn" id="radioLoopBtn" onclick="radioToggleLoop()" title="Loop current track">⟳ LOOP</button>
       </div>
 
+      <div id="radioExpandedSections">
       <div class="radio-volume-row">
         <span class="radio-vol-icon" id="radioVolIcon">🔊</span>
         <input class="radio-volume-slider" id="radioVolSlider" type="range" min="0" max="100" value="5" oninput="radioSetVolume(this.value)" />
@@ -2876,6 +2988,17 @@
         <input class="radio-url-input" id="radioUrlInput" placeholder="YouTube URL to queue..." onkeydown="if(event.key==='Enter') radioAddToQueue()" />
         <button class="radio-add-btn" onclick="radioAddToQueue()">+ ADD</button>
       </div>
+
+      <!-- PLAYLISTS -->
+      <div class="radio-playlist-section">
+        <div class="radio-playlist-label">💾 PLAYLISTS</div>
+        <div class="radio-playlist-save-row">
+          <input class="radio-playlist-name-input" id="radioPlaylistNameInput" placeholder="Playlist name..." onkeydown="if(event.key==='Enter') radioSavePlaylist()" />
+          <button class="radio-playlist-save-btn" onclick="radioSavePlaylist()">SAVE</button>
+        </div>
+        <div class="radio-playlist-list" id="radioPlaylistList"></div>
+      </div>
+      </div>
     </div>
   </div>
   <button class="radio-tab-btn" id="radioTabBtn" onclick="toggleRadio()">
@@ -2888,8 +3011,8 @@
 <div class="notes-tab" id="notesTab">
   <div class="notes-side-panel" id="notesSidePanel">
     <div class="notes-side-panel-inner">
-      <div class="notes-side-title">📝 MISC NOTES</div>
-      <textarea class="misc-notes-area notes-side-textarea" placeholder="Alibi checks, general observations, anything that doesn't fit elsewhere..."></textarea>
+      <div class="notes-side-title">📝 MISC NOTES <button id="notesMinBtn" onclick="toggleNotesMin()" style="float:right;background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:0;line-height:1;" title="Minimize">▾</button></div>
+      <textarea class="misc-notes-area notes-side-textarea" id="notesTextarea" placeholder="Alibi checks, general observations, anything that doesn't fit elsewhere..."></textarea>
     </div>
   </div>
   <button class="notes-tab-btn" id="notesTabBtn" onclick="toggleNotesTab()">
@@ -2902,7 +3025,7 @@
 <div class="settings-tab" id="settingsTab">
   <div class="settings-side-panel" id="settingsSidePanel">
     <div class="settings-side-panel-inner">
-      <div class="settings-side-title">⚙ SETTINGS</div>
+      <div class="settings-side-title">⚙ SETTINGS <button id="settingsMinBtn" onclick="toggleSettingsMin()" style="float:right;background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:0;line-height:1;" title="Minimize">▾</button></div>
 
       <!-- Accent color -->
       <div class="settings-row">
@@ -4877,44 +5000,12 @@
     ctx.fillText('— PARTICIPANTS —', W/2, y + 16);
     ctx.textAlign = 'left'; y += H_PART_LBL;
 
-    // ── PARTICIPANT GRID ──
+    // ── PARTICIPANT GRID ── (drawn inside finishCard with avatars)
     const PW = (W - PAD*2 - (PCOLS-1)*6) / PCOLS;
-    activeParticipants.forEach((s, i) => {
-      const col = i % PCOLS;
-      const row = Math.floor(i / PCOLS);
-      const px = PAD + col * (PW + 6);
-      const py = y + row * 60;
-
-      ctx.fillStyle = SURF; roundRect(ctx, px, py, PW, 52, 2); ctx.fill();
-      ctx.strokeStyle = BORDER;
-      ctx.lineWidth = 1; roundRect(ctx, px, py, PW, 52, 2); ctx.stroke();
-      // neutral top bar
-      ctx.fillStyle = BORDER; roundRect(ctx, px, py, PW, 2, 2); ctx.fill();
-
-      ctx.fillStyle = s.nameColor || COL; ctx.font = '15px "Special Elite", cursive'; ctx.textAlign = 'left';
-      ctx.fillText(truncate(ctx, s.name, PW-16), px+10, py+22);
-      if (s.talent) { ctx.fillStyle = YELLOW; ctx.font = '9px "Share Tech Mono", monospace'; ctx.fillText(truncate(ctx, (useShsl ? 'SHSL' : 'Ultimate') + ' ' + s.talent, PW-16), px+10, py+36); }
-      ctx.textAlign = 'left';
-    });
     y += H_PART;
 
-    // ── DECEASED ──
-    if (deceasedNamed.length > 0) {
-      ctx.fillStyle = 'rgba(80,0,80,0.08)';
-      roundRect(ctx, PAD, y, W-PAD*2, H_DEAD-8, 2); ctx.fill();
-      ctx.strokeStyle = 'rgba(150,0,150,0.25)'; ctx.lineWidth=1;
-      roundRect(ctx, PAD, y, W-PAD*2, H_DEAD-8, 2); ctx.stroke();
-      ctx.fillStyle = '#c060c0'; ctx.font='14px "Bebas Neue", sans-serif'; ctx.textAlign='left';
-      ctx.fillText('☠ DECEASED', PAD+12, y+20);
-      deceasedNamed.forEach((d,i) => {
-        const col = i%PCOLS, row=Math.floor(i/PCOLS);
-        const px = PAD+8+col*(PW+6), py = y+30+row*56;
-        ctx.fillStyle='#c060c0'; ctx.font='14px "Special Elite", cursive';
-        ctx.fillText(truncate(ctx,d.name,PW-20), px, py+14);
-        if (d.talent) { ctx.fillStyle=YELLOW; ctx.font='9px "Share Tech Mono", monospace'; ctx.fillText(truncate(ctx,(useShsl ? 'SHSL' : 'Ultimate')+' '+d.talent,PW-20), px, py+27); }
-      });
-      y += H_DEAD;
-    }
+    // ── DECEASED ── (drawn inside finishCard with avatars)
+    if (deceasedNamed.length > 0) { y += H_DEAD; }
 
     // ── CONFIRMED WEAPONS ──
     if (confirmedWeapons.length > 0) {
@@ -4967,19 +5058,104 @@
       : null;
     const realMurdererAvatarSrc = realMurdererSuspect?.avatarUrl || null;
     const allVictimAvatarSrcs = victimAvatarSrcs;
+    const participantAvatarSrcs = activeParticipants.map(s => s.avatarUrl || null);
+    const deceasedAvatarSrcs    = deceasedNamed.map(d => d.avatarUrl || null);
     Promise.all([
       loadImg(victimAvatarSrc),
       loadImg(accusedAvatarSrc),
       loadImg(realMurdererAvatarSrc),
-      ...allVictimAvatarSrcs.map(loadImg)
-    ]).then(([victimImg, accusedImg, realMurdererImg, ...allVictimImgs]) => {
-      finishCard(victimImg, accusedImg, realMurdererImg, allVictimImgs);
+      ...allVictimAvatarSrcs.map(loadImg),
+      Promise.all(participantAvatarSrcs.map(loadImg)),
+      Promise.all(deceasedAvatarSrcs.map(loadImg)),
+    ]).then(([victimImg, accusedImg, realMurdererImg, ...rest]) => {
+      const allVictimImgs   = rest.slice(0, allVictimAvatarSrcs.length);
+      const participantImgs = rest[allVictimAvatarSrcs.length];
+      const deceasedImgs    = rest[allVictimAvatarSrcs.length + 1];
+      finishCard(victimImg, accusedImg, realMurdererImg, allVictimImgs, participantImgs, deceasedImgs);
     });
     return;
 
     finishCard();
 
-    function finishCard(victimImg, accusedImg, realMurdererImg, allVictimImgs = []) {
+    function finishCard(victimImg, accusedImg, realMurdererImg, allVictimImgs = [], participantImgs = [], deceasedImgs = []) {
+
+      // ── PARTICIPANT GRID (with avatars) ──
+      let partY = H_HEADER + H_PART_LBL + PAD + 14; // +14 for divider
+      activeParticipants.forEach((s, i) => {
+        const col = i % PCOLS;
+        const row = Math.floor(i / PCOLS);
+        const px = PAD + col * (PW + 6);
+        const py = partY + row * 60;
+
+        ctx.fillStyle = SURF; roundRect(ctx, px, py, PW, 52, 2); ctx.fill();
+        ctx.strokeStyle = BORDER; ctx.lineWidth = 1; roundRect(ctx, px, py, PW, 52, 2); ctx.stroke();
+        // top bar
+        ctx.fillStyle = BORDER; roundRect(ctx, px, py, PW, 2, 2); ctx.fill();
+
+        // Avatar as transparent bg (right-aligned)
+        const aImg = participantImgs[i];
+        if (aImg) {
+          ctx.save();
+          roundRect(ctx, px, py, PW, 52, 2); ctx.clip();
+          ctx.globalAlpha = 0.18;
+          const scale = Math.max(PW / aImg.width, 52 / aImg.height);
+          const dw = aImg.width * scale, dh = aImg.height * scale;
+          ctx.drawImage(aImg, px + (PW - dw), py + (52 - dh) / 2, dw, dh);
+          ctx.globalAlpha = 1;
+          ctx.restore();
+        }
+
+        ctx.fillStyle = s.nameColor || COL; ctx.font = '15px "Special Elite", cursive'; ctx.textAlign = 'left';
+        ctx.fillText(truncate(ctx, s.name, PW - 16), px + 10, py + 22);
+        if (s.talent) { ctx.fillStyle = YELLOW; ctx.font = '9px "Share Tech Mono", monospace'; ctx.fillText(truncate(ctx, (useShsl ? 'SHSL' : 'Ultimate') + ' ' + s.talent, PW - 16), px + 10, py + 36); }
+      });
+
+      // ── DECEASED (with avatars + X) ──
+      if (deceasedNamed.length > 0) {
+        let deadY = H_HEADER + H_PART_LBL + H_PART + PAD + 14; // +14 for divider
+        ctx.fillStyle = 'rgba(80,0,80,0.08)';
+        roundRect(ctx, PAD, deadY, W - PAD * 2, H_DEAD - 8, 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(150,0,150,0.25)'; ctx.lineWidth = 1;
+        roundRect(ctx, PAD, deadY, W - PAD * 2, H_DEAD - 8, 2); ctx.stroke();
+        ctx.fillStyle = '#c060c0'; ctx.font = '14px "Bebas Neue", sans-serif'; ctx.textAlign = 'left';
+        ctx.fillText('☠ DECEASED', PAD + 12, deadY + 20);
+
+        deceasedNamed.forEach((d, i) => {
+          const col = i % PCOLS, row = Math.floor(i / PCOLS);
+          const px = PAD + 8 + col * (PW + 6), py = deadY + 30 + row * 56;
+          const cardH = 48;
+
+          ctx.fillStyle = 'rgba(80,0,80,0.15)'; roundRect(ctx, px, py, PW - 8, cardH, 2); ctx.fill();
+          ctx.strokeStyle = 'rgba(150,0,150,0.3)'; ctx.lineWidth = 1; roundRect(ctx, px, py, PW - 8, cardH, 2); ctx.stroke();
+
+          // Avatar bg
+          const dImg = deceasedImgs[i];
+          if (dImg) {
+            ctx.save();
+            roundRect(ctx, px, py, PW - 8, cardH, 2); ctx.clip();
+            ctx.globalAlpha = 0.15;
+            const scale = Math.max((PW - 8) / dImg.width, cardH / dImg.height);
+            const dw = dImg.width * scale, dh = dImg.height * scale;
+            ctx.drawImage(dImg, px + ((PW - 8) - dw), py + (cardH - dh) / 2, dw, dh);
+            ctx.globalAlpha = 1;
+            ctx.restore();
+          }
+
+          // X overlay
+          const xSize = Math.min(cardH, PW - 8) * 0.55;
+          const cx = px + (PW - 8) / 2, cy = py + cardH / 2;
+          ctx.save();
+          ctx.strokeStyle = 'rgba(150,0,150,0.6)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(cx - xSize/2, cy - xSize/2); ctx.lineTo(cx + xSize/2, cy + xSize/2); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(cx + xSize/2, cy - xSize/2); ctx.lineTo(cx - xSize/2, cy + xSize/2); ctx.stroke();
+          ctx.restore();
+
+          ctx.fillStyle = '#c060c0'; ctx.font = '13px "Special Elite", cursive'; ctx.textAlign = 'left';
+          ctx.fillText(truncate(ctx, d.name, PW - 20), px + 6, py + 15);
+          if (d.talent) { ctx.fillStyle = YELLOW; ctx.font = '9px "Share Tech Mono", monospace'; ctx.fillText(truncate(ctx, (useShsl ? 'SHSL' : 'Ultimate') + ' ' + d.talent, PW - 20), px + 6, py + 28); }
+        });
+      }
+
       // ── VERDICT ──
       ctx.fillStyle=divGrad; ctx.fillRect(PAD, y, W-PAD*2, 1);
       let vy = y + 14;
@@ -5048,7 +5224,13 @@
         }
 
         ctx.fillStyle='rgba(224,48,48,0.5)'; ctx.font='bold 28px "Bebas Neue", sans-serif'; ctx.textAlign='center';
-        ctx.fillText('→', midX, vy+50);
+        ctx.fillText('←', midX, vy+44);
+        // Murder weapon between arrow and accused
+        const mwDisplay = document.getElementById('murderWeaponText')?.textContent?.trim();
+        if (mwDisplay && mwDisplay !== '— Select weapon —') {
+          ctx.fillStyle='rgba(224,48,48,0.75)'; ctx.font='10px "Bebas Neue", sans-serif'; ctx.textAlign='center';
+          ctx.fillText(mwDisplay, midX, vy+62);
+        }
 
         ctx.fillStyle=MUTED; ctx.font='10px "Share Tech Mono", monospace'; ctx.textAlign='left';
         ctx.fillText('🔪 ACCUSED MURDERER', midX+20, vy+22);
@@ -5350,15 +5532,18 @@
   function loadFromCode() {
     const code = document.getElementById('loadCodeText').value.trim();
     const errEl = document.getElementById('loadCodeError');
+    errEl.style.display = 'none';
+    let state;
     try {
-      const json = decodeURIComponent(escape(atob(code)));
-      const state = JSON.parse(json);
-      if (!state.v) throw new Error('bad version');
-      applyState(state);
-      closeLoadModal();
+      const json = decodeURIComponent(Array.from(atob(code), c => '%' + c.charCodeAt(0).toString(16).padStart(2,'0')).join(''));
+      state = JSON.parse(json);
     } catch (e) {
       errEl.style.display = 'block';
+      return;
     }
+    if (!state || !state.v) { errEl.style.display = 'block'; return; }
+    applyState(state);
+    closeLoadModal();
   }
 
   // Close modals on backdrop click
@@ -5436,7 +5621,13 @@
           if (!document.getElementById('investigatorGate')) radioPlayNext();
         },
         onStateChange: e => {
-          if (e.data === YT.PlayerState.ENDED) radioSkip();
+          if (e.data === YT.PlayerState.ENDED) {
+            if (radioLoop && radioCurrentTrack) {
+              ytPlayer.seekTo(0); ytPlayer.playVideo();
+            } else {
+              radioSkip();
+            }
+          }
           if (e.data === YT.PlayerState.PLAYING) {
             radioPlaying = true;
             radioStartElapsedTimer();
@@ -5465,6 +5656,12 @@
 
   function radioPlayNext() {
     if (!radioQueue.length) {
+      // If looping current track, replay it
+      if (radioLoop && radioCurrentTrack) {
+        ytPlayer.seekTo(0);
+        ytPlayer.playVideo();
+        return;
+      }
       document.getElementById('radioNpTitle').textContent = '— Queue empty —';
       document.getElementById('radioNpDur').textContent = '';
       document.getElementById('radioElapsed').textContent = '0:00';
@@ -5490,7 +5687,20 @@
     if (ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
     clearInterval(radioElapsedTimer);
     radioElapsedSec = 0;
+    // Skip ignores loop — always advance
+    const loopWas = radioLoop;
+    radioLoop = false;
     radioPlayNext();
+    radioLoop = loopWas;
+  }
+
+  let radioLoop = false;
+
+  function radioToggleLoop() {
+    radioLoop = !radioLoop;
+    const btn = document.getElementById('radioLoopBtn');
+    btn.style.borderColor = radioLoop ? 'var(--accent)' : '';
+    btn.style.color = radioLoop ? 'var(--accent)' : '';
   }
 
   function radioTogglePlay() {
@@ -5585,6 +5795,78 @@
       </div>`).join('');
   }
 
+  // ── PLAYLIST SYSTEM ──
+  const PLAYLIST_STORAGE_KEY = 'carnage_radio_playlists';
+
+  function radioLoadPlaylists() {
+    try { return JSON.parse(localStorage.getItem(PLAYLIST_STORAGE_KEY)) || []; }
+    catch(e) { return []; }
+  }
+
+  function radioSavePlaylists(playlists) {
+    localStorage.setItem(PLAYLIST_STORAGE_KEY, JSON.stringify(playlists));
+  }
+
+  function radioSavePlaylist() {
+    const nameInput = document.getElementById('radioPlaylistNameInput');
+    const name = nameInput.value.trim();
+    if (!name) return;
+    // Build tracks from current queue + currently playing
+    const tracks = [];
+    if (radioCurrentTrack) tracks.push({ ...radioCurrentTrack });
+    radioQueue.forEach(t => tracks.push({ ...t }));
+    if (!tracks.length) return;
+    const playlists = radioLoadPlaylists();
+    // Overwrite if name exists
+    const existing = playlists.findIndex(p => p.name === name);
+    const entry = { name, tracks, savedAt: Date.now() };
+    if (existing >= 0) playlists[existing] = entry;
+    else playlists.unshift(entry);
+    radioSavePlaylists(playlists);
+    nameInput.value = '';
+    radioRenderPlaylists();
+  }
+
+  function radioLoadPlaylist(idx) {
+    const playlists = radioLoadPlaylists();
+    const pl = playlists[idx];
+    if (!pl) return;
+    // Stop current, replace queue
+    if (ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
+    clearInterval(radioElapsedTimer);
+    radioCurrentTrack = null;
+    radioElapsedSec = 0;
+    radioQueue = pl.tracks.map(t => ({ ...t }));
+    radioRenderQueue();
+    radioRenderPlaylists();
+    if (ytPlayer) radioPlayNext();
+  }
+
+  function radioDeletePlaylist(idx, e) {
+    e.stopPropagation();
+    const playlists = radioLoadPlaylists();
+    playlists.splice(idx, 1);
+    radioSavePlaylists(playlists);
+    radioRenderPlaylists();
+  }
+
+  function radioRenderPlaylists() {
+    const el = document.getElementById('radioPlaylistList');
+    if (!el) return;
+    const playlists = radioLoadPlaylists();
+    if (!playlists.length) {
+      el.innerHTML = '<div class="radio-playlist-empty">No saved playlists</div>';
+      return;
+    }
+    el.innerHTML = playlists.map((pl, i) => `
+      <div class="radio-playlist-item">
+        <span class="radio-playlist-item-name" title="${pl.name}">${pl.name}</span>
+        <span class="radio-playlist-item-count">${pl.tracks.length} track${pl.tracks.length !== 1 ? 's' : ''}</span>
+        <span class="radio-playlist-item-load" onclick="radioLoadPlaylist(${i})" title="Load playlist">▶ LOAD</span>
+        <span class="radio-playlist-item-del" onclick="radioDeletePlaylist(${i}, event)" title="Delete">✕</span>
+      </div>`).join('');
+  }
+
   function youtubeParseVideoId(url) {
     try {
       let match = url.match(/youtu\.be\/([^?&]+)/);
@@ -5598,6 +5880,7 @@
   // Init queue display — fetch titles for pre-loaded tracks
   radioQueue.forEach(t => radioFetchTitle(t, () => radioRenderQueue()));
   radioRenderQueue();
+  radioRenderPlaylists();
   (function() {
     const grid = document.querySelector('.main-grid');
     const DEFAULT_ORDER = ['panel-participants','panel-photos','panel-timeline','panel-verdict'];
@@ -5812,6 +6095,84 @@
     document.body.style.setProperty('--grid-pulse', _gridCurrent.toFixed(4));
     _gridRafId = requestAnimationFrame(_gridRafLoop);
   }
+
+  // ── DRAGGABLE SIDE TABS ──
+  (function() {
+    const TAB_CONFIG = [
+      { tabId: 'radioTab',    btnId: 'radioTabBtn',    storageKey: 'carnage_tab_top_radio',    defaultTop: 300 },
+      { tabId: 'notesTab',    btnId: 'notesTabBtn',    storageKey: 'carnage_tab_top_notes',    defaultTop: 520 },
+      { tabId: 'settingsTab', btnId: 'settingsTabBtn', storageKey: 'carnage_tab_top_settings', defaultTop: 80  },
+    ];
+
+    TAB_CONFIG.forEach(({ tabId, btnId, storageKey, defaultTop }) => {
+      const tab = document.getElementById(tabId);
+      const btn = document.getElementById(btnId);
+      if (!tab || !btn) return;
+
+      // Restore saved position
+      const saved = localStorage.getItem(storageKey);
+      const initialTop = saved !== null ? parseInt(saved) : defaultTop;
+      tab.style.top = initialTop + 'px';
+
+      let dragging = false;
+      let startY = 0;
+      let startTop = 0;
+      let didDrag = false;
+
+      btn.addEventListener('mousedown', e => {
+        dragging = true;
+        didDrag = false;
+        startY = e.clientY;
+        startTop = parseInt(tab.style.top) || defaultTop;
+        btn.style.cursor = 'ns-resize';
+        e.preventDefault();
+      });
+
+      document.addEventListener('mousemove', e => {
+        if (!dragging) return;
+        const delta = e.clientY - startY;
+        if (Math.abs(delta) > 3) didDrag = true;
+        const newTop = Math.max(0, Math.min(window.innerHeight - 60, startTop + delta));
+        tab.style.top = newTop + 'px';
+      });
+
+      document.addEventListener('mouseup', e => {
+        if (!dragging) return;
+        dragging = false;
+        btn.style.cursor = '';
+        const finalTop = parseInt(tab.style.top);
+        localStorage.setItem(storageKey, finalTop);
+        // If dragged, suppress the click toggle
+        if (didDrag) {
+          e.stopImmediatePropagation();
+          btn.addEventListener('click', ev => ev.stopImmediatePropagation(), { once: true, capture: true });
+        }
+      });
+
+      // Touch support
+      btn.addEventListener('touchstart', e => {
+        dragging = true;
+        didDrag = false;
+        startY = e.touches[0].clientY;
+        startTop = parseInt(tab.style.top) || defaultTop;
+      }, { passive: true });
+
+      btn.addEventListener('touchmove', e => {
+        if (!dragging) return;
+        const delta = e.touches[0].clientY - startY;
+        if (Math.abs(delta) > 3) didDrag = true;
+        const newTop = Math.max(0, Math.min(window.innerHeight - 60, startTop + delta));
+        tab.style.top = newTop + 'px';
+        e.preventDefault();
+      }, { passive: false });
+
+      btn.addEventListener('touchend', () => {
+        if (!dragging) return;
+        dragging = false;
+        localStorage.setItem(storageKey, parseInt(tab.style.top));
+      });
+    });
+  })();
 
 </script>
 
