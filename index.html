@@ -5641,10 +5641,10 @@
         },
         onStateChange: e => {
           if (e.data === YT.PlayerState.ENDED) {
-            if (radioManualLoad) return; // ignore ENDED fired by stopVideo during playlist load
+            if (radioManualLoad) return; // ignore ENDED fired by stopVideo during playlist load / skip
             if (radioLoop && radioCurrentTrack) {
               ytPlayer.seekTo(0); ytPlayer.playVideo();
-            } else {
+            } else if (radioCurrentTrack) {
               radioSkip();
             }
           }
@@ -5704,14 +5704,18 @@
   }
 
   function radioSkip() {
+    radioManualLoad = true;
     if (ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
     clearInterval(radioElapsedTimer);
     radioElapsedSec = 0;
     // Skip ignores loop — always advance
     const loopWas = radioLoop;
     radioLoop = false;
-    radioPlayNext();
-    radioLoop = loopWas;
+    setTimeout(() => {
+      radioManualLoad = false;
+      radioPlayNext();
+      radioLoop = loopWas;
+    }, 100);
   }
 
   let radioLoop = false;
