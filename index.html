@@ -6484,13 +6484,15 @@
       radioRoomSetStatus('Wait ' + mins + 'm before creating another room', 'error');
       return false;
     }
-    // Active room cap check
-    const clientId = radioRoomGetClientId();
-    const snap = await rtdb.ref('rooms').orderByChild('clientId').equalTo(clientId).once('value');
-    if (snap.exists() && Object.keys(snap.val()).length >= ROOM_MAX_ACTIVE) {
-      radioRoomSetStatus('Max ' + ROOM_MAX_ACTIVE + ' active rooms reached', 'error');
-      return false;
-    }
+    // Active room cap check — fail open if query errors (don't block creation)
+    try {
+      const clientId = radioRoomGetClientId();
+      const snap = await rtdb.ref('rooms').orderByChild('clientId').equalTo(clientId).once('value');
+      if (snap.exists() && Object.keys(snap.val()).length >= ROOM_MAX_ACTIVE) {
+        radioRoomSetStatus('Max ' + ROOM_MAX_ACTIVE + ' active rooms reached', 'error');
+        return false;
+      }
+    } catch(e) { /* fail open */ }
     return true;
   }
 
