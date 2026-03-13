@@ -7026,21 +7026,23 @@
 
 
   // ── MASCOT SYSTEM ────────────────────────────────────────────
+  const KAEDE_SPRITE_NEUTRAL   = 'https://static.wikia.nocookie.net/danganronpa/images/4/48/Danganronpa_V3_Kaede_Akamatsu_Halfbody_Sprite_%2823%29.png/revision/latest?cb=20180414190937';
+  const KAEDE_SPRITE_CONCERNED = 'https://static.wikia.nocookie.net/danganronpa/images/d/dd/Danganronpa_V3_Kaede_Akamatsu_Halfbody_Sprite_%2843%29.png/revision/latest?cb=20180414191027';
+
   const MASCOTS = {
     kaede: {
       name: 'KAEDE AKAMATSU',
       img: document.getElementById('mascotSprite') ? document.getElementById('mascotSprite').src : '',
+      sprite: KAEDE_SPRITE_NEUTRAL,
       lines: [
         "I believe in everyone here... we can figure this out together!",
-        "Music helps me think. Do you ever feel that way?",
+        "Music helps me think. Playing piano always helped me clear my head.",
         "Even in a place like this, I won't give up hope.",
         "I keep looking at this evidence... something doesn't add up.",
-        "Hey, are you doing okay? You seem really focused.",
         "The truth is always worth fighting for. Always.",
         "I wonder what everyone else is thinking right now...",
         "If we just trust each other, we can get through this.",
         "Some days it's hard to stay positive, but I try.",
-        "You know, playing piano always helped me clear my head.",
         "There has to be a way out. There has to be.",
         "I won't let despair win. Not today.",
         "Don't lose hope, okay? I mean it.",
@@ -7048,33 +7050,33 @@
         "I'm scared too. But we have to keep going.",
       ],
       lines_sus: [
-        "Someone here is acting really suspicious... keep a close eye on them.",
+        "Someone here is acting really suspicious... we need to keep a close eye on them.",
         "I don't want to believe it, but the evidence is pointing somewhere...",
-        "Be careful who you trust right now. Someone isn't being honest.",
-        "I've been watching closely... and something feels off about this.",
+        "Someone in this group isn't being honest. We have to figure out who.",
+        "I've been watching closely... something feels off about them.",
         "We can't ignore the signs. Something's wrong here.",
-        "My gut is telling me something. I hope I'm wrong.",
+        "My gut is telling me something. I hope I'm wrong about them.",
         "Everyone seems nervous... but one person especially.",
-        "A liar in the group is the most dangerous thing. Stay sharp.",
+        "There's a liar among everyone here. We need to stay sharp.",
       ],
       lines_victim: [
         "We have to find the truth... for their sake. We owe them that.",
         "Someone took everything from them. We can't let that go unanswered.",
         "I keep thinking about them... I want to cry, but I have to stay focused.",
-        "The least we can do is find out what really happened.",
+        "The least we can do is find out what really happened to them.",
         "They deserved better. Everyone here does.",
         "I won't let their death be meaningless. I refuse.",
         "It hurts. But falling apart won't help them now.",
         "No matter what, we find the truth. For them.",
       ],
       lines_culprit: [
-        "You were accused... I hope it's not true. But I have to face the possibility.",
-        "I want to believe in you. But the evidence doesn't lie.",
-        "Even now, I can't bring myself to hate you. Why did it come to this?",
-        "Whatever drove you to this... it doesn't make it okay. Nothing does.",
-        "The worst part is I still care what happens to you.",
+        "They were accused... I hope it's not true. But I have to face the possibility.",
+        "I want to believe in them. But the evidence doesn't lie.",
+        "Even now, I can't bring myself to hate them. Why did it come to this?",
+        "Whatever drove them to this... it doesn't make it okay. Nothing does.",
+        "The worst part is I still care what happens to them.",
         "I wish things had gone differently. I really do.",
-        "Was there no other way? Couldn't you have talked to someone?",
+        "Was there no other way? Couldn't they have talked to someone?",
         "Everyone has a reason. But a reason isn't an excuse.",
       ],
       lines_all_cleared: [
@@ -7106,12 +7108,13 @@
     const allCleared = hasAny && allSuspects.every(s => s.status === 'cleared' || s.accused);
 
     // Priority: culprit > victim > sus > all-cleared > generic
+    let concerned = false;
     if (hasCulprit && mascot.lines_culprit) {
-      pool = mascot.lines_culprit;
+      pool = mascot.lines_culprit; concerned = true;
     } else if (hasVictim && mascot.lines_victim) {
-      pool = mascot.lines_victim;
+      pool = mascot.lines_victim; concerned = true;
     } else if (hasSus && mascot.lines_sus) {
-      pool = mascot.lines_sus;
+      pool = mascot.lines_sus; concerned = true;
     } else if (allCleared && mascot.lines_all_cleared) {
       pool = mascot.lines_all_cleared;
     }
@@ -7124,6 +7127,11 @@
 
     const bubble = document.getElementById('mascotBubble');
     const sprite = document.getElementById('mascotSprite');
+
+    // Swap sprite based on context (only for Kaede)
+    if (_mascotActive === 'kaede') {
+      sprite.src = concerned ? KAEDE_SPRITE_CONCERNED : KAEDE_SPRITE_NEUTRAL;
+    }
 
     // Stop idle bounce while talking
     sprite.classList.remove('idle');
@@ -7161,8 +7169,8 @@
 
   // Init on load
   (function initMascot() {
-    // Store kaede img src for later mascot swaps
-    MASCOTS.kaede.imgSrc = document.getElementById('mascotSprite').src;
+    // Store kaede sprite srcs for later mascot swaps
+    MASCOTS.kaede.imgSrc = KAEDE_SPRITE_NEUTRAL;
     const visible = localStorage.getItem('carnage_mascot_visible') !== '0';
     mascotSetVisible(visible);
     // Sync settings toggle
@@ -7179,7 +7187,7 @@
 <div id="mascotContainer">
   <div id="mascotBubble"></div>
   <div id="mascotNameTag">KAEDE AKAMATSU</div>
-  <img id="mascotSprite" src="assets/asset_png_3.png" alt="Mascot" onclick="mascotClick()" title="Click me!" />
+  <img id="mascotSprite" src="https://static.wikia.nocookie.net/danganronpa/images/4/48/Danganronpa_V3_Kaede_Akamatsu_Halfbody_Sprite_%2823%29.png/revision/latest?cb=20180414190937" alt="Mascot" onclick="mascotClick()" title="Click me!" />
 </div>
 
 <div id="jumpscareOverlay">
