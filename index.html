@@ -94,7 +94,7 @@
   }
 
   /* Page-level scan effect on load */
-  body::after {
+  body.dossier-revealed::after {
     content: '';
     position: fixed;
     left: 0; right: 0;
@@ -105,28 +105,28 @@
     animation: scanline 1.1s ease-out forwards;
   }
 
-  .header {
+  body.dossier-revealed .header {
     animation: fadeSlideDown 0.55s cubic-bezier(.22,.68,0,1.2) both;
     animation-delay: 0.1s;
   }
-  .divider {
+  body.dossier-revealed .divider {
     animation: fadeIn 0.4s ease both;
     animation-delay: 0.45s;
   }
-  .trial-timer-bar {
+  body.dossier-revealed .trial-timer-bar {
     animation: fadeSlideDown 0.45s cubic-bezier(.22,.68,0,1.2) both;
     animation-delay: 0.55s;
   }
-  .panel-draggable {
+  body.dossier-revealed .panel-draggable {
     animation: fadeSlideUp 0.5s cubic-bezier(.22,.68,0,1.2) both;
   }
-  #panel-participants { animation-delay: 0.65s; }
-  #panel-photos       { animation-delay: 0.78s; }
-  #panel-timeline     { animation-delay: 0.88s; }
-  #panel-misc         { animation-delay: 0.97s; }
-  #panel-verdict      { animation-delay: 1.05s; }
+  body.dossier-revealed #panel-participants { animation-delay: 0.65s; }
+  body.dossier-revealed #panel-photos       { animation-delay: 0.78s; }
+  body.dossier-revealed #panel-timeline     { animation-delay: 0.88s; }
+  body.dossier-revealed #panel-misc         { animation-delay: 0.97s; }
+  body.dossier-revealed #panel-verdict      { animation-delay: 1.05s; }
 
-  .radio-tab {
+  body.dossier-revealed .radio-tab {
     animation: fadeIn 0.5s ease both;
     animation-delay: 1.1s;
   }
@@ -2541,6 +2541,8 @@
     display: flex;
     flex-direction: row-reverse;
     align-items: stretch;
+  }
+  body.dossier-revealed .notes-tab {
     animation: fadeIn 0.5s ease both;
     animation-delay: 1.2s;
   }
@@ -2621,6 +2623,8 @@
     z-index: 1000;
     display: flex;
     align-items: stretch;
+  }
+  body.dossier-revealed .settings-tab {
     animation: fadeIn 0.5s ease both;
     animation-delay: 1.3s;
   }
@@ -5641,10 +5645,10 @@
         },
         onStateChange: e => {
           if (e.data === YT.PlayerState.ENDED) {
-            if (radioManualLoad) return; // ignore ENDED fired by stopVideo during playlist load / skip
+            if (radioManualLoad) return; // ignore ENDED fired by stopVideo during playlist load
             if (radioLoop && radioCurrentTrack) {
               ytPlayer.seekTo(0); ytPlayer.playVideo();
-            } else if (radioCurrentTrack) {
+            } else {
               radioSkip();
             }
           }
@@ -5704,18 +5708,14 @@
   }
 
   function radioSkip() {
-    radioManualLoad = true;
     if (ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
     clearInterval(radioElapsedTimer);
     radioElapsedSec = 0;
     // Skip ignores loop — always advance
     const loopWas = radioLoop;
     radioLoop = false;
-    setTimeout(() => {
-      radioManualLoad = false;
-      radioPlayNext();
-      radioLoop = loopWas;
-    }, 100);
+    radioPlayNext();
+    radioLoop = loopWas;
   }
 
   let radioLoop = false;
@@ -6053,6 +6053,7 @@
       gate.addEventListener('animationend', () => {
         gate.remove();
         document.body.classList.remove('gate-locked');
+        document.body.classList.add('dossier-revealed');
         // If radio player already ready, start playing immediately
         if (ytPlayer && ytApiReady && !radioCurrentTrack) radioPlayNext();
       }, { once: true });
