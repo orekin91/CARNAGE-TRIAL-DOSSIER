@@ -7539,12 +7539,25 @@
         "Was there no other way? Couldn't they have talked to someone?",
         "Everyone has a reason. But a reason isn't an excuse.",
       ],
-      lines_all_cleared: [
-        "Everyone's been cleared! I knew it — I just knew we'd all make it through!",
-        "No suspects... that's either really good or really scary. Stay alert!",
-        "All clear for now. But don't let your guard down yet.",
-        "I'm relieved... but also a little confused. Something still doesn't add up.",
-      ],
+      lines_cleared: {
+        one: [
+          "There's only one name on our list and they've been cleared... so where does that leave us?",
+          "Just one suspect and they're cleared. Either we've been thorough, or we've been looking in completely the wrong place.",
+          "One person. Cleared. I don't know if I should feel relieved or more worried than before.",
+        ],
+        few: [
+          "Everyone on the list has been cleared... with only a handful of suspects, that really narrows things down. Or opens them back up.",
+          "All of them cleared? I want to believe that's good news, but something still feels off.",
+          "We've gone through everyone and cleared them all. Either the truth is hiding somewhere we haven't looked, or we missed something.",
+          "Cleared, cleared, cleared... okay. Something isn't adding up. Let's look again.",
+        ],
+        many: [
+          "Everyone's been cleared?! With this many suspects, that can't be right. We must've missed something.",
+          "All of them? That's a lot of people to rule out. The answer has to be hiding in the details somewhere.",
+          "A group this size and no one's flagged? I really think we need to go back through everything.",
+          "Every single one of them cleared... I believe in everyone here, but statistically that feels wrong.",
+        ],
+      },
       lines_sure: [
         "Hold on — are you absolutely sure about this? Once we mark someone guilty, there's no taking it back. This is the moment of truth.",
         "Wait! Before you commit — are you certain? Look at everything one more time. There's no going back from this.",
@@ -7633,12 +7646,25 @@
         "Was there a moment they could have turned back? There always is.",
         "I feel a strange kinship with people who've lost their way. It doesn't mean I'll let them go.",
       ],
-      lines_all_cleared: [
-        "Everyone's cleared? Then the hope I believed in wasn't misplaced after all.",
-        "No culprit among us... for now. Remain vigilant. My luck doesn't stay quiet for long.",
-        "A brief respite. Enjoy it. But don't let your guard down.",
-        "All clear. That's... actually good news. I'll allow myself to feel relief for once.",
-      ],
+      lines_cleared: {
+        one: [
+          "One suspect. Cleared. My luck is whispering that this isn't as clean as it looks.",
+          "Just one person of interest, and they're cleared... Either we've solved nothing, or we've been looking at the wrong person entirely.",
+          "A single suspect, exonerated. I find that more unsettling than reassuring, if I'm honest.",
+        ],
+        few: [
+          "All cleared. A small group like this — and no answers. Despair has a way of hiding in plain sight.",
+          "Every one of them cleared. Either hope is telling us to look elsewhere, or someone here is very, very good at hiding.",
+          "Cleared, cleared, cleared... Ahaha. The truth is still out there. It has to be. Hope doesn't just vanish.",
+          "A few suspects, all cleared. I've seen this pattern before. It never ends the way you expect.",
+        ],
+        many: [
+          "That many people and not one of them flagged? My luck — good or bad — is screaming at me right now.",
+          "All of them? A group this large, and we've cleared everyone? Something is buried here. Something we haven't found yet.",
+          "Every single one... cleared. Hahaha. The despair of a dead end is something I know well. But hope always finds a crack.",
+          "This many suspects, all exonerated. Either we're very thorough or very wrong. My gut says the latter. And my gut is cursed, so.",
+        ],
+      },
       lines_sure: [
         "I see you've made a decision. But before you commit — are you truly certain? A false accusation carries an unbearable weight. Think carefully.",
         "So. You're ready to name a culprit. I won't stop you. But I ask you one last time — are you absolutely sure? There is no coming back from this.",
@@ -7702,8 +7728,10 @@
       pool = mascot.lines_victim; concerned = true;
     } else if (hasSus && mascot.lines_sus) {
       pool = mascot.lines_sus; concerned = true;
-    } else if (allCleared && mascot.lines_all_cleared) {
-      pool = mascot.lines_all_cleared;
+    } else if (allCleared && mascot.lines_cleared) {
+      const n = allSuspects.length;
+      const bucket = n === 1 ? 'one' : n <= 4 ? 'few' : 'many';
+      pool = mascot.lines_cleared[bucket];
     }
 
     // Pick a line, avoid repeating
