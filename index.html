@@ -8740,6 +8740,14 @@
       candidate = active.reduce((best, s) => countEvidence(s) >= countEvidence(best) ? s : best);
     }
 
+    // Easter egg: the deduced candidate is the investigator/player themselves
+    if (candidate && _invNameInList([candidate])) {
+      _mascotLastCulpritSpriteKey = 'concerned';
+      if (_mascotActive === 'kyoko')  return "The evidence points to you. I won't pretend I haven't noticed — it would be intellectually dishonest. I have no interest in softening this based on sentiment. Verify it carefully, but don't dismiss it.";
+      if (_mascotActive === 'nagito') return "Ahahaha... you? The data keeps pointing back to you. I don't want to believe it — you're the one building this dossier, the one searching for hope in all this. But I can't ignore what the evidence suggests. I'm sorry.";
+      return "This is really hard to say, but... the evidence keeps pointing at you. You've been working on this whole dossier, and I... I really, really hope I'm wrong. Please tell me I'm wrong.";
+    }
+
     const name = candidate ? (candidate.displayName || candidate.nickname || candidate.name) : null;
     const ev   = candidate ? countEvidence(candidate) : 0;
     const statusNote = candidate?.accused      ? 'already accused'
