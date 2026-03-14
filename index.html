@@ -6285,6 +6285,12 @@
         onStateChange: e => {
           if (e.data === YT.PlayerState.ENDED) {
             if (radioManualLoad) return;
+            if (radioCurrentTrack && radioCurrentTrack.videoId === CLAIRE_DE_LUNE.videoId) {
+              clearTimeout(_kaedeMidwayTimer);
+              _kmAwaitingMidway = false;
+              _kaedeEndOfSongPrompt();
+              return;
+            }
             if (radioLoop && radioCurrentTrack) {
               ytPlayer.seekTo(0); ytPlayer.playVideo();
             } else if (radioCurrentTrack) {
@@ -6292,6 +6298,11 @@
             }
           }
           if (e.data === YT.PlayerState.PLAYING) {
+            if (_kmAwaitingMidway) {
+              _kmAwaitingMidway = false;
+              clearTimeout(_kaedeMidwayTimer);
+              _kaedeMidwayTimer = setTimeout(_kaedeMidwayPrompt, CLAIRE_MIDWAY_MS);
+            }
             radioPlaying = true;
             radioStartElapsedTimer();
             gridVisualizerStart();
@@ -6348,6 +6359,8 @@
 
   function radioSkip() {
     radioManualLoad = true;
+    clearTimeout(_kaedeMidwayTimer);
+    _kmAwaitingMidway = false;
     if (ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
     clearInterval(radioElapsedTimer);
     radioElapsedSec = 0;
@@ -7898,6 +7911,7 @@
 
   const CLAIRE_DE_LUNE  = { videoId: 'KBKYw1P2LxU', title: 'Clair de Lune — Debussy', duration: null };
   const CLAIRE_MIDWAY_MS = 152000; // ~2:32 into the 5:05 piece
+  let _kmAwaitingMidway = false; // true after YES click; timer starts when song begins PLAYING
 
   function _kmType(text, done) {
     const el = document.getElementById('kaedeMusicText');
@@ -8014,7 +8028,7 @@
       document.getElementById('radioTabBtn').classList.add('open');
     }
     clearTimeout(_kaedeMidwayTimer);
-    _kaedeMidwayTimer = setTimeout(_kaedeMidwayPrompt, CLAIRE_MIDWAY_MS);
+    _kmAwaitingMidway = true; // timer starts when YT fires PLAYING, not now
   }
 
   function _kaedeMidwayPrompt() {
@@ -8050,7 +8064,46 @@
       document.getElementById('kaedeMusicContinue').style.opacity = '';
       return;
     }
+    document.getElementById('kaedeMusicOverlay').removeEventListener('click', _kmMidwayAdvance);
     _kmClose();
+  }
+
+  function _kaedeEndOfSongPrompt() {
+    const overlay = document.getElementById('kaedeMusicOverlay');
+    const sprite  = document.getElementById('kaedeMusicSprite');
+
+    _kmPhase = 'end';
+    sprite.src = MASCOTS['kaede'].sprites.neutral;
+    document.getElementById('kaedeMusicText').textContent = '';
+    document.getElementById('kaedeMusicConfirmBtns').classList.remove('visible');
+    document.getElementById('kaedeMusicContinue').style.opacity = '0';
+    document.getElementById('kaedeMusicContinue').textContent = '▼ CLICK TO CLOSE';
+    document.getElementById('kaedeMusicContinue').style.display = '';
+    document.getElementById('mascotContainer').style.visibility = 'hidden';
+
+    overlay.style.display = 'flex';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      overlay.classList.add('visible', 'clickable');
+      _kmCurrentLine = "That's the end... I hope it helped a little. You've got this — whatever's going on in that dossier, I believe in you. Take your time.";
+      _kmType(_kmCurrentLine, () => {
+        document.getElementById('kaedeMusicContinue').style.opacity = '';
+      });
+    }));
+    overlay.addEventListener('click', _kmEndAdvance);
+  }
+
+  function _kmEndAdvance() {
+    if (_kmPhase !== 'end') return;
+    if (_kmTyping) {
+      clearInterval(_kmTypeTimer);
+      _kmTyping = false;
+      document.getElementById('kaedeMusicText').textContent = _kmCurrentLine;
+      document.getElementById('kaedeMusicContinue').style.opacity = '';
+      return;
+    }
+    document.getElementById('kaedeMusicOverlay').removeEventListener('click', _kmEndAdvance);
+    _kmClose();
+    radioSkip(); // advance queue now that the song is done
   }
 
   // ── VERDICT MASCOT OVERLAY ───────────────────────────────────
