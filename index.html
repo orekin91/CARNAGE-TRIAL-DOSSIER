@@ -8117,6 +8117,20 @@
       lines_verdict_mascot_accused_wrong: [
         "Wrong — and I'm not going to pretend I'm not relieved. Deeply, deeply relieved. But we still don't have the answer, so... let's keep going. Together. Please.",
       ],
+      lines_score_correct: [
+        "One down. You got it right. That's a good start — hold onto that.",
+        "Two correct now. You're building something real here. Keep going.",
+        "Three for three. I know this is hard, but you're doing so well. I mean it.",
+        "Four right. That's — wow. I'm genuinely in awe. You've got a real gift for this.",
+        "Five. Five correct verdicts. I don't even have words. You're incredible. I hope you know that.",
+      ],
+      lines_score_wrong: [
+        "One wrong. It happens — don't let it shake you too much. We keep going.",
+        "Two incorrect now. Something's not clicking. Take a breath and look again.",
+        "Three wrong calls. I'm worried. Please slow down — every mistake matters here.",
+        "Four incorrect verdicts. I... I need you to stop and really think. Please. People are counting on us.",
+        "Five wrong. I don't know what to say. I'm not giving up on you — but something has to change.",
+      ],
       lines_wellbeing_repeat: [
         "You've asked me that a few times now... I'm still okay! Promise! Though I'm starting to wonder if YOU'RE the one who needs checking in on.",
         "Again? I appreciate that you care, I really do — but I'm fine! Genuinely. You don't need to keep asking.",
@@ -8282,6 +8296,20 @@
       lines_verdict_mascot_accused_wrong: [
         "Wrong. And I — ahaha. I don't have words for the relief. I know I shouldn't feel relief, there's still a culprit out there, but... knowing it wasn't me. That I didn't do this. My luck gave me something for once. Let's find the real answer. I'll do anything to help.",
       ],
+      lines_score_correct: [
+        "One correct verdict. Ahaha... hope really does find a way, doesn't it? Well done.",
+        "Two right. My luck must be rubbing off on you in the good direction for once. Please keep going.",
+        "Three correct calls. I've seen a lot of investigations end in despair. This one... might not. That's remarkable.",
+        "Four. Four correct verdicts. Someone like me has no right to feel this proud, but — ahahaha — I do. I really do.",
+        "Five correct. The very best kind of hope — earned, not given. I don't know if luck had anything to do with this. I think it was just you.",
+      ],
+      lines_score_wrong: [
+        "One wrong. Ahahaha... don't spiral. Even hope stumbles. This isn't the end.",
+        "Two incorrect verdicts now. I want to say something reassuring but — I'm worried. Please be careful.",
+        "Three wrong calls. My luck tends to drag despair in when things start unravelling. I'm scared of what that means for us.",
+        "Four incorrect. Ahaha... this is what despair tastes like. I know it well. Please — please don't give up. Not yet.",
+        "Five wrong. I... ahahaha. I don't know what hope looks like from here. But I refuse to stop believing there is one. Please try again.",
+      ],
       lines_wellbeing_repeat: [
         "You keep asking about me... ahaha. Someone like me really isn't worth this much attention. I'm fine — better than fine. The fact that you're still here is more than enough.",
         "Again? I appreciate it. But I'm the Ultimate Lucky Student — whatever happens to me was always going to happen. Please, focus on the case.",
@@ -8441,6 +8469,20 @@
       lines_verdict_mascot_accused_wrong: [
         "Wrong. The evidence led here and it was insufficient. I'm not relieved — I'm recalibrating. A false conclusion means we missed something. Let's find what it was.",
       ],
+      lines_score_correct: [
+        "One correct verdict. A single data point. Encouraging, but don't read too much into it yet.",
+        "Two correct. The pattern is holding. Continue applying the same rigour.",
+        "Three correct verdicts. Statistically, this is no longer luck. You're reading the evidence well.",
+        "Four correct. I don't offer praise lightly. Your methodology is sound. Don't deviate from it.",
+        "Five correct verdicts. Flawless, within this sample. I have nothing critical to add. That itself is significant.",
+      ],
+      lines_score_wrong: [
+        "One wrong verdict. Isolated errors happen. Identify the reasoning failure and correct it.",
+        "Two incorrect. There's a pattern forming in your mistakes. Find it before it compounds.",
+        "Three wrong calls. Your read on the evidence is flawed somewhere. Stop and rebuild from the facts.",
+        "Four incorrect verdicts. This isn't a reasoning problem — it's a fundamental misreading of the available data. Start over.",
+        "Five wrong. I can't explain this charitably. The evidence was there. Something is preventing you from seeing it clearly.",
+      ],
       lines_wellbeing_repeat: [
         "You've asked me that before. The answer hasn't changed.",
         "Still functional. This line of questioning is not advancing the investigation.",
@@ -8487,6 +8529,8 @@
 
   let _mascotActive = 'kaede';
   let _mascotBubbleTimer = null;
+  let _caseCorrectCount = 0;
+  let _caseWrongCount   = 0;
   let _mascotLastLine = -1;
   let _mascotClickCount = 0;
   let _mascotChatterTimer = null;
@@ -9707,6 +9751,42 @@
     document.getElementById('guiltyStamp').classList.remove('show');
     document.getElementById('innocentStampAccused').classList.remove('show');
     confirmVerdict(correct);
+
+    // Score tracking — cap at 5 for dialogue purposes
+    if (correct) {
+      _caseCorrectCount = Math.min(_caseCorrectCount + 1, 5);
+    } else {
+      _caseWrongCount = Math.min(_caseWrongCount + 1, 5);
+    }
+
+    // Show a score-based comment from the sidebar mascot after a short delay
+    const mascot = MASCOTS[_mascotActive];
+    if (mascot) {
+      const pool = correct ? mascot.lines_score_correct : mascot.lines_score_wrong;
+      const idx  = correct ? (_caseCorrectCount - 1) : (_caseWrongCount - 1);
+      if (pool && pool[idx]) {
+        setTimeout(() => {
+          const bubble    = document.getElementById('mascotBubble');
+          const sprite    = document.getElementById('mascotSprite');
+          const container = document.getElementById('mascotContainer');
+          if (!bubble || !sprite) return;
+          const spriteKey = correct ? 'cheer' : 'concerned';
+          const timeout   = correct ? 5000 : 6000;
+          sprite.src = MASCOTS[_mascotActive].sprites[spriteKey] || MASCOTS[_mascotActive].sprites.neutral;
+          sprite.classList.remove('idle');
+          void sprite.offsetWidth;
+          bubble.textContent = pool[idx];
+          bubble.classList.add('visible');
+          clearTimeout(_mascotBubbleTimer);
+          _mascotBubbleTimer = setTimeout(() => {
+            bubble.classList.remove('visible');
+            sprite.src = MASCOTS[_mascotActive].sprites.resting;
+            container.style.transform = '';
+            setTimeout(() => sprite.classList.add('idle'), 300);
+          }, timeout);
+        }, 800);
+      }
+    }
   }
 
   function onGuiltyClick() {
