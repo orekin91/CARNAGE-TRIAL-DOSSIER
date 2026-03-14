@@ -3504,6 +3504,8 @@
   .verdict-mascot-btn.yes:hover { background: rgba(48,192,96,0.12); }
   .verdict-mascot-btn.no  { border-color: var(--red, #e03030); color: var(--red, #e03030); }
   .verdict-mascot-btn.no:hover  { background: rgba(224,48,48,0.12); }
+  .verdict-mascot-btn.cancel { border-color: var(--border, #2a2a35); color: var(--muted, #555); font-size: clamp(10px, 1vw, 13px); }
+  .verdict-mascot-btn.cancel:hover { border-color: var(--muted, #555); color: var(--fg, #c8b99a); }
 </style>
 </head>
 <body class="gate-locked">
@@ -8136,6 +8138,18 @@
     _vmShowResult(false);
   }
 
+  function verdictMascotCancel(e) {
+    e.stopPropagation();
+    const overlay = document.getElementById('verdictMascotOverlay');
+    overlay.removeEventListener('click', _vmAdvance);
+    overlay.classList.add('exiting');
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      overlay.classList.remove('visible', 'exiting');
+      document.getElementById('mascotContainer').style.visibility = '';
+    }, 500);
+  }
+
   function _vmShowResult(correct) {
     _vmPhase = 'result';
     const mascot  = MASCOTS[_mascotActive];
@@ -8209,8 +8223,9 @@
     <div id="verdictMascotName"><span id="verdictMascotNameText"></span><span id="verdictMascotTalent"></span></div>
     <div id="verdictMascotText"></div>
     <div id="verdictMascotConfirmBtns">
-      <button class="verdict-mascot-btn yes" onclick="verdictMascotYes(event)">✓ YES, I'M SURE</button>
-      <button class="verdict-mascot-btn no"  onclick="verdictMascotNo(event)">✗ NEVER MIND</button>
+      <button class="verdict-mascot-btn yes"    onclick="verdictMascotYes(event)">⚖ THEY ARE THE CULPRIT</button>
+      <button class="verdict-mascot-btn no"     onclick="verdictMascotNo(event)">✗ THEY WERE NOT THE CULPRIT</button>
+      <button class="verdict-mascot-btn cancel" onclick="verdictMascotCancel(event)">↩ NEVER MIND</button>
     </div>
     <div id="verdictMascotContinue">▼ CLICK TO CONTINUE</div>
   </div>
