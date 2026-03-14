@@ -3602,6 +3602,92 @@
     color: var(--red, #e03030);
     background: rgba(224,48,48,0.08);
   }
+
+  /* ── KYOKO EASTEREGG OVERLAY ─────────────────────────── */
+  #kyokoEggOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99000;
+    background: #000;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.6s;
+  }
+  #kyokoEggOverlay.visible { opacity: 1; display: flex; }
+  #kyokoEggOverlay.clickable { cursor: pointer; }
+  #kyokoEggOverlay.exiting { opacity: 0; pointer-events: none; }
+  #kyokoEggBg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    -webkit-user-drag: none;
+    user-select: none;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  #kyokoEggBg.visible { opacity: 1; }
+  #kyokoEggSprite {
+    position: absolute;
+    bottom: 130px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-height: 70vh;
+    object-fit: contain;
+    -webkit-user-drag: none;
+    user-select: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  #kyokoEggSprite.visible { opacity: 1; }
+  #kyokoEggBox {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    background: linear-gradient(180deg, rgba(8,8,14,0.97) 0%, rgba(8,8,14,1) 100%);
+    border-top: 2px solid #6a8faf;
+    padding: clamp(16px, 2.5vh, 28px) clamp(20px, 5vw, 80px);
+    min-height: 130px;
+    box-sizing: border-box;
+  }
+  #kyokoEggName {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(16px, 2vw, 22px);
+    letter-spacing: 3px;
+    color: #6a8faf;
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  #kyokoEggTalent {
+    font-size: clamp(9px, 1vw, 12px);
+    letter-spacing: 4px;
+    color: var(--muted, #555);
+    opacity: 0.85;
+  }
+  #kyokoEggText {
+    font-family: 'Special Elite', serif;
+    font-size: clamp(13px, 1.3vw, 17px);
+    color: var(--fg, #c8b99a);
+    line-height: 1.7;
+    min-height: 2.4em;
+    padding-right: clamp(80px, 20vw, 260px);
+  }
+  #kyokoEggContinue {
+    position: absolute;
+    bottom: clamp(14px, 2vh, 22px);
+    right: clamp(20px, 4vw, 60px);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted, #555);
+    animation: introBlink 1.1s ease-in-out infinite;
+  }
 </style>
 </head>
 <body class="gate-locked">
@@ -3793,6 +3879,7 @@
         <select id="mascotSelector" onchange="mascotSetActive(this.value)" style="background:#16161c;color:var(--text);border:1px solid var(--border);border-radius:3px;padding:4px 8px;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px;cursor:pointer;">
           <option value="kaede">Kaede Akamatsu</option>
           <option value="nagito">Nagito Komaeda</option>
+          <option value="kyoko">Kyoko Kirigiri</option>
         </select>
       </div>
 
@@ -7817,6 +7904,115 @@
         "The path to hope is long. Pace yourself. There's no glory in collapsing before the finish.",
       ],
     },
+
+    kyoko: {
+      name:   'KYOKO KIRIGIRI',
+      talent: 'ULTIMATE DETECTIVE',
+      sprites: {
+        intro:     'assets/Kyoko_intro.png',
+        neutral:   'assets/Kyoko_neutral.png',
+        resting:   'assets/Kyoko_neutral.png',
+        concerned: 'assets/Kyoko_Concerned.png',
+        talking:   'assets/Kyoko_talking.png',
+        cheer:     'assets/Kyoko_Cheer.png',
+        sure:      'assets/Kyoko_Sure.png',
+        despair:   'assets/Kyoko_Despair.png',
+      },
+      introLines: [
+        "Kyoko Kirigiri. Ultimate Detective. I'll be observing from here — try not to let my presence distract you.",
+        "I don't offer encouragement. I offer precision. Use this dossier carefully and we'll find the truth.",
+        "One more thing: don't make assumptions you can't support with evidence. That's how investigations fall apart.",
+      ],
+      lines: [
+        "Every detail matters. Don't dismiss anything as coincidence until you can prove it is.",
+        "I've learned not to trust first impressions. Look deeper.",
+        "The truth doesn't hide. People hide it. Focus on the people.",
+        "A good detective reads what's missing as much as what's there.",
+        "Emotion clouds judgment. Observe first. React later.",
+        "Someone in this investigation is choosing their words very carefully. Worth noting.",
+        "Evidence doesn't lie. Interpretations do. Stay close to the facts.",
+        "I find silence more revealing than most people find conversation.",
+        "The most dangerous assumption is the one you don't realise you're making.",
+        "Keep your notes thorough. Memory is unreliable under stress.",
+        "Patience. Rushing an investigation is how innocent people get hurt.",
+        "There's always a thread you haven't pulled yet. Find it.",
+      ],
+      lines_sus: [
+        "Someone here is being deliberately evasive. I've noticed. You should too.",
+        "Watch their behaviour, not just their words. Actions are harder to rehearse.",
+        "There's a discrepancy somewhere. I can feel it. We need to find it.",
+        "A guilty person doesn't always look nervous. Sometimes they look perfectly calm.",
+        "Cross-reference everything. Liars are consistent until they're not.",
+        "I've dealt with people like this before. They slip up. Keep pressure on the evidence.",
+        "Something isn't adding up. That's not a feeling — that's a logical conclusion.",
+        "The most composed person in the room often has the most to hide.",
+      ],
+      lines_victim: [
+        "They deserved answers while they were alive. We owe them the truth now that they're not.",
+        "Set aside grief for now. Channel it into finding who did this.",
+        "A victim's history matters. Who they were tells us something about who wanted them gone.",
+        "Don't let sympathy blur your objectivity. The best thing you can do for them is think clearly.",
+        "Every victim leaves traces. We just have to know what we're looking at.",
+        "I've investigated many deaths. None of them get easier. But the work stays the same.",
+        "Their story doesn't end here. We finish it.",
+        "Focus. Whoever did this is counting on grief slowing you down.",
+      ],
+      lines_culprit: [
+        "So it comes to this. I hope the evidence is solid. A mistake here is unforgivable.",
+        "I try not to judge motives until I understand them. Understanding isn't excusing.",
+        "Even a culprit has a story. That story led here. What was it?",
+        "Whatever they believed they were doing — the outcome speaks for itself.",
+        "I've seen people reach a point where this felt like the only option. It never is.",
+        "The investigation isn't over just because we have a name. Make sure the evidence holds.",
+        "They made their choice. Now we make ours — and ours has to be right.",
+        "Don't let relief at having an answer cloud your judgment. Verify everything.",
+      ],
+      lines_cleared: {
+        one: [
+          "One suspect cleared. Either we've been thorough or we've been looking in entirely the wrong direction.",
+          "Cleared. That narrows things significantly — or it should. Don't lose that thread.",
+          "One name. Cleared. The answer is either very close or very well hidden. Stay focused.",
+        ],
+        few: [
+          "All cleared. That's either very good news or a sign that the real answer isn't on this list yet.",
+          "Every suspect cleared. Go back to the evidence. Something was missed.",
+          "A small pool and no answers. The truth is still in the details somewhere.",
+          "Cleared across the board. I'd feel better about that if the case were actually closed.",
+        ],
+        many: [
+          "Every person on this list has been cleared. With a group this size, that's unlikely to be correct. Start over.",
+          "All of them? I'd want to see the evidence behind each of those before I believed it.",
+          "That many suspects cleared means either the investigation has been thorough or a mistake was made. Which is it?",
+          "Something is wrong. This many people don't all clear cleanly. Look again.",
+        ],
+      },
+      lines_sure: [
+        "Before you commit — is the evidence airtight? Gut feelings aren't evidence. Facts are.",
+        "You're ready to name a culprit. I need you to be certain, not just confident. There's a difference.",
+        "A wrong accusation doesn't just fail the investigation — it fails every person involved. Are you sure?",
+        "I've seen investigations fall apart at this exact moment. Slow down. Verify. Then decide.",
+      ],
+      lines_verdict_correct: [
+        "Correct. The evidence held. That's what a proper investigation looks like — well done.",
+        "You got it right. I won't pretend that's always guaranteed. Good work.",
+      ],
+      lines_verdict_wrong: [
+        "...That's not right. We accused the wrong person. Go back to the evidence — immediately.",
+        "Wrong. I should have pushed harder to verify. We fix this now.",
+      ],
+      lines_cheer: [
+        "You've been at this for a while. A rested investigator is a better investigator. Step away briefly.",
+        "Tunnel vision is a real risk in extended investigations. Take a break and reset your perspective.",
+        "Hydration and rest affect cognitive function. I'm not being sentimental — I'm being practical. Take a break.",
+        "Even I have to step away sometimes. It helps. Trust the process.",
+        "Note: the details you miss when tired are exactly the ones that matter. Rest first.",
+        "If you've been staring at the same information for an hour, you've stopped seeing it clearly. Pause.",
+        "A short break now is more efficient than a long mistake later.",
+        "I've caught more leads after stepping away than I ever did by pushing through. Something to consider.",
+        "Don't confuse persistence with effectiveness. Sometimes they're opposites.",
+        "Take five minutes. The dossier will still be here. You need to be sharp when you come back.",
+      ],
+    },
   };
 
   let _mascotActive = 'kaede';
@@ -7901,6 +8097,16 @@
       if (_nagitoNeutralClicks >= 4) {
         _nagitoRouletteOffered = true;
         setTimeout(nagitoRouletteOpen, 4800);
+      }
+    }
+
+    // Kyoko easter egg — count neutral-only clicks
+    const isKyokoNeutral = (_mascotActive === 'kyoko' && pool === MASCOTS['kyoko'].lines);
+    if (isKyokoNeutral && !_kyokoEggOffered) {
+      _kyokoNeutralClicks++;
+      if (_kyokoNeutralClicks >= 4) {
+        _kyokoEggOffered = true;
+        setTimeout(kyokoEggOpen, 4800);
       }
     }
 
@@ -8313,6 +8519,171 @@
     _nrClose();
   }
 
+  // ── KYOKO EASTEREGG ──────────────────────────────────────────
+  let _kyokoNeutralClicks = 0;
+  let _kyokoEggOffered    = false;
+  let _kePhase            = 'reluctant'; // 'reluctant' | 'scene'
+  let _keCurrentLine      = '';
+  let _keTyping           = false;
+  let _keTypeTimer        = null;
+  let _keReluctantBeat    = 0;
+  let _keSceneBeat        = 0;
+
+  const KYOKO_EGG_SONG = { videoId: 'gCp4bCD65Z0', title: 'Danganronpa THH — Kyoko\'s Warning', duration: null };
+
+  const KYOKO_EGG_RELUCTANT = [
+    "...You keep clicking on me. I've noticed.",
+    "You want me to say it. The warning. The one about the 16th student.",
+    "...Fine. But not here like this. Come with me.",
+  ];
+
+  const KYOKO_EGG_SCENE = [
+    "There's something about this case you need to understand. Something I haven't said aloud until now.",
+    "There may be someone unaccounted for. Someone whose name doesn't appear on any list — who was never meant to be found.",
+    "At Hope's Peak Academy, there was a 16th student. Hidden. Concealed from the rest of us from the very beginning.",
+    "Her name was Mukuro Ikusaba. The one they called the Ultimate Soldier.",
+    "Mukuro Ikusaba... the 16th student, lying hidden somewhere in this school... the one they call the Ultimate Soldier...",
+    "Watch out for her.",
+    "...That's all. Get back to work.",
+  ];
+
+  function _keType(text, done, speed) {
+    const el = document.getElementById('kyokoEggText');
+    el.textContent = '';
+    _keTyping = true;
+    let i = 0;
+    const ms = speed || 26;
+    clearInterval(_keTypeTimer);
+    _keTypeTimer = setInterval(() => {
+      el.textContent += text[i++];
+      if (i >= text.length) {
+        clearInterval(_keTypeTimer);
+        _keTyping = false;
+        if (done) done();
+      }
+    }, ms);
+  }
+
+  function _keClose(after) {
+    const overlay = document.getElementById('kyokoEggOverlay');
+    overlay.classList.add('exiting');
+    overlay.classList.remove('clickable');
+    setTimeout(() => {
+      overlay.classList.remove('visible', 'exiting');
+      overlay.style.display = 'none';
+      document.getElementById('kyokoEggBg').classList.remove('visible');
+      document.getElementById('kyokoEggSprite').classList.remove('visible');
+      document.getElementById('mascotContainer').style.visibility = '';
+      if (after) after();
+    }, 600);
+  }
+
+  function kyokoEggOpen() {
+    const overlay = document.getElementById('kyokoEggOverlay');
+    _kePhase = 'reluctant';
+    _keReluctantBeat = 0;
+    _keSceneBeat = 0;
+    document.getElementById('kyokoEggText').textContent = '';
+    const cont = document.getElementById('kyokoEggContinue');
+    cont.style.opacity = '0';
+    cont.textContent = '▼ CLICK TO CONTINUE';
+    document.getElementById('kyokoEggBg').classList.remove('visible');
+    // Show concerned sprite for reluctant phase
+    const sprite = document.getElementById('kyokoEggSprite');
+    sprite.src = 'assets/Kyoko_Concerned.png';
+    sprite.classList.add('visible');
+    document.getElementById('mascotContainer').style.visibility = 'hidden';
+
+    overlay.style.display = 'flex';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      overlay.classList.add('visible');
+      _keCurrentLine = KYOKO_EGG_RELUCTANT[0];
+      _keType(_keCurrentLine, () => {
+        cont.style.opacity = '';
+        overlay.classList.add('clickable');
+        overlay.addEventListener('click', _keReluctantAdvance);
+      });
+    }));
+  }
+
+  function _keReluctantAdvance() {
+    if (_kePhase !== 'reluctant') return;
+    const overlay = document.getElementById('kyokoEggOverlay');
+    const cont = document.getElementById('kyokoEggContinue');
+    // Skip-to-end if still typing
+    if (_keTyping) {
+      clearInterval(_keTypeTimer);
+      _keTyping = false;
+      document.getElementById('kyokoEggText').textContent = _keCurrentLine;
+      cont.style.opacity = '';
+      return;
+    }
+    _keReluctantBeat++;
+    if (_keReluctantBeat < KYOKO_EGG_RELUCTANT.length) {
+      cont.style.opacity = '0';
+      _keCurrentLine = KYOKO_EGG_RELUCTANT[_keReluctantBeat];
+      _keType(_keCurrentLine, () => { cont.style.opacity = ''; });
+    } else {
+      // Done with reluctant phase — transition to the scene
+      overlay.classList.remove('clickable');
+      overlay.removeEventListener('click', _keReluctantAdvance);
+      _kePhase = 'scene';
+      _keSceneBeat = 0;
+      cont.style.opacity = '0';
+      document.getElementById('kyokoEggText').textContent = '';
+      // Mute radio, queue the easter egg song
+      if (ytPlayer && ytPlayer.mute) ytPlayer.mute();
+      radioQueue.unshift({ ...KYOKO_EGG_SONG });
+      radioSkip();
+      // Fade out sprite, fade in background
+      document.getElementById('kyokoEggSprite').classList.remove('visible');
+      setTimeout(() => {
+        document.getElementById('kyokoEggBg').classList.add('visible');
+        setTimeout(() => {
+          _keCurrentLine = KYOKO_EGG_SCENE[0];
+          _keType(_keCurrentLine, () => {
+            cont.style.opacity = '';
+            overlay.classList.add('clickable');
+            overlay.addEventListener('click', _keSceneAdvance);
+          });
+        }, 1000);
+      }, 400);
+    }
+  }
+
+  function _keSceneAdvance() {
+    if (_kePhase !== 'scene') return;
+    const overlay = document.getElementById('kyokoEggOverlay');
+    const cont = document.getElementById('kyokoEggContinue');
+    // Skip-to-end if still typing
+    if (_keTyping) {
+      clearInterval(_keTypeTimer);
+      _keTyping = false;
+      document.getElementById('kyokoEggText').textContent = _keCurrentLine;
+      cont.style.opacity = '';
+      return;
+    }
+    _keSceneBeat++;
+    if (_keSceneBeat < KYOKO_EGG_SCENE.length) {
+      cont.style.opacity = '0';
+      _keCurrentLine = KYOKO_EGG_SCENE[_keSceneBeat];
+      // Beats 4 & 5 (the famous warning) type slower and more ominously
+      const speed = (_keSceneBeat >= 4) ? 55 : 26;
+      const isLast = _keSceneBeat === KYOKO_EGG_SCENE.length - 1;
+      _keType(_keCurrentLine, () => {
+        if (isLast) cont.textContent = '▼ CLICK TO CLOSE';
+        cont.style.opacity = '';
+      }, speed);
+    } else {
+      // All beats done — close and restore radio
+      overlay.classList.remove('clickable');
+      overlay.removeEventListener('click', _keSceneAdvance);
+      _keClose(() => {
+        if (ytPlayer && ytPlayer.unMute) ytPlayer.unMute();
+      });
+    }
+  }
+
   // ── VERDICT MASCOT OVERLAY ───────────────────────────────────
   let _vmTypeTimer  = null;
   let _vmTyping     = false;
@@ -8519,6 +8890,17 @@
       <button class="verdict-mascot-btn no"  onclick="kaedeMusicNo(event)">✗ NO THANKS</button>
     </div>
     <div id="kaedeMusicContinue">▼ CLICK TO CONTINUE</div>
+  </div>
+</div>
+
+<!-- KYOKO EASTEREGG OVERLAY -->
+<div id="kyokoEggOverlay">
+  <img id="kyokoEggBg" src="assets/kyoko_easteregg.png" alt="" draggable="false" />
+  <img id="kyokoEggSprite" src="assets/Kyoko_Concerned.png" alt="Kyoko Kirigiri" draggable="false" />
+  <div id="kyokoEggBox">
+    <div id="kyokoEggName">KYOKO KIRIGIRI<span id="kyokoEggTalent">ULTIMATE DETECTIVE</span></div>
+    <div id="kyokoEggText"></div>
+    <div id="kyokoEggContinue" style="opacity:0">▼ CLICK TO CONTINUE</div>
   </div>
 </div>
 
