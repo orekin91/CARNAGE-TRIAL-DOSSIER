@@ -2863,10 +2863,11 @@
   /* ── SETTINGS SIDE TAB ── */
   .settings-tab {
     position: fixed;
-    left: 0;
+    right: 0;
     top: 80px;
     z-index: 1000;
     display: flex;
+    flex-direction: row-reverse;
     align-items: stretch;
   }
   body.dossier-revealed .settings-tab {
@@ -2876,8 +2877,8 @@
   .settings-tab-btn {
     background: #16161c;
     border: 1px solid var(--border);
-    border-left: none;
-    border-radius: 0 4px 4px 0;
+    border-right: none;
+    border-radius: 4px 0 0 4px;
     color: var(--muted);
     cursor: pointer;
     writing-mode: vertical-rl;
@@ -2897,7 +2898,7 @@
   .settings-side-panel {
     background: #111115;
     border: 1px solid var(--border);
-    border-left: none;
+    border-right: none;
     width: 0;
     overflow: hidden;
     transition: width 0.3s ease;
@@ -3376,10 +3377,10 @@
   }
   #kaedeIntroSkip {
     position: absolute;
-    top: clamp(12px, 2vh, 20px);
-    right: clamp(16px, 3vw, 32px);
+    bottom: clamp(14px, 2vh, 22px);
+    left: clamp(20px, 4vw, 60px);
     font-family: 'Share Tech Mono', monospace;
-    font-size: 9px;
+    font-size: 10px;
     letter-spacing: 2px;
     color: var(--muted, #555);
     background: none;
@@ -3390,6 +3391,109 @@
     border-radius: 2px;
   }
   #kaedeIntroSkip:hover { color: var(--fg, #c8b99a); border-color: var(--fg, #c8b99a); }
+
+  /* ── VERDICT MASCOT OVERLAY ──────────────────────────────────── */
+  #verdictMascotOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99000;
+    background: rgba(0,0,0,0.88);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  #verdictMascotOverlay.visible { opacity: 1; display: flex; }
+  #verdictMascotOverlay.clickable { cursor: pointer; }
+  #verdictMascotOverlay.exiting { opacity: 0; pointer-events: none; }
+
+  #verdictMascotSprite {
+    position: absolute;
+    bottom: 120px;
+    right: clamp(40px, 8vw, 160px);
+    height: clamp(300px, 55vh, 520px);
+    width: auto;
+    object-fit: contain;
+    object-position: bottom;
+    -webkit-user-drag: none;
+    user-select: none;
+    filter: drop-shadow(0 0 24px rgba(224,48,48,0.3));
+    transform: translateY(20px);
+    opacity: 0;
+    transition: transform 0.5s cubic-bezier(0.22,1,0.36,1), opacity 0.5s;
+  }
+  #verdictMascotOverlay.visible #verdictMascotSprite {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  #verdictMascotBox {
+    position: absolute;
+    bottom: 0;
+    left: 0; right: 0;
+    background: linear-gradient(180deg, rgba(10,10,14,0.96) 0%, rgba(10,10,14,1) 100%);
+    border-top: 2px solid var(--yellow, #d4a017);
+    padding: clamp(16px, 2.5vh, 28px) clamp(20px, 5vw, 80px);
+    min-height: 130px;
+    box-sizing: border-box;
+  }
+  #verdictMascotName {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(16px, 2vw, 22px);
+    letter-spacing: 3px;
+    color: var(--yellow, #d4a017);
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  #verdictMascotTalent {
+    font-size: clamp(9px, 1vw, 12px);
+    letter-spacing: 4px;
+    color: var(--muted, #555);
+    opacity: 0.85;
+  }
+  #verdictMascotText {
+    font-family: 'Special Elite', serif;
+    font-size: clamp(13px, 1.3vw, 17px);
+    color: var(--fg, #c8b99a);
+    line-height: 1.6;
+    min-height: 2.4em;
+    padding-right: clamp(80px, 20vw, 260px);
+  }
+  #verdictMascotContinue {
+    position: absolute;
+    bottom: clamp(14px, 2vh, 22px);
+    right: clamp(20px, 4vw, 60px);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted, #555);
+    animation: introBlink 1.1s ease-in-out infinite;
+  }
+  #verdictMascotConfirmBtns {
+    display: none;
+    gap: 16px;
+    margin-top: 18px;
+  }
+  #verdictMascotConfirmBtns.visible { display: flex; }
+  .verdict-mascot-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(13px, 1.3vw, 16px);
+    letter-spacing: 2px;
+    background: none;
+    border: 2px solid var(--border, #2a2a35);
+    padding: 10px 28px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 3px;
+    color: var(--muted, #555);
+  }
+  .verdict-mascot-btn.yes { border-color: var(--green, #30c060); color: var(--green, #30c060); }
+  .verdict-mascot-btn.yes:hover { background: rgba(48,192,96,0.12); }
+  .verdict-mascot-btn.no  { border-color: var(--red, #e03030); color: var(--red, #e03030); }
+  .verdict-mascot-btn.no:hover  { background: rgba(224,48,48,0.12); }
 </style>
 </head>
 <body class="gate-locked">
@@ -3807,7 +3911,7 @@
         </div>
       </div>
       <div class="verdict-box">
-        <button class="verdict-btn guilty-v" id="guiltyBtn" onclick="setVerdict('guilty')">✗ GUILTY</button>
+        <button class="verdict-btn guilty-v" id="guiltyBtn" onclick="onGuiltyClick()">✗ GUILTY</button>
       </div>
 
       <!-- Confirmation step -->
@@ -4092,9 +4196,15 @@
   let settingsTabOpen = false;
   function toggleSettingsTab() {
     settingsTabOpen = !settingsTabOpen;
-    if (settingsTabOpen) { closeNotesTab(); }
+    if (settingsTabOpen) { closeNotesTab(); closeRadio(); }
     document.getElementById('settingsSidePanel').classList.toggle('open', settingsTabOpen);
     document.getElementById('settingsTabBtn').classList.toggle('open', settingsTabOpen);
+  }
+  function closeRadio() {
+    if (!radioOpen) return;
+    radioOpen = false;
+    document.getElementById('radioPanel').classList.remove('open');
+    document.getElementById('radioTabBtn').classList.remove('open');
   }
   function closeNotesTab() {
     notesTabOpen = false;
@@ -7376,6 +7486,8 @@
         concerned: 'assets/kaede_concerned.png',
         talking:   'assets/Kaede_talking.png',
         cheer:     'assets/Kaede_Cheer.png',
+        sure:      'assets/Kaede_Sure.png',
+        despair:   'assets/Kaede_Despair.png',
       },
       introLines: [
         "Oh! You've made it in — I'm so glad! My name is Kaede Akamatsu — the Ultimate Pianist. Nice to meet you!",
@@ -7427,11 +7539,36 @@
         "Was there no other way? Couldn't they have talked to someone?",
         "Everyone has a reason. But a reason isn't an excuse.",
       ],
-      lines_all_cleared: [
-        "Everyone's been cleared! I knew it — I just knew we'd all make it through!",
-        "No suspects... that's either really good or really scary. Stay alert!",
-        "All clear for now. But don't let your guard down yet.",
-        "I'm relieved... but also a little confused. Something still doesn't add up.",
+      lines_cleared: {
+        one: [
+          "There's only one name on our list and they've been cleared... so where does that leave us?",
+          "Just one suspect and they're cleared. Either we've been thorough, or we've been looking in completely the wrong place.",
+          "One person. Cleared. I don't know if I should feel relieved or more worried than before.",
+        ],
+        few: [
+          "Everyone on the list has been cleared... with only a handful of suspects, that really narrows things down. Or opens them back up.",
+          "All of them cleared? I want to believe that's good news, but something still feels off.",
+          "We've gone through everyone and cleared them all. Either the truth is hiding somewhere we haven't looked, or we missed something.",
+          "Cleared, cleared, cleared... okay. Something isn't adding up. Let's look again.",
+        ],
+        many: [
+          "Everyone's been cleared?! With this many suspects, that can't be right. We must've missed something.",
+          "All of them? That's a lot of people to rule out. The answer has to be hiding in the details somewhere.",
+          "A group this size and no one's flagged? I really think we need to go back through everything.",
+          "Every single one of them cleared... I believe in everyone here, but statistically that feels wrong.",
+        ],
+      },
+      lines_sure: [
+        "Hold on — are you absolutely sure about this? Once we mark someone guilty, there's no taking it back. This is the moment of truth.",
+        "Wait! Before you commit — are you certain? Look at everything one more time. There's no going back from this.",
+      ],
+      lines_verdict_correct: [
+        "We got it right!! I KNEW we could do it — I just knew it! You caught the real culprit! Justice has been served!",
+        "YES! That's them! We figured it out together! I'm so proud of us — of YOU! We did it!",
+      ],
+      lines_verdict_wrong: [
+        "Oh no... that... wasn't right. I'm so sorry. We accused the wrong person. It's not okay — but we'll face this together. We have to.",
+        "That's not... no. We got it wrong. I'm sorry. I should have pushed us harder to look at the evidence. I'm so sorry.",
       ],
       lines_cheer: [
         "Hey — have you taken a break recently? Don't forget to stretch! Even I know rest is important!",
@@ -7457,6 +7594,8 @@
         concerned: 'assets/Nagito_concerned.png',
         talking:   'assets/Nagito_Talking.png',
         cheer:     'assets/Nagito_Cheer.png',
+        sure:      'assets/Nagito_Sure.png',
+        despair:   'assets/Nagito_Despair.png',
       },
       introLines: [
         "Ah... so we're doing this. I'm Nagito Komaeda — the Ultimate Lucky Student. Though luck like mine is more of a curse, really.",
@@ -7507,11 +7646,42 @@
         "Was there a moment they could have turned back? There always is.",
         "I feel a strange kinship with people who've lost their way. It doesn't mean I'll let them go.",
       ],
-      lines_all_cleared: [
-        "Everyone's cleared? Then the hope I believed in wasn't misplaced after all.",
-        "No culprit among us... for now. Remain vigilant. My luck doesn't stay quiet for long.",
-        "A brief respite. Enjoy it. But don't let your guard down.",
-        "All clear. That's... actually good news. I'll allow myself to feel relief for once.",
+      lines_cleared: {
+        one: [
+          "One suspect. Cleared. My luck is whispering that this isn't as clean as it looks.",
+          "Just one person of interest, and they're cleared... Either we've solved nothing, or we've been looking at the wrong person entirely.",
+          "A single suspect, exonerated. I find that more unsettling than reassuring, if I'm honest.",
+        ],
+        few: [
+          "All cleared. A small group like this — and no answers. Despair has a way of hiding in plain sight.",
+          "Every one of them cleared. Either hope is telling us to look elsewhere, or someone here is very, very good at hiding.",
+          "Cleared, cleared, cleared... Ahaha. The truth is still out there. It has to be. Hope doesn't just vanish.",
+          "A few suspects, all cleared. I've seen this pattern before. It never ends the way you expect.",
+        ],
+        many: [
+          "That many people and not one of them flagged? My luck — good or bad — is screaming at me right now.",
+          "All of them? A group this large, and we've cleared everyone? Something is buried here. Something we haven't found yet.",
+          "Every single one... cleared. Hahaha. The despair of a dead end is something I know well. But hope always finds a crack.",
+          "This many suspects, all exonerated. Either we're very thorough or very wrong. My gut says the latter. And my gut is cursed, so.",
+        ],
+      },
+      lines_sure: [
+        "I see you've made a decision. But before you commit — are you truly certain? A false accusation carries an unbearable weight. Think carefully.",
+        "So. You're ready to name a culprit. I won't stop you. But I ask you one last time — are you absolutely sure? There is no coming back from this.",
+        "Ahaha... how wonderful. You've chosen. But you know, hope and despair are two sides of the same coin — and right now, I can't tell which face is pointing up. Are you sure?",
+        "The moment of accusation. I've always found it beautiful in a horrifying sort of way. The crushing weight of certainty... or the crushing weight of being wrong. Which will it be for you?",
+        "I won't pretend I don't find this thrilling. The potential for hope — or for despair — hanging on a single choice. Are you absolutely certain this is your answer?",
+        "You know, trash like me has no business telling you what to do. But even I know that naming the wrong person is a despair that lingers. So I'll ask, just once — are you sure?",
+        "Haha... it's funny, isn't it? The closer you get to hope, the more terrifying it becomes. What if you're right? What if you're wrong? Both possibilities are overwhelming. ...Are you sure?",
+        "I've been wrong before. About many things. About people. About hope itself. So before you commit — genuinely ask yourself. Not for my sake. For yours.",
+      ],
+      lines_verdict_correct: [
+        "...You were right. The truth prevailed. This is what hope looks like — shining through the darkest despair. You should be proud.",
+        "Correct. Against all odds, you found the answer. I'd call it luck, but... no. This was skill. Well done.",
+      ],
+      lines_verdict_wrong: [
+        "...Wrong. I had a feeling, but I hoped I was mistaken. The despair of a false accusation is something I'm all too familiar with. Don't let it break you.",
+        "That's not the right answer. This kind of despair... it's heavy. But it's not the end. The truth is still out there — we just have to find it.",
       ],
       lines_cheer: [
         "Someone as worthless as me shouldn't say this, but... you've been at this a while. Rest is part of the process.",
@@ -7558,8 +7728,10 @@
       pool = mascot.lines_victim; concerned = true;
     } else if (hasSus && mascot.lines_sus) {
       pool = mascot.lines_sus; concerned = true;
-    } else if (allCleared && mascot.lines_all_cleared) {
-      pool = mascot.lines_all_cleared;
+    } else if (allCleared && mascot.lines_cleared) {
+      const n = allSuspects.length;
+      const bucket = n === 1 ? 'one' : n <= 4 ? 'few' : 'many';
+      pool = mascot.lines_cleared[bucket];
     }
 
     // Pick a line, avoid repeating
@@ -7693,19 +7865,171 @@
     _scheduleChatter();
   });
 
+  // ── VERDICT MASCOT OVERLAY ───────────────────────────────────
+  let _vmTypeTimer  = null;
+  let _vmTyping     = false;
+  let _vmPhase      = 'sure'; // 'sure' | 'confirm' | 'result'
+  let _vmCurrentLine = '';
+
+  function _vmType(text, done) {
+    const el = document.getElementById('verdictMascotText');
+    el.textContent = '';
+    _vmTyping = true;
+    let i = 0;
+    clearInterval(_vmTypeTimer);
+    _vmTypeTimer = setInterval(() => {
+      el.textContent += text[i++];
+      if (i >= text.length) {
+        clearInterval(_vmTypeTimer);
+        _vmTyping = false;
+        if (done) done();
+      }
+    }, 22);
+  }
+
+  function verdictMascotOpen() {
+    const mascot  = MASCOTS[_mascotActive];
+    const overlay = document.getElementById('verdictMascotOverlay');
+    const sprite  = document.getElementById('verdictMascotSprite');
+    const nameEl  = document.getElementById('verdictMascotNameText');
+    const talentEl= document.getElementById('verdictMascotTalent');
+
+    sprite.src       = mascot.sprites.sure;
+    nameEl.textContent  = mascot.name;
+    talentEl.textContent = mascot.talent;
+
+    _vmPhase = 'sure';
+    document.getElementById('verdictMascotConfirmBtns').classList.remove('visible');
+    document.getElementById('verdictMascotContinue').style.opacity = '0';
+    document.getElementById('verdictMascotContinue').style.display = '';
+    document.getElementById('verdictMascotText').textContent = '';
+
+    // Hide sidebar mascot while overlay is open
+    document.getElementById('mascotContainer').style.visibility = 'hidden';
+
+    overlay.style.display = 'flex';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      overlay.classList.add('visible', 'clickable');
+      const pool = mascot.lines_sure;
+      _vmCurrentLine = pool[Math.floor(Math.random() * pool.length)];
+      _vmType(_vmCurrentLine, () => {
+        document.getElementById('verdictMascotContinue').style.opacity = '';
+      });
+    }));
+
+    overlay.addEventListener('click', _vmAdvance);
+  }
+
+  function _vmAdvance(e) {
+    if (_vmPhase !== 'sure') return;
+    // If still typing, snap to full text
+    if (_vmTyping) {
+      clearInterval(_vmTypeTimer);
+      _vmTyping = false;
+      document.getElementById('verdictMascotText').textContent = _vmCurrentLine;
+      document.getElementById('verdictMascotContinue').style.opacity = '';
+      return;
+    }
+    // Advance to confirm phase
+    _vmPhase = 'confirm';
+    const overlay = document.getElementById('verdictMascotOverlay');
+    overlay.classList.remove('clickable');
+    overlay.removeEventListener('click', _vmAdvance);
+    document.getElementById('verdictMascotContinue').style.display = 'none';
+    document.getElementById('verdictMascotConfirmBtns').classList.add('visible');
+    document.getElementById('verdictMascotText').textContent = 'Are you absolutely certain?';
+  }
+
+  function verdictMascotYes(e) {
+    e.stopPropagation();
+    _vmShowResult(true);
+  }
+
+  function verdictMascotNo(e) {
+    e.stopPropagation();
+    _vmShowResult(false);
+  }
+
+  function _vmShowResult(correct) {
+    _vmPhase = 'result';
+    const mascot  = MASCOTS[_mascotActive];
+    const sprite  = document.getElementById('verdictMascotSprite');
+    const overlay = document.getElementById('verdictMascotOverlay');
+
+    document.getElementById('verdictMascotConfirmBtns').classList.remove('visible');
+    document.getElementById('verdictMascotContinue').style.display = 'none';
+
+    sprite.src = correct ? mascot.sprites.cheer : mascot.sprites.despair;
+
+    const pool = correct ? mascot.lines_verdict_correct : mascot.lines_verdict_wrong;
+    const line = pool[Math.floor(Math.random() * pool.length)];
+
+    _vmType(line, () => {
+      // After typing done, wait 2.5s then auto-close
+      setTimeout(() => {
+        overlay.classList.add('exiting');
+        setTimeout(() => {
+          overlay.style.display = 'none';
+          overlay.classList.remove('visible', 'exiting');
+          document.getElementById('mascotContainer').style.visibility = '';
+          // Set verdict state and confirm
+          _vmApplyVerdict(correct);
+        }, 500);
+      }, 2500);
+    });
+  }
+
+  function _vmApplyVerdict(correct) {
+    // Set guilty verdict state without re-opening the confirm UI
+    currentVerdict = 'guilty';
+    document.getElementById('guiltyBtn').classList.add('active');
+    document.getElementById('guiltyStampMain').classList.remove('show');
+    document.getElementById('verdictConfirm').style.display = 'none';
+    document.getElementById('realMurdererWrap').style.display = 'none';
+    document.getElementById('confirmYes').classList.remove('active');
+    document.getElementById('confirmNo').classList.remove('active');
+    document.getElementById('guiltyStamp').classList.remove('show');
+    document.getElementById('innocentStampAccused').classList.remove('show');
+    confirmVerdict(correct);
+  }
+
+  function onGuiltyClick() {
+    // If already guilty — toggle off normally
+    if (currentVerdict === 'guilty') {
+      setVerdict('guilty');
+      return;
+    }
+    verdictMascotOpen();
+  }
+
 </script>
 
 <div id="toastContainer"></div>
 <!-- MASCOT ASSISTANT -->
 <div id="kaedeIntro">
-  <button id="kaedeIntroSkip" onclick="kaedeIntroSkip()">SKIP ▸▸</button>
   <img id="kaedeIntroSprite" src="assets/kaede_intro.png" alt="Kaede Akamatsu" draggable="false" />
   <div id="kaedeIntroBox">
     <div id="kaedeIntroName">KAEDE AKAMATSU<span id="kaedeIntroTalent">ULTIMATE PIANIST</span></div>
     <div id="kaedeIntroText"></div>
+    <button id="kaedeIntroSkip" onclick="kaedeIntroSkip()">SKIP ▸▸</button>
     <div id="kaedeIntroContinue">▼ CLICK TO CONTINUE</div>
   </div>
 </div>
+
+<!-- VERDICT MASCOT OVERLAY -->
+<div id="verdictMascotOverlay">
+  <img id="verdictMascotSprite" src="" alt="" draggable="false" />
+  <div id="verdictMascotBox">
+    <div id="verdictMascotName"><span id="verdictMascotNameText"></span><span id="verdictMascotTalent"></span></div>
+    <div id="verdictMascotText"></div>
+    <div id="verdictMascotConfirmBtns">
+      <button class="verdict-mascot-btn yes" onclick="verdictMascotYes(event)">✓ YES, I'M SURE</button>
+      <button class="verdict-mascot-btn no"  onclick="verdictMascotNo(event)">✗ NEVER MIND</button>
+    </div>
+    <div id="verdictMascotContinue">▼ CLICK TO CONTINUE</div>
+  </div>
+</div>
+
 <div id="mascotContainer">
   <div id="mascotBubble"></div>
   <div id="mascotNameTag">KAEDE AKAMATSU</div>
