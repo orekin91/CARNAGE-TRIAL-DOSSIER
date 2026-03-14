@@ -3391,6 +3391,109 @@
     border-radius: 2px;
   }
   #kaedeIntroSkip:hover { color: var(--fg, #c8b99a); border-color: var(--fg, #c8b99a); }
+
+  /* ── VERDICT MASCOT OVERLAY ──────────────────────────────────── */
+  #verdictMascotOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99000;
+    background: rgba(0,0,0,0.88);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  #verdictMascotOverlay.visible { opacity: 1; display: flex; }
+  #verdictMascotOverlay.clickable { cursor: pointer; }
+  #verdictMascotOverlay.exiting { opacity: 0; pointer-events: none; }
+
+  #verdictMascotSprite {
+    position: absolute;
+    bottom: 120px;
+    right: clamp(40px, 8vw, 160px);
+    height: clamp(300px, 55vh, 520px);
+    width: auto;
+    object-fit: contain;
+    object-position: bottom;
+    -webkit-user-drag: none;
+    user-select: none;
+    filter: drop-shadow(0 0 24px rgba(224,48,48,0.3));
+    transform: translateY(20px);
+    opacity: 0;
+    transition: transform 0.5s cubic-bezier(0.22,1,0.36,1), opacity 0.5s;
+  }
+  #verdictMascotOverlay.visible #verdictMascotSprite {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  #verdictMascotBox {
+    position: absolute;
+    bottom: 0;
+    left: 0; right: 0;
+    background: linear-gradient(180deg, rgba(10,10,14,0.96) 0%, rgba(10,10,14,1) 100%);
+    border-top: 2px solid var(--yellow, #d4a017);
+    padding: clamp(16px, 2.5vh, 28px) clamp(20px, 5vw, 80px);
+    min-height: 130px;
+    box-sizing: border-box;
+  }
+  #verdictMascotName {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(16px, 2vw, 22px);
+    letter-spacing: 3px;
+    color: var(--yellow, #d4a017);
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  #verdictMascotTalent {
+    font-size: clamp(9px, 1vw, 12px);
+    letter-spacing: 4px;
+    color: var(--muted, #555);
+    opacity: 0.85;
+  }
+  #verdictMascotText {
+    font-family: 'Special Elite', serif;
+    font-size: clamp(13px, 1.3vw, 17px);
+    color: var(--fg, #c8b99a);
+    line-height: 1.6;
+    min-height: 2.4em;
+    padding-right: clamp(80px, 20vw, 260px);
+  }
+  #verdictMascotContinue {
+    position: absolute;
+    bottom: clamp(14px, 2vh, 22px);
+    right: clamp(20px, 4vw, 60px);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted, #555);
+    animation: introBlink 1.1s ease-in-out infinite;
+  }
+  #verdictMascotConfirmBtns {
+    display: none;
+    gap: 16px;
+    margin-top: 18px;
+  }
+  #verdictMascotConfirmBtns.visible { display: flex; }
+  .verdict-mascot-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(13px, 1.3vw, 16px);
+    letter-spacing: 2px;
+    background: none;
+    border: 2px solid var(--border, #2a2a35);
+    padding: 10px 28px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 3px;
+    color: var(--muted, #555);
+  }
+  .verdict-mascot-btn.yes { border-color: var(--green, #30c060); color: var(--green, #30c060); }
+  .verdict-mascot-btn.yes:hover { background: rgba(48,192,96,0.12); }
+  .verdict-mascot-btn.no  { border-color: var(--red, #e03030); color: var(--red, #e03030); }
+  .verdict-mascot-btn.no:hover  { background: rgba(224,48,48,0.12); }
 </style>
 </head>
 <body class="gate-locked">
@@ -3808,7 +3911,7 @@
         </div>
       </div>
       <div class="verdict-box">
-        <button class="verdict-btn guilty-v" id="guiltyBtn" onclick="setVerdict('guilty')">✗ GUILTY</button>
+        <button class="verdict-btn guilty-v" id="guiltyBtn" onclick="onGuiltyClick()">✗ GUILTY</button>
       </div>
 
       <!-- Confirmation step -->
@@ -7383,6 +7486,8 @@
         concerned: 'assets/kaede_concerned.png',
         talking:   'assets/Kaede_talking.png',
         cheer:     'assets/Kaede_Cheer.png',
+        sure:      'assets/Kaede_Sure.png',
+        despair:   'assets/Kaede_Despair.png',
       },
       introLines: [
         "Oh! You've made it in — I'm so glad! My name is Kaede Akamatsu — the Ultimate Pianist. Nice to meet you!",
@@ -7440,6 +7545,18 @@
         "All clear for now. But don't let your guard down yet.",
         "I'm relieved... but also a little confused. Something still doesn't add up.",
       ],
+      lines_sure: [
+        "Hold on — are you absolutely sure about this? Once we mark someone guilty, there's no taking it back. This is the moment of truth.",
+        "Wait! Before you commit — are you certain? Look at everything one more time. There's no going back from this.",
+      ],
+      lines_verdict_correct: [
+        "We got it right!! I KNEW we could do it — I just knew it! You caught the real culprit! Justice has been served!",
+        "YES! That's them! We figured it out together! I'm so proud of us — of YOU! We did it!",
+      ],
+      lines_verdict_wrong: [
+        "Oh no... that... wasn't right. I'm so sorry. We accused the wrong person. It's not okay — but we'll face this together. We have to.",
+        "That's not... no. We got it wrong. I'm sorry. I should have pushed us harder to look at the evidence. I'm so sorry.",
+      ],
       lines_cheer: [
         "Hey — have you taken a break recently? Don't forget to stretch! Even I know rest is important!",
         "Just checking in! How are you holding up? Remember to take care of yourself, okay?",
@@ -7464,6 +7581,8 @@
         concerned: 'assets/Nagito_concerned.png',
         talking:   'assets/Nagito_Talking.png',
         cheer:     'assets/Nagito_Cheer.png',
+        sure:      'assets/Nagito_Sure.png',
+        despair:   'assets/Nagito_Despair.png',
       },
       introLines: [
         "Ah... so we're doing this. I'm Nagito Komaeda — the Ultimate Lucky Student. Though luck like mine is more of a curse, really.",
@@ -7519,6 +7638,18 @@
         "No culprit among us... for now. Remain vigilant. My luck doesn't stay quiet for long.",
         "A brief respite. Enjoy it. But don't let your guard down.",
         "All clear. That's... actually good news. I'll allow myself to feel relief for once.",
+      ],
+      lines_sure: [
+        "I see you've made a decision. But before you commit — are you truly certain? A false accusation carries an unbearable weight. Think carefully.",
+        "So. You're ready to name a culprit. I won't stop you. But I ask you one last time — are you absolutely sure? There is no coming back from this.",
+      ],
+      lines_verdict_correct: [
+        "...You were right. The truth prevailed. This is what hope looks like — shining through the darkest despair. You should be proud.",
+        "Correct. Against all odds, you found the answer. I'd call it luck, but... no. This was skill. Well done.",
+      ],
+      lines_verdict_wrong: [
+        "...Wrong. I had a feeling, but I hoped I was mistaken. The despair of a false accusation is something I'm all too familiar with. Don't let it break you.",
+        "That's not the right answer. This kind of despair... it's heavy. But it's not the end. The truth is still out there — we just have to find it.",
       ],
       lines_cheer: [
         "Someone as worthless as me shouldn't say this, but... you've been at this a while. Rest is part of the process.",
@@ -7700,6 +7831,143 @@
     _scheduleChatter();
   });
 
+  // ── VERDICT MASCOT OVERLAY ───────────────────────────────────
+  let _vmTypeTimer  = null;
+  let _vmTyping     = false;
+  let _vmPhase      = 'sure'; // 'sure' | 'confirm' | 'result'
+  let _vmCurrentLine = '';
+
+  function _vmType(text, done) {
+    const el = document.getElementById('verdictMascotText');
+    el.textContent = '';
+    _vmTyping = true;
+    let i = 0;
+    clearInterval(_vmTypeTimer);
+    _vmTypeTimer = setInterval(() => {
+      el.textContent += text[i++];
+      if (i >= text.length) {
+        clearInterval(_vmTypeTimer);
+        _vmTyping = false;
+        if (done) done();
+      }
+    }, 22);
+  }
+
+  function verdictMascotOpen() {
+    const mascot  = MASCOTS[_mascotActive];
+    const overlay = document.getElementById('verdictMascotOverlay');
+    const sprite  = document.getElementById('verdictMascotSprite');
+    const nameEl  = document.getElementById('verdictMascotNameText');
+    const talentEl= document.getElementById('verdictMascotTalent');
+
+    sprite.src       = mascot.sprites.sure;
+    nameEl.textContent  = mascot.name;
+    talentEl.textContent = mascot.talent;
+
+    _vmPhase = 'sure';
+    document.getElementById('verdictMascotConfirmBtns').classList.remove('visible');
+    document.getElementById('verdictMascotContinue').style.opacity = '0';
+    document.getElementById('verdictMascotContinue').style.display = '';
+    document.getElementById('verdictMascotText').textContent = '';
+
+    // Hide sidebar mascot while overlay is open
+    document.getElementById('mascotContainer').style.visibility = 'hidden';
+
+    overlay.style.display = 'flex';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      overlay.classList.add('visible', 'clickable');
+      const pool = mascot.lines_sure;
+      _vmCurrentLine = pool[Math.floor(Math.random() * pool.length)];
+      _vmType(_vmCurrentLine, () => {
+        document.getElementById('verdictMascotContinue').style.opacity = '';
+      });
+    }));
+
+    overlay.addEventListener('click', _vmAdvance);
+  }
+
+  function _vmAdvance(e) {
+    if (_vmPhase !== 'sure') return;
+    // If still typing, snap to full text
+    if (_vmTyping) {
+      clearInterval(_vmTypeTimer);
+      _vmTyping = false;
+      document.getElementById('verdictMascotText').textContent = _vmCurrentLine;
+      document.getElementById('verdictMascotContinue').style.opacity = '';
+      return;
+    }
+    // Advance to confirm phase
+    _vmPhase = 'confirm';
+    const overlay = document.getElementById('verdictMascotOverlay');
+    overlay.classList.remove('clickable');
+    overlay.removeEventListener('click', _vmAdvance);
+    document.getElementById('verdictMascotContinue').style.display = 'none';
+    document.getElementById('verdictMascotConfirmBtns').classList.add('visible');
+    document.getElementById('verdictMascotText').textContent = 'Are you absolutely certain?';
+  }
+
+  function verdictMascotYes(e) {
+    e.stopPropagation();
+    _vmShowResult(true);
+  }
+
+  function verdictMascotNo(e) {
+    e.stopPropagation();
+    _vmShowResult(false);
+  }
+
+  function _vmShowResult(correct) {
+    _vmPhase = 'result';
+    const mascot  = MASCOTS[_mascotActive];
+    const sprite  = document.getElementById('verdictMascotSprite');
+    const overlay = document.getElementById('verdictMascotOverlay');
+
+    document.getElementById('verdictMascotConfirmBtns').classList.remove('visible');
+    document.getElementById('verdictMascotContinue').style.display = 'none';
+
+    sprite.src = correct ? mascot.sprites.cheer : mascot.sprites.despair;
+
+    const pool = correct ? mascot.lines_verdict_correct : mascot.lines_verdict_wrong;
+    const line = pool[Math.floor(Math.random() * pool.length)];
+
+    _vmType(line, () => {
+      // After typing done, wait 2.5s then auto-close
+      setTimeout(() => {
+        overlay.classList.add('exiting');
+        setTimeout(() => {
+          overlay.style.display = 'none';
+          overlay.classList.remove('visible', 'exiting');
+          document.getElementById('mascotContainer').style.visibility = '';
+          // Set verdict state and confirm
+          _vmApplyVerdict(correct);
+        }, 500);
+      }, 2500);
+    });
+  }
+
+  function _vmApplyVerdict(correct) {
+    // Set guilty verdict state without re-opening the confirm UI
+    currentVerdict = 'guilty';
+    document.getElementById('guiltyBtn').classList.add('active');
+    document.getElementById('guiltyStampMain').classList.remove('show');
+    document.getElementById('verdictConfirm').style.display = 'none';
+    document.getElementById('realMurdererWrap').style.display = 'none';
+    document.getElementById('confirmYes').classList.remove('active');
+    document.getElementById('confirmNo').classList.remove('active');
+    document.getElementById('guiltyStamp').classList.remove('show');
+    document.getElementById('innocentStampAccused').classList.remove('show');
+    confirmVerdict(correct);
+  }
+
+  function onGuiltyClick() {
+    // If already guilty — toggle off normally
+    if (currentVerdict === 'guilty') {
+      setVerdict('guilty');
+      return;
+    }
+    verdictMascotOpen();
+  }
+
 </script>
 
 <div id="toastContainer"></div>
@@ -7713,6 +7981,21 @@
     <div id="kaedeIntroContinue">▼ CLICK TO CONTINUE</div>
   </div>
 </div>
+
+<!-- VERDICT MASCOT OVERLAY -->
+<div id="verdictMascotOverlay">
+  <img id="verdictMascotSprite" src="" alt="" draggable="false" />
+  <div id="verdictMascotBox">
+    <div id="verdictMascotName"><span id="verdictMascotNameText"></span><span id="verdictMascotTalent"></span></div>
+    <div id="verdictMascotText"></div>
+    <div id="verdictMascotConfirmBtns">
+      <button class="verdict-mascot-btn yes" onclick="verdictMascotYes(event)">✓ YES, I'M SURE</button>
+      <button class="verdict-mascot-btn no"  onclick="verdictMascotNo(event)">✗ NEVER MIND</button>
+    </div>
+    <div id="verdictMascotContinue">▼ CLICK TO CONTINUE</div>
+  </div>
+</div>
+
 <div id="mascotContainer">
   <div id="mascotBubble"></div>
   <div id="mascotNameTag">KAEDE AKAMATSU</div>
