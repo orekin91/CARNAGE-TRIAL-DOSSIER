@@ -8037,14 +8037,14 @@
     const hasAny     = allSuspects.length > 0 || allVictims.length > 0;
     const allCleared = hasAny && allSuspects.every(s => s.status === 'cleared' || s.accused);
 
-    // Priority: culprit > victim > sus > all-cleared > generic
+    // Priority: culprit > sus > victim > all-cleared > generic
     let concerned = false;
     if (hasCulprit && mascot.lines_culprit) {
       pool = mascot.lines_culprit; concerned = true;
-    } else if (hasVictim && mascot.lines_victim) {
-      pool = mascot.lines_victim; concerned = true;
     } else if (hasSus && mascot.lines_sus) {
       pool = mascot.lines_sus; concerned = true;
+    } else if (hasVictim && mascot.lines_victim) {
+      pool = mascot.lines_victim; concerned = true;
     } else if (allCleared && mascot.lines_cleared) {
       const n = allSuspects.length;
       const bucket = n === 1 ? 'one' : n <= 4 ? 'few' : 'many';
