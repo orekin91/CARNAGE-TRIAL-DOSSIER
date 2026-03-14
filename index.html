@@ -3376,10 +3376,10 @@
   }
   #kaedeIntroSkip {
     position: absolute;
-    top: clamp(12px, 2vh, 20px);
-    right: clamp(16px, 3vw, 32px);
+    bottom: clamp(14px, 2vh, 22px);
+    left: clamp(20px, 4vw, 60px);
     font-family: 'Share Tech Mono', monospace;
-    font-size: 9px;
+    font-size: 10px;
     letter-spacing: 2px;
     color: var(--muted, #555);
     background: none;
@@ -7698,11 +7698,11 @@
 <div id="toastContainer"></div>
 <!-- MASCOT ASSISTANT -->
 <div id="kaedeIntro">
-  <button id="kaedeIntroSkip" onclick="kaedeIntroSkip()">SKIP ▸▸</button>
   <img id="kaedeIntroSprite" src="assets/kaede_intro.png" alt="Kaede Akamatsu" draggable="false" />
   <div id="kaedeIntroBox">
     <div id="kaedeIntroName">KAEDE AKAMATSU<span id="kaedeIntroTalent">ULTIMATE PIANIST</span></div>
     <div id="kaedeIntroText"></div>
+    <button id="kaedeIntroSkip" onclick="kaedeIntroSkip()">SKIP ▸▸</button>
     <div id="kaedeIntroContinue">▼ CLICK TO CONTINUE</div>
   </div>
 </div>
