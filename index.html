@@ -9596,6 +9596,8 @@
     _vmTyping = true;
     let i = 0;
     clearInterval(_vmTypeTimer);
+    // Target ~3 500 ms max typing time; never faster than 10ms or slower than 22ms per char
+    const interval = Math.max(10, Math.min(22, Math.floor(3500 / text.length)));
     _vmTypeTimer = setInterval(() => {
       el.textContent += text[i++];
       if (i >= text.length) {
@@ -9603,7 +9605,7 @@
         _vmTyping = false;
         if (done) done();
       }
-    }, 22);
+    }, interval);
   }
 
   function verdictMascotOpen() {
