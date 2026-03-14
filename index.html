@@ -2863,10 +2863,11 @@
   /* ── SETTINGS SIDE TAB ── */
   .settings-tab {
     position: fixed;
-    left: 0;
+    right: 0;
     top: 80px;
     z-index: 1000;
     display: flex;
+    flex-direction: row-reverse;
     align-items: stretch;
   }
   body.dossier-revealed .settings-tab {
@@ -2876,8 +2877,8 @@
   .settings-tab-btn {
     background: #16161c;
     border: 1px solid var(--border);
-    border-left: none;
-    border-radius: 0 4px 4px 0;
+    border-right: none;
+    border-radius: 4px 0 0 4px;
     color: var(--muted);
     cursor: pointer;
     writing-mode: vertical-rl;
@@ -2897,7 +2898,7 @@
   .settings-side-panel {
     background: #111115;
     border: 1px solid var(--border);
-    border-left: none;
+    border-right: none;
     width: 0;
     overflow: hidden;
     transition: width 0.3s ease;
@@ -4092,9 +4093,15 @@
   let settingsTabOpen = false;
   function toggleSettingsTab() {
     settingsTabOpen = !settingsTabOpen;
-    if (settingsTabOpen) { closeNotesTab(); }
+    if (settingsTabOpen) { closeNotesTab(); closeRadio(); }
     document.getElementById('settingsSidePanel').classList.toggle('open', settingsTabOpen);
     document.getElementById('settingsTabBtn').classList.toggle('open', settingsTabOpen);
+  }
+  function closeRadio() {
+    if (!radioOpen) return;
+    radioOpen = false;
+    document.getElementById('radioPanel').classList.remove('open');
+    document.getElementById('radioTabBtn').classList.remove('open');
   }
   function closeNotesTab() {
     notesTabOpen = false;
