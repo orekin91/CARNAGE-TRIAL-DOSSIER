@@ -2699,9 +2699,10 @@
     flex-direction: column;
     align-items: center;
     pointer-events: none;
+    visibility: visible;
     transition: opacity 0.4s;
   }
-  #mascotContainer.hidden { opacity: 0; pointer-events: none; }
+  #mascotContainer.hidden { opacity: 0; visibility: hidden; }
 
   #mascotBubble {
     background: var(--panel-bg, #111114);
@@ -2747,6 +2748,9 @@
   }
   #mascotSprite {
     width: 110px;
+    height: 180px;
+    object-fit: contain;
+    object-position: bottom;
     cursor: pointer;
     pointer-events: auto;
     transform: translateY(4px);
@@ -7026,8 +7030,8 @@
 
 
   // ── MASCOT SYSTEM ────────────────────────────────────────────
-  const KAEDE_SPRITE_NEUTRAL   = 'assets/kaede_neutral.png';
-  const KAEDE_SPRITE_CONCERNED = 'assets/kaede_concerned.png';
+  const KAEDE_SPRITE_NEUTRAL   = 'assets/asset_png_3.png';
+  const KAEDE_SPRITE_CONCERNED = 'assets/asset_png_3.png';
 
   const MASCOTS = {
     kaede: {
@@ -7187,7 +7191,7 @@
 <div id="mascotContainer">
   <div id="mascotBubble"></div>
   <div id="mascotNameTag">KAEDE AKAMATSU</div>
-  <img id="mascotSprite" src="assets/kaede_neutral.png" alt="Mascot" onclick="mascotClick()" title="Click me!" />
+  <img id="mascotSprite" src="assets/asset_png_3.png" alt="Mascot" onclick="mascotClick()" title="Click me!" />
 </div>
 
 <div id="jumpscareOverlay">
