@@ -9726,18 +9726,43 @@
     }
     const line = pool[Math.floor(Math.random() * pool.length)];
 
+    _vmPhase = 'result';
+    overlay.classList.add('clickable');
+
+    let _resultDoneTriggered = false;
+    function _closeResult() {
+      if (_resultDoneTriggered) return;
+      _resultDoneTriggered = true;
+      overlay.removeEventListener('click', _resultClick);
+      overlay.classList.remove('clickable');
+      overlay.classList.add('exiting');
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        overlay.classList.remove('visible', 'exiting');
+        document.getElementById('mascotContainer').style.visibility = '';
+        _vmApplyVerdict(correct);
+      }, 500);
+    }
+
+    function _resultClick() {
+      if (_vmTyping) {
+        // First click: snap to full text
+        clearInterval(_vmTypeTimer);
+        _vmTyping = false;
+        document.getElementById('verdictMascotText').textContent = line;
+      } else {
+        // Second click (or click after typing finished): close immediately
+        clearTimeout(_vmCloseTimer);
+        _closeResult();
+      }
+    }
+
+    let _vmCloseTimer = null;
+    overlay.addEventListener('click', _resultClick);
+
     _vmType(line, () => {
       // After typing done, wait 2.5s then auto-close
-      setTimeout(() => {
-        overlay.classList.add('exiting');
-        setTimeout(() => {
-          overlay.style.display = 'none';
-          overlay.classList.remove('visible', 'exiting');
-          document.getElementById('mascotContainer').style.visibility = '';
-          // Set verdict state and confirm
-          _vmApplyVerdict(correct);
-        }, 500);
-      }, 2500);
+      _vmCloseTimer = setTimeout(_closeResult, 2500);
     });
   }
 
