@@ -2772,7 +2772,28 @@
     color: var(--accent, #e03030);
     margin-bottom: 2px;
     opacity: 0.7;
+    display: flex;
+    align-items: center;
+    gap: 5px;
   }
+  #mascotAskBtn {
+    background: transparent;
+    border: 1px solid rgba(224,48,48,0.4);
+    border-radius: 50%;
+    color: var(--accent, #e03030);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 8px;
+    width: 14px;
+    height: 14px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    pointer-events: auto;
+    opacity: 0.7;
+    transition: opacity 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+  }
+  #mascotAskBtn:hover { opacity: 1; border-color: var(--accent, #e03030); }
 
   /* ── MASCOT QUESTIONNAIRE ── */
   #mascotQuestionnaire {
@@ -8232,8 +8253,6 @@
   let _mascotChatterLastLine = -1;
 
   function mascotClick() {
-    // Don't fire a normal click if a long-press just triggered the questionnaire
-    if (_mascotLPFired) { _mascotLPFired = false; return; }
     // Click while questionnaire is open → close it
     if (_mqOpen) { mascotQuestionnaireClose(); return; }
     const mascot = MASCOTS[_mascotActive];
@@ -8334,25 +8353,7 @@
   }
 
   // ── MASCOT QUESTIONNAIRE ─────────────────────────────────────────────────────
-  let _mascotLPTimer   = null;
-  let _mascotLPFired   = false;
-  let _mqOpen          = false;
-
-  (function _initMascotLongPress() {
-    const sprite = document.getElementById('mascotSprite');
-    if (!sprite) return;
-    function lpStart() {
-      _mascotLPFired = false;
-      _mascotLPTimer = setTimeout(() => { _mascotLPFired = true; mascotQuestionnaireOpen(); }, 600);
-    }
-    function lpCancel() { clearTimeout(_mascotLPTimer); }
-    sprite.addEventListener('mousedown',  e => { if (e.button === 0) lpStart(); });
-    sprite.addEventListener('mouseup',    lpCancel);
-    sprite.addEventListener('mouseleave', lpCancel);
-    sprite.addEventListener('touchstart', e => { e.preventDefault(); lpStart(); }, { passive: false });
-    sprite.addEventListener('touchend',   lpCancel);
-    sprite.addEventListener('touchcancel',lpCancel);
-  })();
+  let _mqOpen = false;
 
   function mascotQuestionnaireOpen() {
     const panel      = document.getElementById('mascotQuestionnaire');
@@ -9257,8 +9258,8 @@
     <button class="mq-close" onclick="mascotQuestionnaireClose()">✕ CLOSE</button>
   </div>
   <div id="mascotBubble"></div>
-  <div id="mascotNameTag">KAEDE AKAMATSU</div>
-  <img id="mascotSprite" src="assets/kaede_neutral.png" alt="Mascot" draggable="false" onclick="mascotClick()" title="Click me! (hold for questions)" />
+  <div id="mascotNameTag">KAEDE AKAMATSU<button id="mascotAskBtn" onclick="mascotQuestionnaireOpen()" title="Ask a question">?</button></div>
+  <img id="mascotSprite" src="assets/kaede_neutral.png" alt="Mascot" draggable="false" onclick="mascotClick()" title="Click me!" />
 </div>
 
 <div id="jumpscareOverlay">
