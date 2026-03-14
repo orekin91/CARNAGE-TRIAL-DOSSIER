@@ -3506,6 +3506,102 @@
   .verdict-mascot-btn.no:hover  { background: rgba(224,48,48,0.12); }
   .verdict-mascot-btn.cancel { border-color: var(--border, #2a2a35); color: var(--muted, #555); font-size: clamp(10px, 1vw, 13px); }
   .verdict-mascot-btn.cancel:hover { border-color: var(--muted, #555); color: var(--fg, #c8b99a); }
+
+  /* ── NAGITO ROULETTE OVERLAY ── */
+  #nagitoRouletteOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99000;
+    background: #000;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  #nagitoRouletteOverlay.visible { opacity: 1; display: flex; }
+  #nagitoRouletteOverlay.clickable { cursor: pointer; }
+  #nagitoRouletteOverlay.exiting { opacity: 0; pointer-events: none; }
+  #nagitoFDRBg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+  #nagitoRouletteBox {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    background: linear-gradient(180deg, rgba(10,10,14,0.96) 0%, rgba(10,10,14,1) 100%);
+    border-top: 2px solid var(--yellow, #d4a017);
+    padding: clamp(16px, 2.5vh, 28px) clamp(20px, 5vw, 80px);
+    min-height: 130px;
+    box-sizing: border-box;
+  }
+  #nagitoRouletteName {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(16px, 2vw, 22px);
+    letter-spacing: 3px;
+    color: var(--yellow, #d4a017);
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  #nagitoRouletteTalent {
+    font-size: clamp(9px, 1vw, 12px);
+    letter-spacing: 4px;
+    color: var(--muted, #555);
+    opacity: 0.85;
+  }
+  #nagitoRouletteText {
+    font-family: 'Special Elite', serif;
+    font-size: clamp(13px, 1.3vw, 17px);
+    color: var(--fg, #c8b99a);
+    line-height: 1.6;
+    min-height: 2.4em;
+    padding-right: clamp(80px, 20vw, 260px);
+  }
+  #nagitoRouletteContinue {
+    position: absolute;
+    bottom: clamp(14px, 2vh, 22px);
+    right: clamp(20px, 4vw, 60px);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted, #555);
+    animation: introBlink 1.1s ease-in-out infinite;
+  }
+  #nagitoRouletteBullets {
+    display: none;
+    gap: 12px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+  #nagitoRouletteBullets.visible { display: flex; }
+  .roulette-bullet-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(14px, 1.4vw, 18px);
+    letter-spacing: 2px;
+    background: none;
+    border: 2px solid var(--border, #2a2a35);
+    padding: 10px 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 3px;
+    color: var(--muted, #555);
+    min-width: 52px;
+    text-align: center;
+  }
+  .roulette-bullet-btn:hover {
+    border-color: var(--red, #e03030);
+    color: var(--red, #e03030);
+    background: rgba(224,48,48,0.08);
+  }
 </style>
 </head>
 <body class="gate-locked">
@@ -7798,6 +7894,16 @@
       }
     }
 
+    // Nagito roulette easter egg — count neutral-only clicks
+    const isNagitoNeutral = (_mascotActive === 'nagito' && pool === MASCOTS['nagito'].lines);
+    if (isNagitoNeutral && !_nagitoRouletteOffered) {
+      _nagitoNeutralClicks++;
+      if (_nagitoNeutralClicks >= 4) {
+        _nagitoRouletteOffered = true;
+        setTimeout(nagitoRouletteOpen, 4800);
+      }
+    }
+
     clearTimeout(_mascotBubbleTimer);
     _mascotBubbleTimer = setTimeout(() => {
       bubble.classList.remove('visible');
@@ -7958,24 +8064,18 @@
 
     overlay.style.display = 'flex';
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      overlay.classList.add('visible', 'clickable');
+      overlay.classList.add('visible');
       _kmCurrentLine = "Hey, um... I've been thinking. You've all been working so hard and it seems really stressful. Would you like me to play something soothing? I know a piece that always helps me clear my head.";
       _kmType(_kmCurrentLine, () => {
         document.getElementById('kaedeMusicContinue').style.opacity = '';
+        overlay.classList.add('clickable');
+        overlay.addEventListener('click', _kmAdvance);
       });
     }));
-    overlay.addEventListener('click', _kmAdvance);
   }
 
   function _kmAdvance() {
-    if (_kmPhase !== 'ask') return;
-    if (_kmTyping) {
-      clearInterval(_kmTypeTimer);
-      _kmTyping = false;
-      document.getElementById('kaedeMusicText').textContent = _kmCurrentLine;
-      document.getElementById('kaedeMusicContinue').style.opacity = '';
-      return;
-    }
+    if (_kmPhase !== 'ask' || _kmTyping) return;
     _kmPhase = 'confirm';
     const overlay = document.getElementById('kaedeMusicOverlay');
     overlay.classList.remove('clickable');
@@ -8104,6 +8204,113 @@
     document.getElementById('kaedeMusicOverlay').removeEventListener('click', _kmEndAdvance);
     _kmClose();
     radioSkip(); // advance queue now that the song is done
+  }
+
+  // ── NAGITO ROULETTE EASTER EGG ───────────────────────────────
+  let _nagitoNeutralClicks = 0;
+  let _nagitoRouletteOffered = false;
+  let _nrPhase       = 'intro'; // 'intro' | 'pick' | 'result'
+  let _nrCurrentLine = '';
+  let _nrTyping      = false;
+  let _nrTypeTimer   = null;
+
+  function _nrType(text, done) {
+    const el = document.getElementById('nagitoRouletteText');
+    el.textContent = '';
+    _nrTyping = true;
+    let i = 0;
+    clearInterval(_nrTypeTimer);
+    _nrTypeTimer = setInterval(() => {
+      el.textContent += text[i++];
+      if (i >= text.length) {
+        clearInterval(_nrTypeTimer);
+        _nrTyping = false;
+        if (done) done();
+      }
+    }, 22);
+  }
+
+  function _nrClose(after) {
+    const overlay = document.getElementById('nagitoRouletteOverlay');
+    overlay.classList.add('exiting');
+    overlay.classList.remove('clickable');
+    setTimeout(() => {
+      overlay.classList.remove('visible', 'exiting');
+      overlay.style.display = 'none';
+      document.getElementById('mascotContainer').style.visibility = '';
+      if (after) after();
+    }, 500);
+  }
+
+  function nagitoRouletteOpen() {
+    const overlay = document.getElementById('nagitoRouletteOverlay');
+    _nrPhase = 'intro';
+    document.getElementById('nagitoRouletteText').textContent = '';
+    document.getElementById('nagitoRouletteBullets').classList.remove('visible');
+    const cont = document.getElementById('nagitoRouletteContinue');
+    cont.style.opacity = '0';
+    cont.textContent = '▼ CLICK TO CONTINUE';
+    cont.style.display = '';
+    document.getElementById('mascotContainer').style.visibility = 'hidden';
+
+    overlay.style.display = 'flex';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      overlay.classList.add('visible');
+      _nrCurrentLine = "Ahaha... you know, it doesn't really matter what happens to me. My luck is so repulsive — so utterly twisted — that it would never allow me to die before something truly wonderful happens for everyone else. That's just how it works. So... how about a little game? Russian roulette. Don't worry about me. I literally cannot lose.";
+      _nrType(_nrCurrentLine, () => {
+        cont.style.opacity = '';
+        overlay.classList.add('clickable');
+        overlay.addEventListener('click', _nrIntroAdvance);
+      });
+    }));
+  }
+
+  function _nrIntroAdvance() {
+    if (_nrPhase !== 'intro' || _nrTyping) return;
+    _nrPhase = 'pick';
+    const overlay = document.getElementById('nagitoRouletteOverlay');
+    overlay.classList.remove('clickable');
+    overlay.removeEventListener('click', _nrIntroAdvance);
+    document.getElementById('nagitoRouletteContinue').style.display = 'none';
+    document.getElementById('nagitoRouletteBullets').classList.add('visible');
+    _nrCurrentLine = "So — how many bullets should we load into the chamber?";
+    _nrType(_nrCurrentLine);
+  }
+
+  function nagitoRoulettePick(bullets, e) {
+    e.stopPropagation();
+    if (_nrPhase !== 'pick') return;
+    _nrPhase = 'result';
+    document.getElementById('nagitoRouletteBullets').classList.remove('visible');
+    const cont = document.getElementById('nagitoRouletteContinue');
+    cont.textContent = '▼ CLICK TO CLOSE';
+    cont.style.display = '';
+    cont.style.opacity = '0';
+
+    const fired = Math.random() < bullets / 6;
+    if (!fired) {
+      _nrCurrentLine = "...Click. The chamber was empty. Ahaha — you see? That's what hope looks like. It always finds a way through, even when the odds are against it. Thank you. Thank you for trusting in it. In me. That means more than I deserve.";
+    } else {
+      _nrCurrentLine = "...The trigger pulled. I heard the firing pin strike. But — ahaha — of course. Of course it jammed. My luck really is something wretched, isn't it? Even a bullet won't cooperate with me. Still... I'm glad you played. I really am.";
+    }
+    _nrType(_nrCurrentLine, () => {
+      cont.style.opacity = '';
+      document.getElementById('nagitoRouletteOverlay').classList.add('clickable');
+      document.getElementById('nagitoRouletteOverlay').addEventListener('click', _nrResultAdvance);
+    });
+  }
+
+  function _nrResultAdvance() {
+    if (_nrPhase !== 'result') return;
+    if (_nrTyping) {
+      clearInterval(_nrTypeTimer);
+      _nrTyping = false;
+      document.getElementById('nagitoRouletteText').textContent = _nrCurrentLine;
+      document.getElementById('nagitoRouletteContinue').style.opacity = '';
+      return;
+    }
+    document.getElementById('nagitoRouletteOverlay').removeEventListener('click', _nrResultAdvance);
+    _nrClose();
   }
 
   // ── VERDICT MASCOT OVERLAY ───────────────────────────────────
@@ -8285,6 +8492,23 @@
 </div>
 
 <!-- KAEDE MUSIC EASTER EGG OVERLAY -->
+<div id="nagitoRouletteOverlay">
+  <img id="nagitoFDRBg" src="assets/NagitoFDR.png" alt="" draggable="false" />
+  <div id="nagitoRouletteBox">
+    <div id="nagitoRouletteName">NAGITO KOMAEDA<span id="nagitoRouletteTalent">ULTIMATE LUCKY STUDENT</span></div>
+    <div id="nagitoRouletteText"></div>
+    <div id="nagitoRouletteBullets">
+      <button class="roulette-bullet-btn" onclick="nagitoRoulettePick(1,event)">1</button>
+      <button class="roulette-bullet-btn" onclick="nagitoRoulettePick(2,event)">2</button>
+      <button class="roulette-bullet-btn" onclick="nagitoRoulettePick(3,event)">3</button>
+      <button class="roulette-bullet-btn" onclick="nagitoRoulettePick(4,event)">4</button>
+      <button class="roulette-bullet-btn" onclick="nagitoRoulettePick(5,event)">5</button>
+      <button class="roulette-bullet-btn" onclick="nagitoRoulettePick(6,event)">6</button>
+    </div>
+    <div id="nagitoRouletteContinue" style="opacity:0">▼ CLICK TO CLOSE</div>
+  </div>
+</div>
+
 <div id="kaedeMusicOverlay">
   <img id="kaedeMusicSprite" src="" alt="Kaede Akamatsu" draggable="false" />
   <div id="kaedeMusicBox">
