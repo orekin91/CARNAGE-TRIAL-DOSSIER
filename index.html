@@ -8037,14 +8037,14 @@
     const hasAny     = allSuspects.length > 0 || allVictims.length > 0;
     const allCleared = hasAny && allSuspects.every(s => s.status === 'cleared' || s.accused);
 
-    // Priority: culprit > victim > sus > all-cleared > generic
+    // Priority: culprit > sus > victim > all-cleared > generic
     let concerned = false;
     if (hasCulprit && mascot.lines_culprit) {
       pool = mascot.lines_culprit; concerned = true;
-    } else if (hasVictim && mascot.lines_victim) {
-      pool = mascot.lines_victim; concerned = true;
     } else if (hasSus && mascot.lines_sus) {
       pool = mascot.lines_sus; concerned = true;
+    } else if (hasVictim && mascot.lines_victim) {
+      pool = mascot.lines_victim; concerned = true;
     } else if (allCleared && mascot.lines_cleared) {
       const n = allSuspects.length;
       const bucket = n === 1 ? 'one' : n <= 4 ? 'few' : 'many';
@@ -8538,13 +8538,8 @@
   ];
 
   const KYOKO_EGG_SCENE = [
-    "There's something about this case you need to understand. Something I haven't said aloud until now.",
-    "There may be someone unaccounted for. Someone whose name doesn't appear on any list — who was never meant to be found.",
-    "At Hope's Peak Academy, there was a 16th student. Hidden. Concealed from the rest of us from the very beginning.",
-    "Her name was Mukuro Ikusaba. The one they called the Ultimate Soldier.",
-    "Mukuro Ikusaba... the 16th student, lying hidden somewhere in this school... the one they call the Ultimate Soldier...",
-    "Watch out for her.",
-    "...That's all. Get back to work.",
+    "Mukuro Ikusaba.",
+    "Mukuro Ikusaba... The sixteenth student, lying hidden somewhere in this dossier... The one they call the Ultimate Despair... Watch out for her.",
   ];
 
   function _keType(text, done, speed) {
@@ -8631,8 +8626,7 @@
       _keSceneBeat = 0;
       cont.style.opacity = '0';
       document.getElementById('kyokoEggText').textContent = '';
-      // Mute radio, queue the easter egg song
-      if (ytPlayer && ytPlayer.mute) ytPlayer.mute();
+      // Replace radio with the easter egg song (same pattern as Claire de Lune)
       radioQueue.unshift({ ...KYOKO_EGG_SONG });
       radioSkip();
       // Fade out sprite, fade in background
@@ -8667,8 +8661,8 @@
     if (_keSceneBeat < KYOKO_EGG_SCENE.length) {
       cont.style.opacity = '0';
       _keCurrentLine = KYOKO_EGG_SCENE[_keSceneBeat];
-      // Beats 4 & 5 (the famous warning) type slower and more ominously
-      const speed = (_keSceneBeat >= 4) ? 55 : 26;
+      // Beat 0 = name only (slow pause effect), beat 1 = full warning (very slow)
+      const speed = _keSceneBeat === 0 ? 60 : 50;
       const isLast = _keSceneBeat === KYOKO_EGG_SCENE.length - 1;
       _keType(_keCurrentLine, () => {
         if (isLast) cont.textContent = '▼ CLICK TO CLOSE';
@@ -8678,9 +8672,7 @@
       // All beats done — close and restore radio
       overlay.classList.remove('clickable');
       overlay.removeEventListener('click', _keSceneAdvance);
-      _keClose(() => {
-        if (ytPlayer && ytPlayer.unMute) ytPlayer.unMute();
-      });
+      _keClose();
     }
   }
 
