@@ -2748,14 +2748,22 @@
   }
   #mascotSprite {
     width: auto;
-    max-width: 160px;
-    height: 180px;
+    max-width: clamp(110px, 14vw, 160px);
+    height: clamp(115px, 13vw, 180px);
     cursor: pointer;
     pointer-events: auto;
     transform: translateY(4px);
-    transition: transform 0.2s;
+    transition: transform 0.2s, width 0.3s, height 0.3s, max-width 0.3s;
     filter: drop-shadow(0 0 8px rgba(224,48,48,0.3));
     image-rendering: auto;
+  }
+  #mascotContainer[data-size="medium"] #mascotSprite {
+    max-width: clamp(155px, 20vw, 240px);
+    height: clamp(170px, 19vw, 270px);
+  }
+  #mascotContainer[data-size="big"] #mascotSprite {
+    max-width: clamp(200px, 27vw, 320px);
+    height: clamp(225px, 26vw, 360px);
   }
   #mascotSprite:hover { transform: translateY(0px); }
   #mascotSprite:active { transform: translateY(2px); }
@@ -2772,28 +2780,34 @@
     color: var(--accent, #e03030);
     margin-bottom: 2px;
     opacity: 0.7;
-    display: flex;
+  }
+  #mascotSpriteWrap {
+    position: relative;
+    display: inline-flex;
     align-items: center;
-    gap: 5px;
   }
   #mascotAskBtn {
-    background: transparent;
-    border: 1px solid rgba(224,48,48,0.75);
+    position: absolute;
+    left: -24px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(17,17,20,0.85);
+    border: 1px solid rgba(224,48,48,0.8);
     border-radius: 50%;
     color: var(--accent, #e03030);
     font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    width: 18px;
-    height: 18px;
+    font-size: 12px;
+    width: 20px;
+    height: 20px;
     line-height: 1;
     cursor: pointer;
     padding: 0;
     pointer-events: auto;
     opacity: 0.9;
-    transition: opacity 0.15s, border-color 0.15s;
-    flex-shrink: 0;
+    transition: opacity 0.15s, border-color 0.15s, background 0.15s;
+    z-index: 2;
   }
-  #mascotAskBtn:hover { opacity: 1; border-color: var(--accent, #e03030); }
+  #mascotAskBtn:hover { opacity: 1; border-color: var(--accent, #e03030); background: rgba(224,48,48,0.15); }
 
   /* ── MASCOT QUESTIONNAIRE ── */
   #mascotQuestionnaire {
@@ -3413,8 +3427,6 @@
   /* ── Mascot scales with viewport width ─────────────────────── */
   #mascotSprite {
     width:  auto;
-    max-width: clamp(110px, 14vw, 160px);
-    height: clamp(115px, 13vw, 180px);
     -webkit-user-drag: none;
     user-select: none;
   }
@@ -4052,6 +4064,14 @@
           <option value="nagito">Nagito Komaeda</option>
           <option value="kyoko">Kyoko Kirigiri</option>
         </select>
+      </div>
+      <div class="settings-row">
+        <div class="settings-label">Mascot Size</div>
+        <div style="display:flex;gap:6px;">
+          <button id="mascotSizeSmall"  class="tag-btn active" onclick="mascotSetSize('small')"  style="font-size:10px;letter-spacing:1px;">SMALL</button>
+          <button id="mascotSizeMedium" class="tag-btn"        onclick="mascotSetSize('medium')" style="font-size:10px;letter-spacing:1px;">MEDIUM</button>
+          <button id="mascotSizeBig"    class="tag-btn"        onclick="mascotSetSize('big')"    style="font-size:10px;letter-spacing:1px;">BIG</button>
+        </div>
       </div>
 
     </div>
@@ -8541,6 +8561,17 @@
     localStorage.setItem('carnage_mascot_visible', visible ? '1' : '0');
   }
 
+  function mascotSetSize(size) {
+    const container = document.getElementById('mascotContainer');
+    if (!container) return;
+    container.dataset.size = size;
+    ['small', 'medium', 'big'].forEach(s => {
+      const btn = document.getElementById('mascotSize' + s.charAt(0).toUpperCase() + s.slice(1));
+      if (btn) btn.classList.toggle('active', s === size);
+    });
+    localStorage.setItem('carnage_mascot_size', size);
+  }
+
   // Init on load — deferred so mascot DOM elements exist
   function initMascot() {
     // Restore saved mascot choice — always apply, even for kaede
@@ -8559,6 +8590,9 @@
     // Sync settings toggle
     const tog = document.getElementById('mascotVisibleToggle');
     if (tog) tog.checked = visible;
+    // Restore saved size
+    const savedSize = localStorage.getItem('carnage_mascot_size') || 'small';
+    mascotSetSize(savedSize);
     // Start idle bounce after a short delay
     setTimeout(() => document.getElementById('mascotSprite').classList.add('idle'), 800);
     // Start periodic chatter
@@ -9258,8 +9292,11 @@
     <button class="mq-close" onclick="mascotQuestionnaireClose()">✕ CLOSE</button>
   </div>
   <div id="mascotBubble"></div>
-  <div id="mascotNameTag">KAEDE AKAMATSU<button id="mascotAskBtn" onclick="mascotQuestionnaireOpen()" title="Ask a question">?</button></div>
-  <img id="mascotSprite" src="assets/kaede_neutral.png" alt="Mascot" draggable="false" onclick="mascotClick()" title="Click me!" />
+  <div id="mascotNameTag">KAEDE AKAMATSU</div>
+  <div id="mascotSpriteWrap">
+    <button id="mascotAskBtn" onclick="mascotQuestionnaireOpen()" title="Ask a question">?</button>
+    <img id="mascotSprite" src="assets/kaede_neutral.png" alt="Mascot" draggable="false" onclick="mascotClick()" title="Click me!" />
+  </div>
 </div>
 
 <div id="jumpscareOverlay">
