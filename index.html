@@ -8869,6 +8869,9 @@
     // Sync mascot selector
     const sel = document.getElementById('mascotSelector');
     if (sel) sel.value = _mascotActive;
+    // Sync settings label
+    const mascotLabel = document.getElementById('mascotName');
+    if (mascotLabel) mascotLabel.textContent = 'currently: ' + mascot.name.split(' ')[0].charAt(0) + mascot.name.split(' ')[0].slice(1).toLowerCase();
     const visible = localStorage.getItem('carnage_mascot_visible') !== '0';
     mascotSetVisible(visible);
     // Sync settings toggle
@@ -9116,8 +9119,8 @@
     "...This song.",
     "I haven't heard it in a while. Or maybe I stopped letting myself remember what it sounded like.",
     "It reminds me of someone. Her name was Chiaki Nanami. Ultimate Gamer. She was in my class at Hope's Peak — and she was the heart of it. The kind of person who made everyone around her want to be better just by existing.",
-    "Junko planned all of it. Every moment. She needed us to love Chiaki — the real Chiaki, not the simulation, not the AI — and then she took her away. Executed her. In front of us. That was the trigger. She built our bonds specifically so that watching her die would shatter us beyond repair. And it did. That's what drove the whole class to despair. Not chance, not weakness. Junko's design.",
-    "I used to think I understood what hope was. But she understood it better than I ever did. She played games with us. She smiled. She cared — and Junko knew that. She weaponised everything good about Chiaki and turned it into the instrument of our ruin.",
+    "Junko didn't manufacture what we felt about her. She didn't have to. The real Chiaki — not the simulation, not the AI — she earned every bit of it just by being herself. Junko simply waited. Watched us grow close to her. And then, at exactly the right moment, she executed her in front of us. Crushed the hope we'd placed in her all at once. That's what broke the class. Not weakness. Timing. Junko's plan was never to build anything — only to destroy what already existed.",
+    "I used to think I understood what hope was. But she understood it better than I ever did. She played games with us. She smiled. She cared. And Junko turned all of that into a weapon — not by creating it, but by knowing exactly when to take it away.",
     "...Ahaha. I'm sorry. You didn't ask for this. The song just opened something. Just — don't take the people around you for granted. Even here. Especially here.",
   ];
 
