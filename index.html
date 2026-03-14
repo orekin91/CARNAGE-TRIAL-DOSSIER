@@ -8108,6 +8108,15 @@
       lines_verdict_player_accused_wrong: [
         "Wrong. And honestly? I'm so relieved. I never wanted to believe it was you. You've been here with us, working toward the truth this whole time. Let's find the real answer together, okay? I know we can.",
       ],
+      lines_verdict_player_accused_correct: [
+        "...It was you. I didn't want it to be true. I kept hoping we'd find another answer but — it was you. I don't know how to feel right now. I'm just... I'm really sad.",
+      ],
+      lines_verdict_mascot_accused_correct: [
+        "...I was the culprit. You were right. I keep trying to find something to say and there's nothing. I'm so sorry. I'm so, so sorry.",
+      ],
+      lines_verdict_mascot_accused_wrong: [
+        "Wrong — and I'm not going to pretend I'm not relieved. Deeply, deeply relieved. But we still don't have the answer, so... let's keep going. Together. Please.",
+      ],
       lines_wellbeing_repeat: [
         "You've asked me that a few times now... I'm still okay! Promise! Though I'm starting to wonder if YOU'RE the one who needs checking in on.",
         "Again? I appreciate that you care, I really do — but I'm fine! Genuinely. You don't need to keep asking.",
@@ -8264,6 +8273,15 @@
       lines_verdict_player_accused_wrong: [
         "Wrong. Ahaha... maybe that's okay. Maybe this is just my luck doing what it always does — pulling despair close before hope breaks through. You're not the culprit. I didn't want to believe you were. Let's find the real answer. We owe everyone that much.",
       ],
+      lines_verdict_player_accused_correct: [
+        "...Correct. It was you. The investigator. The one who built all of this. Ahahaha... I can feel the despair of it trying to swallow me whole. My luck always drags something cruel into the light eventually. I'm sorry. I don't know what else to say.",
+      ],
+      lines_verdict_mascot_accused_correct: [
+        "...It was me. You were right. Ahahahaha... of course. Of course my luck would make me the very thing I've been dreading. The instrument of despair. I'm so sorry. I'm so, so sorry. I hope — I genuinely hope — that something good can still come from this.",
+      ],
+      lines_verdict_mascot_accused_wrong: [
+        "Wrong. And I — ahaha. I don't have words for the relief. I know I shouldn't feel relief, there's still a culprit out there, but... knowing it wasn't me. That I didn't do this. My luck gave me something for once. Let's find the real answer. I'll do anything to help.",
+      ],
       lines_wellbeing_repeat: [
         "You keep asking about me... ahaha. Someone like me really isn't worth this much attention. I'm fine — better than fine. The fact that you're still here is more than enough.",
         "Again? I appreciate it. But I'm the Ultimate Lucky Student — whatever happens to me was always going to happen. Please, focus on the case.",
@@ -8414,6 +8432,15 @@
       lines_verdict_player_accused_wrong: [
         "Wrong. Good. I didn't like where the evidence was pointing, and now I have grounds to doubt it. Let's re-examine everything. Properly, this time.",
       ],
+      lines_verdict_player_accused_correct: [
+        "...Correct. You were the culprit. I considered that possibility and chose not to dismiss it. I won't pretend this is easy to say. The truth is the truth regardless of how it feels.",
+      ],
+      lines_verdict_mascot_accused_correct: [
+        "...Correct. I was the culprit. I had considered the possibility that the evidence might point here. I didn't dismiss it. I won't ask for leniency — the truth doesn't negotiate. You found it. That's what matters.",
+      ],
+      lines_verdict_mascot_accused_wrong: [
+        "Wrong. The evidence led here and it was insufficient. I'm not relieved — I'm recalibrating. A false conclusion means we missed something. Let's find what it was.",
+      ],
       lines_wellbeing_repeat: [
         "You've asked me that before. The answer hasn't changed.",
         "Still functional. This line of questioning is not advancing the investigation.",
@@ -8503,6 +8530,22 @@
       ...(typeof victims  !== 'undefined' ? victims  : []),
     ];
     return _invNameInList(all.filter(p => p.accused));
+  }
+
+  // True if the currently accused participant matches the active mascot's name
+  function _accusedIsMascot() {
+    const mascot = MASCOTS[_mascotActive];
+    if (!mascot) return false;
+    const parts = mascot.name.toLowerCase().split(' ').filter(w => w.length > 2);
+    const all = [
+      ...(typeof suspects !== 'undefined' ? suspects : []),
+      ...(typeof victims  !== 'undefined' ? victims  : []),
+    ];
+    return all.some(p => {
+      if (!p.accused) return false;
+      const pn = (p.displayName || p.nickname || p.name || '').toLowerCase();
+      return parts.some(part => pn.includes(part));
+    });
   }
 
   // True if the investigator/player's name appears in the victims list
@@ -9609,17 +9652,28 @@
 
     let pool;
     if (correct) {
-      // Special line if the victim is the player
       if (_playerIsVictim() && mascot.lines_verdict_player_victim_correct) {
+        // Player was the victim
         pool = mascot.lines_verdict_player_victim_correct;
         sprite.src = mascot.sprites.despair; // bittersweet — no cheer
+      } else if (_accusedIsPlayer() && mascot.lines_verdict_player_accused_correct) {
+        // Player was correctly identified as the culprit
+        pool = mascot.lines_verdict_player_accused_correct;
+        sprite.src = mascot.sprites.despair;
+      } else if (_accusedIsMascot() && mascot.lines_verdict_mascot_accused_correct) {
+        // Mascot was correctly identified as the culprit
+        pool = mascot.lines_verdict_mascot_accused_correct;
+        sprite.src = mascot.sprites.despair;
       } else {
         pool = mascot.lines_verdict_correct;
       }
     } else {
-      // Special line if the wrongly-accused was the player
       if (_accusedIsPlayer() && mascot.lines_verdict_player_accused_wrong) {
+        // Player was wrongly accused
         pool = mascot.lines_verdict_player_accused_wrong;
+      } else if (_accusedIsMascot() && mascot.lines_verdict_mascot_accused_wrong) {
+        // Mascot was wrongly accused
+        pool = mascot.lines_verdict_mascot_accused_wrong;
       } else {
         pool = mascot.lines_verdict_wrong;
       }
