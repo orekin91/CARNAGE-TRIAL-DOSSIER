@@ -2809,6 +2809,14 @@
   }
   #mascotAskBtn:hover { opacity: 1; border-color: var(--accent, #e03030); background: rgba(224,48,48,0.15); }
 
+  /* ── MASCOT BODY AREA (relative anchor for questionnaire) ── */
+  #mascotBodyArea {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
   /* ── MASCOT QUESTIONNAIRE ── */
   #mascotQuestionnaire {
     display: none;
@@ -2819,13 +2827,21 @@
     border-radius: 10px;
     padding: 10px 12px;
     width: 200px;
-    margin-bottom: 6px;
     pointer-events: auto;
     opacity: 0;
     transform: translateY(8px);
     transition: opacity 0.2s, transform 0.2s;
+    /* Anchor absolutely above the body area — never affects flex layout */
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%) translateY(8px);
+    z-index: 10;
   }
-  #mascotQuestionnaire.visible { opacity: 1; transform: translateY(0); }
+  #mascotQuestionnaire.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
   .mq-header {
     font-family: 'Bebas Neue', cursive;
     font-size: 11px;
@@ -9284,18 +9300,20 @@
 </div>
 
 <div id="mascotContainer">
-  <div id="mascotQuestionnaire">
-    <div class="mq-header">WHAT WOULD YOU LIKE TO ASK?</div>
-    <button class="mq-btn" onclick="mascotAnswer('wellbeing')">How are you doing?</button>
-    <button class="mq-btn" onclick="mascotAnswer('talent')">Tell me about your talent.</button>
-    <button class="mq-btn" id="mqCulpritBtn" onclick="mascotAnswer('culprit')">Who do you think is the culprit?</button>
-    <button class="mq-close" onclick="mascotQuestionnaireClose()">✕ CLOSE</button>
-  </div>
   <div id="mascotBubble"></div>
-  <div id="mascotNameTag">KAEDE AKAMATSU</div>
-  <div id="mascotSpriteWrap">
-    <button id="mascotAskBtn" onclick="mascotQuestionnaireOpen()" title="Ask a question">?</button>
-    <img id="mascotSprite" src="assets/kaede_neutral.png" alt="Mascot" draggable="false" onclick="mascotClick()" title="Click me!" />
+  <div id="mascotBodyArea">
+    <div id="mascotQuestionnaire">
+      <div class="mq-header">WHAT WOULD YOU LIKE TO ASK?</div>
+      <button class="mq-btn" onclick="mascotAnswer('wellbeing')">How are you doing?</button>
+      <button class="mq-btn" onclick="mascotAnswer('talent')">Tell me about your talent.</button>
+      <button class="mq-btn" id="mqCulpritBtn" onclick="mascotAnswer('culprit')">Who do you think is the culprit?</button>
+      <button class="mq-close" onclick="mascotQuestionnaireClose()">✕ CLOSE</button>
+    </div>
+    <div id="mascotNameTag">KAEDE AKAMATSU</div>
+    <div id="mascotSpriteWrap">
+      <button id="mascotAskBtn" onclick="mascotQuestionnaireOpen()" title="Ask a question">?</button>
+      <img id="mascotSprite" src="assets/kaede_neutral.png" alt="Mascot" draggable="false" onclick="mascotClick()" title="Click me!" />
+    </div>
   </div>
 </div>
 
