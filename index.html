@@ -8163,6 +8163,7 @@
         cheer:     'assets/Nagito_Cheer.png',
         sure:      'assets/Nagito_Sure.png',
         despair:   'assets/Nagito_Despair.png',
+        distress:  'assets/Nagito_distress.png',
       },
       introLines: [
         "Ah... so we're doing this. I'm Nagito Komaeda — the Ultimate Lucky Student. Though luck like mine is more of a curse, really.",
@@ -9115,8 +9116,8 @@
     "...This song.",
     "I haven't heard it in a while. Or maybe I stopped letting myself remember what it sounded like.",
     "It reminds me of someone. Her name was Chiaki Nanami. Ultimate Gamer. She was in my class at Hope's Peak — and she was the heart of it. The kind of person who made everyone around her want to be better just by existing.",
-    "She wasn't designed to survive, you know. None of us were. Hope's Peak manufactured the whole thing — the hope, the bonds, the grief — specifically so that when it was torn apart, what was left could be shaped into despair. It worked. On almost everyone.",
-    "I used to think I understood what hope was. But she understood it better than I ever did. She played games with us. She smiled. She cared, not because she was programmed to — though she was — but because she chose to. Over and over.",
+    "Junko planned all of it. Every moment. She needed us to love Chiaki — the real Chiaki, not the simulation, not the AI — and then she took her away. Executed her. In front of us. That was the trigger. She built our bonds specifically so that watching her die would shatter us beyond repair. And it did. That's what drove the whole class to despair. Not chance, not weakness. Junko's design.",
+    "I used to think I understood what hope was. But she understood it better than I ever did. She played games with us. She smiled. She cared — and Junko knew that. She weaponised everything good about Chiaki and turned it into the instrument of our ruin.",
     "...Ahaha. I'm sorry. You didn't ask for this. The song just opened something. Just — don't take the people around you for granted. Even here. Especially here.",
   ];
 
@@ -9154,10 +9155,27 @@
     }, 600);
   }
 
+  const _NB_SPRITE_DESPAIR  = 'assets/Nagito_Despair.png';
+  const _NB_SPRITE_DISTRESS = 'assets/Nagito_distress.png';
+  // Beat index at which the sprite switches from despair → distress
+  const _NB_DISTRESS_BEAT = 3;
+
+  function _nbSetSprite(src) {
+    const bg = document.getElementById('nagitoBinariaBg');
+    if (bg && bg.src !== src) {
+      bg.style.transition = 'opacity 0.4s';
+      bg.style.opacity = '0';
+      setTimeout(() => { bg.src = src; bg.style.opacity = ''; }, 400);
+    }
+  }
+
   function nagitoBinariaOpen() {
     if (_mascotActive !== 'nagito') return;
     const overlay = document.getElementById('nagitoBinariaOverlay');
     _nbBeat = 0;
+    // Reset sprite to despair at the start
+    const bg = document.getElementById('nagitoBinariaBg');
+    if (bg) { bg.src = _NB_SPRITE_DESPAIR; bg.style.opacity = ''; }
     document.getElementById('nagitoBinariaText').textContent = '';
     const cont = document.getElementById('nagitoBinariaContinue');
     cont.style.opacity = '0';
@@ -9193,6 +9211,8 @@
     if (_nbBeat < NAGITO_BINARIA_BEATS.length) {
       cont.style.opacity = '0';
       if (_nbBeat === NAGITO_BINARIA_BEATS.length - 1) cont.textContent = '▼ CLICK TO CLOSE';
+      // Switch to distress sprite when he starts talking about Chiaki's death
+      if (_nbBeat === _NB_DISTRESS_BEAT) _nbSetSprite(_NB_SPRITE_DISTRESS);
       _nbCurrentLine = NAGITO_BINARIA_BEATS[_nbBeat];
       _nbType(_nbCurrentLine, () => { cont.style.opacity = '1'; });
     } else {
@@ -9664,7 +9684,7 @@
 
 <!-- NAGITO BINARIA EASTER EGG OVERLAY -->
 <div id="nagitoBinariaOverlay">
-  <img id="nagitoBinariaBg" src="assets/NagitoFDR.png" alt="" draggable="false" />
+  <img id="nagitoBinariaBg" src="assets/Nagito_Despair.png" alt="" draggable="false" />
   <div id="nagitoBinariaBox">
     <div id="nagitoBinariaName">NAGITO KOMAEDA<span id="nagitoBinariaTalent">ULTIMATE LUCKY STUDENT</span></div>
     <div id="nagitoBinariaText"></div>
