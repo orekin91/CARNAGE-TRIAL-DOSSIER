@@ -3793,6 +3793,7 @@
         <select id="mascotSelector" onchange="mascotSetActive(this.value)" style="background:#16161c;color:var(--text);border:1px solid var(--border);border-radius:3px;padding:4px 8px;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px;cursor:pointer;">
           <option value="kaede">Kaede Akamatsu</option>
           <option value="nagito">Nagito Komaeda</option>
+          <option value="kyoko">Kyoko Kirigiri</option>
         </select>
       </div>
 
@@ -7815,6 +7816,115 @@
         "Even the most talented people need breaks. You're no exception. Take care of yourself.",
         "It occurs to me that you haven't looked away from this in a while. For what it's worth... I noticed.",
         "The path to hope is long. Pace yourself. There's no glory in collapsing before the finish.",
+      ],
+    },
+
+    kyoko: {
+      name:   'KYOKO KIRIGIRI',
+      talent: 'ULTIMATE DETECTIVE',
+      sprites: {
+        intro:     'assets/Kyoko_neutral.png',
+        neutral:   'assets/Kyoko_neutral.png',
+        resting:   'assets/Kyoko_neutral.png',
+        concerned: 'assets/Kyoko_neutral.png',
+        talking:   'assets/Kyoko_talking.png',
+        cheer:     'assets/Kyoko_Cheer.png',
+        sure:      'assets/Kyoko_Sure.png',
+        despair:   'assets/Kyoko_Despair.png',
+      },
+      introLines: [
+        "Kyoko Kirigiri. Ultimate Detective. I'll be observing from here — try not to let my presence distract you.",
+        "I don't offer encouragement. I offer precision. Use this dossier carefully and we'll find the truth.",
+        "One more thing: don't make assumptions you can't support with evidence. That's how investigations fall apart.",
+      ],
+      lines: [
+        "Every detail matters. Don't dismiss anything as coincidence until you can prove it is.",
+        "I've learned not to trust first impressions. Look deeper.",
+        "The truth doesn't hide. People hide it. Focus on the people.",
+        "A good detective reads what's missing as much as what's there.",
+        "Emotion clouds judgment. Observe first. React later.",
+        "Someone in this investigation is choosing their words very carefully. Worth noting.",
+        "Evidence doesn't lie. Interpretations do. Stay close to the facts.",
+        "I find silence more revealing than most people find conversation.",
+        "The most dangerous assumption is the one you don't realise you're making.",
+        "Keep your notes thorough. Memory is unreliable under stress.",
+        "Patience. Rushing an investigation is how innocent people get hurt.",
+        "There's always a thread you haven't pulled yet. Find it.",
+      ],
+      lines_sus: [
+        "Someone here is being deliberately evasive. I've noticed. You should too.",
+        "Watch their behaviour, not just their words. Actions are harder to rehearse.",
+        "There's a discrepancy somewhere. I can feel it. We need to find it.",
+        "A guilty person doesn't always look nervous. Sometimes they look perfectly calm.",
+        "Cross-reference everything. Liars are consistent until they're not.",
+        "I've dealt with people like this before. They slip up. Keep pressure on the evidence.",
+        "Something isn't adding up. That's not a feeling — that's a logical conclusion.",
+        "The most composed person in the room often has the most to hide.",
+      ],
+      lines_victim: [
+        "They deserved answers while they were alive. We owe them the truth now that they're not.",
+        "Set aside grief for now. Channel it into finding who did this.",
+        "A victim's history matters. Who they were tells us something about who wanted them gone.",
+        "Don't let sympathy blur your objectivity. The best thing you can do for them is think clearly.",
+        "Every victim leaves traces. We just have to know what we're looking at.",
+        "I've investigated many deaths. None of them get easier. But the work stays the same.",
+        "Their story doesn't end here. We finish it.",
+        "Focus. Whoever did this is counting on grief slowing you down.",
+      ],
+      lines_culprit: [
+        "So it comes to this. I hope the evidence is solid. A mistake here is unforgivable.",
+        "I try not to judge motives until I understand them. Understanding isn't excusing.",
+        "Even a culprit has a story. That story led here. What was it?",
+        "Whatever they believed they were doing — the outcome speaks for itself.",
+        "I've seen people reach a point where this felt like the only option. It never is.",
+        "The investigation isn't over just because we have a name. Make sure the evidence holds.",
+        "They made their choice. Now we make ours — and ours has to be right.",
+        "Don't let relief at having an answer cloud your judgment. Verify everything.",
+      ],
+      lines_cleared: {
+        one: [
+          "One suspect cleared. Either we've been thorough or we've been looking in entirely the wrong direction.",
+          "Cleared. That narrows things significantly — or it should. Don't lose that thread.",
+          "One name. Cleared. The answer is either very close or very well hidden. Stay focused.",
+        ],
+        few: [
+          "All cleared. That's either very good news or a sign that the real answer isn't on this list yet.",
+          "Every suspect cleared. Go back to the evidence. Something was missed.",
+          "A small pool and no answers. The truth is still in the details somewhere.",
+          "Cleared across the board. I'd feel better about that if the case were actually closed.",
+        ],
+        many: [
+          "Every person on this list has been cleared. With a group this size, that's unlikely to be correct. Start over.",
+          "All of them? I'd want to see the evidence behind each of those before I believed it.",
+          "That many suspects cleared means either the investigation has been thorough or a mistake was made. Which is it?",
+          "Something is wrong. This many people don't all clear cleanly. Look again.",
+        ],
+      },
+      lines_sure: [
+        "Before you commit — is the evidence airtight? Gut feelings aren't evidence. Facts are.",
+        "You're ready to name a culprit. I need you to be certain, not just confident. There's a difference.",
+        "A wrong accusation doesn't just fail the investigation — it fails every person involved. Are you sure?",
+        "I've seen investigations fall apart at this exact moment. Slow down. Verify. Then decide.",
+      ],
+      lines_verdict_correct: [
+        "Correct. The evidence held. That's what a proper investigation looks like — well done.",
+        "You got it right. I won't pretend that's always guaranteed. Good work.",
+      ],
+      lines_verdict_wrong: [
+        "...That's not right. We accused the wrong person. Go back to the evidence — immediately.",
+        "Wrong. I should have pushed harder to verify. We fix this now.",
+      ],
+      lines_cheer: [
+        "You've been at this for a while. A rested investigator is a better investigator. Step away briefly.",
+        "Tunnel vision is a real risk in extended investigations. Take a break and reset your perspective.",
+        "Hydration and rest affect cognitive function. I'm not being sentimental — I'm being practical. Take a break.",
+        "Even I have to step away sometimes. It helps. Trust the process.",
+        "Note: the details you miss when tired are exactly the ones that matter. Rest first.",
+        "If you've been staring at the same information for an hour, you've stopped seeing it clearly. Pause.",
+        "A short break now is more efficient than a long mistake later.",
+        "I've caught more leads after stepping away than I ever did by pushing through. Something to consider.",
+        "Don't confuse persistence with effectiveness. Sometimes they're opposites.",
+        "Take five minutes. The dossier will still be here. You need to be sharp when you come back.",
       ],
     },
   };
