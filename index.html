@@ -2747,10 +2747,10 @@
     z-index: 1;
   }
   #mascotSprite {
-    width: 110px;
+    width: auto;
+    max-width: 160px;
     height: 180px;
     object-fit: contain;
-    object-position: bottom;
     cursor: pointer;
     pointer-events: auto;
     transform: translateY(4px);
@@ -3260,7 +3260,8 @@
 
   /* ── Mascot scales with viewport width ─────────────────────── */
   #mascotSprite {
-    width:  clamp(70px,  8vw, 110px);
+    width:  auto;
+    max-width: clamp(110px, 14vw, 160px);
     height: clamp(115px, 13vw, 180px);
     -webkit-user-drag: none;
     user-select: none;
