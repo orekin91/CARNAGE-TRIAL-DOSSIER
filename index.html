@@ -3392,8 +3392,9 @@
   }
   #kaedeIntroSkip:hover { color: var(--fg, #c8b99a); border-color: var(--fg, #c8b99a); }
 
-  /* ── VERDICT MASCOT OVERLAY ──────────────────────────────────── */
-  #verdictMascotOverlay {
+  /* ── VERDICT MASCOT OVERLAY / KAEDE MUSIC OVERLAY ───────────── */
+  #verdictMascotOverlay,
+  #kaedeMusicOverlay {
     position: fixed;
     inset: 0;
     z-index: 99000;
@@ -3404,11 +3405,12 @@
     opacity: 0;
     transition: opacity 0.5s;
   }
-  #verdictMascotOverlay.visible { opacity: 1; display: flex; }
-  #verdictMascotOverlay.clickable { cursor: pointer; }
-  #verdictMascotOverlay.exiting { opacity: 0; pointer-events: none; }
+  #verdictMascotOverlay.visible, #kaedeMusicOverlay.visible { opacity: 1; display: flex; }
+  #verdictMascotOverlay.clickable, #kaedeMusicOverlay.clickable { cursor: pointer; }
+  #verdictMascotOverlay.exiting, #kaedeMusicOverlay.exiting { opacity: 0; pointer-events: none; }
 
-  #verdictMascotSprite {
+  #verdictMascotSprite,
+  #kaedeMusicSprite {
     position: absolute;
     bottom: 120px;
     right: clamp(40px, 8vw, 160px);
@@ -3423,12 +3425,14 @@
     opacity: 0;
     transition: transform 0.5s cubic-bezier(0.22,1,0.36,1), opacity 0.5s;
   }
-  #verdictMascotOverlay.visible #verdictMascotSprite {
+  #verdictMascotOverlay.visible #verdictMascotSprite,
+  #kaedeMusicOverlay.visible #kaedeMusicSprite {
     transform: translateY(0);
     opacity: 1;
   }
 
-  #verdictMascotBox {
+  #verdictMascotBox,
+  #kaedeMusicBox {
     position: absolute;
     bottom: 0;
     left: 0; right: 0;
@@ -3438,7 +3442,8 @@
     min-height: 130px;
     box-sizing: border-box;
   }
-  #verdictMascotName {
+  #verdictMascotName,
+  #kaedeMusicName {
     font-family: 'Bebas Neue', cursive;
     font-size: clamp(16px, 2vw, 22px);
     letter-spacing: 3px;
@@ -3448,13 +3453,15 @@
     flex-direction: column;
     gap: 2px;
   }
-  #verdictMascotTalent {
+  #verdictMascotTalent,
+  #kaedeMusicTalent {
     font-size: clamp(9px, 1vw, 12px);
     letter-spacing: 4px;
     color: var(--muted, #555);
     opacity: 0.85;
   }
-  #verdictMascotText {
+  #verdictMascotText,
+  #kaedeMusicText {
     font-family: 'Special Elite', serif;
     font-size: clamp(13px, 1.3vw, 17px);
     color: var(--fg, #c8b99a);
@@ -3462,7 +3469,8 @@
     min-height: 2.4em;
     padding-right: clamp(80px, 20vw, 260px);
   }
-  #verdictMascotContinue {
+  #verdictMascotContinue,
+  #kaedeMusicContinue {
     position: absolute;
     bottom: clamp(14px, 2vh, 22px);
     right: clamp(20px, 4vw, 60px);
@@ -3472,12 +3480,14 @@
     color: var(--muted, #555);
     animation: introBlink 1.1s ease-in-out infinite;
   }
-  #verdictMascotConfirmBtns {
+  #verdictMascotConfirmBtns,
+  #kaedeMusicConfirmBtns {
     display: none;
     gap: 16px;
     margin-top: 18px;
   }
-  #verdictMascotConfirmBtns.visible { display: flex; }
+  #verdictMascotConfirmBtns.visible,
+  #kaedeMusicConfirmBtns.visible { display: flex; }
   .verdict-mascot-btn {
     font-family: 'Share Tech Mono', monospace;
     font-size: clamp(13px, 1.3vw, 16px);
@@ -7763,6 +7773,16 @@
       requestAnimationFrame(() => { container.style.transform = `translateX(-${drift}px)`; });
     }
 
+    // Kaede music easter egg — count neutral-only clicks
+    const isNeutral = (_mascotActive === 'kaede' && pool === MASCOTS['kaede'].lines);
+    if (isNeutral && !_kaedeMusicOffered) {
+      _kaedeNeutralClicks++;
+      if (_kaedeNeutralClicks >= 4) {
+        _kaedeMusicOffered = true;
+        setTimeout(kaedeMusicOpen, 4800); // trigger after bubble clears
+      }
+    }
+
     clearTimeout(_mascotBubbleTimer);
     _mascotBubbleTimer = setTimeout(() => {
       bubble.classList.remove('visible');
@@ -7864,6 +7884,172 @@
     // Start periodic chatter
     _scheduleChatter();
   });
+
+  // ── KAEDE MUSIC EASTER EGG ───────────────────────────────────
+  let _kaedeNeutralClicks = 0;
+  let _kaedeMusicOffered  = false;
+  let _kaedeMidwayTimer   = null;
+  let _kmPhase            = 'ask';
+  let _kmCurrentLine      = '';
+  let _kmTypeTimer        = null;
+  let _kmTyping           = false;
+
+  const CLAIRE_DE_LUNE  = { videoId: 'KBKYw1P2LxU', title: 'Clair de Lune — Debussy', duration: null };
+  const CLAIRE_MIDWAY_MS = 152000; // ~2:32 into the 5:05 piece
+
+  function _kmType(text, done) {
+    const el = document.getElementById('kaedeMusicText');
+    el.textContent = '';
+    _kmTyping = true;
+    let i = 0;
+    clearInterval(_kmTypeTimer);
+    _kmTypeTimer = setInterval(() => {
+      el.textContent += text[i++];
+      if (i >= text.length) {
+        clearInterval(_kmTypeTimer);
+        _kmTyping = false;
+        if (done) done();
+      }
+    }, 22);
+  }
+
+  function _kmClose(after) {
+    const overlay = document.getElementById('kaedeMusicOverlay');
+    overlay.removeEventListener('click', _kmAdvance);
+    overlay.removeEventListener('click', _kmMidwayAdvance);
+    overlay.classList.add('exiting');
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      overlay.classList.remove('visible', 'exiting', 'clickable');
+      document.getElementById('mascotContainer').style.visibility = '';
+      if (after) after();
+    }, 500);
+  }
+
+  function kaedeMusicOpen() {
+    const mascot  = MASCOTS['kaede'];
+    const overlay = document.getElementById('kaedeMusicOverlay');
+    const sprite  = document.getElementById('kaedeMusicSprite');
+
+    _kmPhase = 'ask';
+    sprite.src = mascot.sprites.talking;
+    document.getElementById('kaedeMusicText').textContent = '';
+    document.getElementById('kaedeMusicConfirmBtns').classList.remove('visible');
+    document.getElementById('kaedeMusicContinue').style.opacity = '0';
+    document.getElementById('kaedeMusicContinue').textContent = '▼ CLICK TO CONTINUE';
+    document.getElementById('kaedeMusicContinue').style.display = '';
+    document.getElementById('mascotContainer').style.visibility = 'hidden';
+
+    overlay.style.display = 'flex';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      overlay.classList.add('visible', 'clickable');
+      _kmCurrentLine = "Hey, um... I've been thinking. You've all been working so hard and it seems really stressful. Would you like me to play something soothing? I know a piece that always helps me clear my head.";
+      _kmType(_kmCurrentLine, () => {
+        document.getElementById('kaedeMusicContinue').style.opacity = '';
+      });
+    }));
+    overlay.addEventListener('click', _kmAdvance);
+  }
+
+  function _kmAdvance() {
+    if (_kmPhase !== 'ask') return;
+    if (_kmTyping) {
+      clearInterval(_kmTypeTimer);
+      _kmTyping = false;
+      document.getElementById('kaedeMusicText').textContent = _kmCurrentLine;
+      document.getElementById('kaedeMusicContinue').style.opacity = '';
+      return;
+    }
+    _kmPhase = 'confirm';
+    const overlay = document.getElementById('kaedeMusicOverlay');
+    overlay.classList.remove('clickable');
+    overlay.removeEventListener('click', _kmAdvance);
+    document.getElementById('kaedeMusicContinue').style.display = 'none';
+    document.getElementById('kaedeMusicConfirmBtns').classList.add('visible');
+    document.getElementById('kaedeMusicText').textContent = 'So... what do you say?';
+  }
+
+  function kaedeMusicYes(e) {
+    e.stopPropagation();
+    _kmPhase = 'result';
+    const sprite = document.getElementById('kaedeMusicSprite');
+    document.getElementById('kaedeMusicConfirmBtns').classList.remove('visible');
+    document.getElementById('kaedeMusicContinue').style.display = 'none';
+
+    if (typeof roomCode !== 'undefined' && roomCode) {
+      // In a room — can't force play
+      sprite.src = MASCOTS['kaede'].sprites.concerned;
+      _kmCurrentLine = "Oh... we're in a room right now! I don't want to change the music for everyone without asking them first. Maybe when you're listening on your own, okay?";
+      _kmType(_kmCurrentLine, () => setTimeout(_kmClose, 2500));
+    } else {
+      // Not in a room — let's go!
+      sprite.src = MASCOTS['kaede'].sprites.cheer;
+      _kmCurrentLine = "Really?! Okay!! I'll play Clair de Lune — it's by Debussy. It's one of my absolute favourites. Just take a breath and let the music do the rest!";
+      _kmType(_kmCurrentLine, () => {
+        setTimeout(() => _kmClose(_kaedeForcePlayClairedeLune), 2000);
+      });
+    }
+  }
+
+  function kaedeMusicNo(e) {
+    e.stopPropagation();
+    _kmPhase = 'result';
+    const sprite = document.getElementById('kaedeMusicSprite');
+    document.getElementById('kaedeMusicConfirmBtns').classList.remove('visible');
+    document.getElementById('kaedeMusicContinue').style.display = 'none';
+
+    sprite.src = MASCOTS['kaede'].sprites.concerned;
+    _kmCurrentLine = "Oh... okay. That's totally fine, I understand! The offer still stands if you change your mind though. I'll be right here!";
+    _kmType(_kmCurrentLine, () => setTimeout(_kmClose, 2500));
+  }
+
+  function _kaedeForcePlayClairedeLune() {
+    radioQueue.unshift({ ...CLAIRE_DE_LUNE });
+    radioSkip();
+    if (!radioOpen) {
+      radioOpen = true;
+      document.getElementById('radioPanel').classList.add('open');
+      document.getElementById('radioTabBtn').classList.add('open');
+    }
+    clearTimeout(_kaedeMidwayTimer);
+    _kaedeMidwayTimer = setTimeout(_kaedeMidwayPrompt, CLAIRE_MIDWAY_MS);
+  }
+
+  function _kaedeMidwayPrompt() {
+    const overlay = document.getElementById('kaedeMusicOverlay');
+    const sprite  = document.getElementById('kaedeMusicSprite');
+
+    _kmPhase = 'midway';
+    sprite.src = MASCOTS['kaede'].sprites.neutral;
+    document.getElementById('kaedeMusicText').textContent = '';
+    document.getElementById('kaedeMusicConfirmBtns').classList.remove('visible');
+    document.getElementById('kaedeMusicContinue').style.opacity = '0';
+    document.getElementById('kaedeMusicContinue').textContent = '▼ CLICK TO CLOSE';
+    document.getElementById('kaedeMusicContinue').style.display = '';
+    document.getElementById('mascotContainer').style.visibility = 'hidden';
+
+    overlay.style.display = 'flex';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      overlay.classList.add('visible', 'clickable');
+      _kmCurrentLine = "Hey... are you feeling a little calmer? I hope the music is helping. Clair de Lune always made everything feel a bit more manageable for me. Just breathe.";
+      _kmType(_kmCurrentLine, () => {
+        document.getElementById('kaedeMusicContinue').style.opacity = '';
+      });
+    }));
+    overlay.addEventListener('click', _kmMidwayAdvance);
+  }
+
+  function _kmMidwayAdvance() {
+    if (_kmPhase !== 'midway') return;
+    if (_kmTyping) {
+      clearInterval(_kmTypeTimer);
+      _kmTyping = false;
+      document.getElementById('kaedeMusicText').textContent = _kmCurrentLine;
+      document.getElementById('kaedeMusicContinue').style.opacity = '';
+      return;
+    }
+    _kmClose();
+  }
 
   // ── VERDICT MASCOT OVERLAY ───────────────────────────────────
   let _vmTypeTimer  = null;
@@ -8027,6 +8213,20 @@
       <button class="verdict-mascot-btn no"  onclick="verdictMascotNo(event)">✗ NEVER MIND</button>
     </div>
     <div id="verdictMascotContinue">▼ CLICK TO CONTINUE</div>
+  </div>
+</div>
+
+<!-- KAEDE MUSIC EASTER EGG OVERLAY -->
+<div id="kaedeMusicOverlay">
+  <img id="kaedeMusicSprite" src="" alt="Kaede Akamatsu" draggable="false" />
+  <div id="kaedeMusicBox">
+    <div id="kaedeMusicName">KAEDE AKAMATSU<span id="kaedeMusicTalent">ULTIMATE PIANIST</span></div>
+    <div id="kaedeMusicText"></div>
+    <div id="kaedeMusicConfirmBtns">
+      <button class="verdict-mascot-btn yes" onclick="kaedeMusicYes(event)">♪ YES PLEASE</button>
+      <button class="verdict-mascot-btn no"  onclick="kaedeMusicNo(event)">✗ NO THANKS</button>
+    </div>
+    <div id="kaedeMusicContinue">▼ CLICK TO CONTINUE</div>
   </div>
 </div>
 
