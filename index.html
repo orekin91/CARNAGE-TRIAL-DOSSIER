@@ -3167,6 +3167,107 @@
     visibility: hidden;
     pointer-events: none;
   }
+
+  /* ── RESPONSIVE SCALING ─────────────────────────────────────────
+     All sizing is driven by clamp() tokens injected here.
+     Override specificity is equal (same selectors, later in file).
+  ─────────────────────────────────────────────────────────────── */
+
+  :root {
+    /* Font-size scale */
+    --fs-tiny:    clamp(7px,  0.6vw,  9px);
+    --fs-xs:      clamp(9px,  0.75vw, 11px);
+    --fs-sm:      clamp(11px, 0.9vw,  13px);
+    --fs-md:      clamp(12px, 1.1vw,  15px);
+    --fs-lg:      clamp(14px, 1.4vw,  18px);
+    --fs-xl:      clamp(18px, 2vw,    28px);
+    --fs-heading: clamp(14px, 1.5vw,  20px);
+
+    /* Spacing scale */
+    --gap-xs: clamp(4px,  0.4vw, 6px);
+    --gap-sm: clamp(6px,  0.7vw, 10px);
+    --gap-md: clamp(10px, 1.2vw, 16px);
+    --gap-lg: clamp(14px, 1.8vw, 24px);
+
+    /* Side-panel widths */
+    --panel-radio-w:    min(300px, 85vw);
+    --panel-notes-w:    min(280px, 85vw);
+    --panel-settings-w: min(220px, 80vw);
+  }
+
+  /* ── Layout containers ─────────────────────────────────────── */
+  .trial-timer-bar {
+    max-width: min(1060px, 96vw);
+    padding: clamp(6px, 0.8vw, 10px) clamp(10px, 1.5vw, 20px);
+    gap: clamp(8px, 1.2vw, 18px);
+  }
+  .main-grid {
+    max-width: min(1100px, 96vw);
+    gap: clamp(10px, 1.5vw, 20px);
+    padding: 0 clamp(10px, 1.5vw, 20px) clamp(20px, 3vw, 40px);
+  }
+  .prev-trials-wrap { max-width: min(1200px, 96vw); }
+
+  /* ── Typography ────────────────────────────────────────────── */
+  .panel-title          { font-size: var(--fs-heading); }
+  .trial-timer-display  { font-size: var(--fs-xl); }
+  .trial-timer-label    { font-size: var(--fs-xs); }
+  .timer-btn            { font-size: var(--fs-tiny); }
+  .subtitle             { font-size: var(--fs-xs); }
+  .meta-label           { font-size: var(--fs-tiny); }
+  .meta-input           { font-size: var(--fs-md); }
+  .suspect-name         { font-size: var(--fs-md); }
+  .nickname-input       { font-size: var(--fs-xs); }
+  .tag-btn              { font-size: var(--fs-tiny); }
+  .suspect-num          { font-size: var(--fs-tiny); }
+  .crime-label          { font-size: var(--fs-tiny); }
+  .crime-input          { font-size: var(--fs-md); }
+  .suspect-notes-area   { font-size: var(--fs-sm); }
+  .notes-area           { font-size: var(--fs-md); }
+  .verdict-btn          { font-size: var(--fs-heading); }
+  .verdict-confirm-btn  { font-size: clamp(14px, 1.4vw, 18px); }
+  .action-btn           { font-size: var(--fs-xs); }
+  .photo-caption        { font-size: var(--fs-tiny); }
+  .panel-count          { font-size: var(--fs-xs); }
+
+  /* ── Side panels ───────────────────────────────────────────── */
+  .radio-panel.open         { width: var(--panel-radio-w); }
+  .radio-panel-inner        { width: var(--panel-radio-w); }
+  .notes-side-panel.open    { width: var(--panel-notes-w); }
+  .notes-side-panel-inner   { width: var(--panel-notes-w); }
+  .settings-side-panel.open { width: var(--panel-settings-w); }
+  .settings-side-panel-inner{ width: var(--panel-settings-w); }
+
+  /* ── Side tab vertical positions scale with viewport height ─ */
+  .radio-tab    { top: clamp(160px, 28vh, 340px); }
+  .notes-tab    { top: clamp(220px, 36vh, 420px); }
+
+  /* ── Mascot scales with viewport width ─────────────────────── */
+  #mascotSprite {
+    width:  clamp(70px,  8vw, 110px);
+    height: clamp(115px, 13vw, 180px);
+  }
+
+  /* ── Tablet / small laptop (≤1024px) ───────────────────────── */
+  @media (max-width: 1024px) {
+    .main-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* ── Mobile (≤700px) ────────────────────────────────────────── */
+  @media (max-width: 700px) {
+    .main-grid      { grid-template-columns: 1fr; gap: 10px; padding: 0 10px 20px; }
+    .trial-timer-bar{ gap: 10px; flex-wrap: wrap; }
+    .radio-tab      { top: 160px; }
+    .notes-tab      { top: 220px; }
+  }
+
+  /* ── Small mobile (≤480px) ──────────────────────────────────── */
+  @media (max-width: 480px) {
+    .main-grid  { padding: 0 6px 16px; }
+    .verdict-box{ flex-direction: column; }
+    .radio-tab  { top: 140px; }
+    .notes-tab  { top: 196px; }
+  }
 </style>
 </head>
 <body class="gate-locked">
