@@ -2747,10 +2747,10 @@
     z-index: 1;
   }
   #mascotSprite {
-    width: 110px;
+    width: auto;
+    max-width: 160px;
     height: 180px;
     object-fit: contain;
-    object-position: bottom;
     cursor: pointer;
     pointer-events: auto;
     transform: translateY(4px);
@@ -3260,7 +3260,8 @@
 
   /* ── Mascot scales with viewport width ─────────────────────── */
   #mascotSprite {
-    width:  clamp(70px,  8vw, 110px);
+    width:  auto;
+    max-width: clamp(110px, 14vw, 160px);
     height: clamp(115px, 13vw, 180px);
     -webkit-user-drag: none;
     user-select: none;
@@ -7374,7 +7375,7 @@
         neutral:   'assets/kaede_intro.png',
         resting:   'assets/asset_png_3.png',
         concerned: 'assets/asset_png_3.png',
-        talking:   'assets/kaede_intro.png',
+        talking:   'assets/Kaede_talking.png',
       },
       introLines: [
         "Oh! You've made it in — I'm so glad! My name is Kaede Akamatsu — the Ultimate Pianist. Nice to meet you!",
@@ -7555,11 +7556,12 @@
     bubble.textContent = pool[idx];
     bubble.classList.add('visible');
 
-    // Every second click: random leftward drift
+    // Every second click: random leftward drift (always reset first so it never accumulates)
+    container.style.transform = '';
     _mascotClickCount++;
     if (_mascotClickCount % 2 === 0) {
-      const drift = Math.floor(Math.random() * 40) + 20; // 20–59 px
-      container.style.transform = `translateX(-${drift}px)`;
+      const drift = Math.floor(Math.random() * 30) + 10; // 10–39 px
+      requestAnimationFrame(() => { container.style.transform = `translateX(-${drift}px)`; });
     }
 
     clearTimeout(_mascotBubbleTimer);
@@ -7599,15 +7601,14 @@
 
   // Init on load
   (function initMascot() {
-    // Restore saved mascot choice
+    // Restore saved mascot choice — always apply, even for kaede
     const savedMascot = localStorage.getItem('carnage_mascot') || 'kaede';
-    if (MASCOTS[savedMascot] && savedMascot !== 'kaede') {
-      _mascotActive = savedMascot;
-      const sprite  = document.getElementById('mascotSprite');
-      const nameTag = document.getElementById('mascotNameTag');
-      if (sprite)  sprite.src = MASCOTS[savedMascot].sprites.resting;
-      if (nameTag) nameTag.textContent = MASCOTS[savedMascot].name;
-    }
+    _mascotActive = MASCOTS[savedMascot] ? savedMascot : 'kaede';
+    const mascot  = MASCOTS[_mascotActive];
+    const sprite  = document.getElementById('mascotSprite');
+    const nameTag = document.getElementById('mascotNameTag');
+    if (sprite)  sprite.src = mascot.sprites.resting;
+    if (nameTag) nameTag.textContent = mascot.name;
     // Sync mascot selector
     const sel = document.getElementById('mascotSelector');
     if (sel) sel.value = _mascotActive;
@@ -7636,7 +7637,7 @@
 <div id="mascotContainer">
   <div id="mascotBubble"></div>
   <div id="mascotNameTag">KAEDE AKAMATSU</div>
-  <img id="mascotSprite" src="assets/asset_png_3.png" alt="Mascot" draggable="false" onclick="mascotClick()" title="Click me!" />
+  <img id="mascotSprite" src="" alt="Mascot" draggable="false" onclick="mascotClick()" title="Click me!" />
 </div>
 
 <div id="jumpscareOverlay">
