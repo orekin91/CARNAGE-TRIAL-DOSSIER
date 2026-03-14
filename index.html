@@ -7375,6 +7375,7 @@
         resting:   'assets/kaede_neutral.png',
         concerned: 'assets/kaede_concerned.png',
         talking:   'assets/Kaede_talking.png',
+        cheer:     'assets/Kaede_Cheer.png',
       },
       introLines: [
         "Oh! You've made it in — I'm so glad! My name is Kaede Akamatsu — the Ultimate Pianist. Nice to meet you!",
@@ -7432,6 +7433,18 @@
         "All clear for now. But don't let your guard down yet.",
         "I'm relieved... but also a little confused. Something still doesn't add up.",
       ],
+      lines_cheer: [
+        "Hey — have you taken a break recently? Don't forget to stretch! Even I know rest is important!",
+        "Just checking in! How are you holding up? Remember to take care of yourself, okay?",
+        "You've been at this for a while... maybe grab some water? Staying hydrated really helps!",
+        "Hey! Don't forget to blink! Screen time can strain your eyes, you know.",
+        "I believe in you! Just... maybe also believe in taking a five-minute break, okay?",
+        "Take a deep breath! We're going to figure this out — but only if you're feeling okay too!",
+        "Ooh, random thought — what if we looked at the evidence from a completely different angle?",
+        "Did you know music helps with focus? Maybe hum something while you work... it helps me!",
+        "Don't push yourself too hard. We need you sharp, not exhausted!",
+        "I'm rooting for you! But also — seriously, take a break if you need one!",
+      ],
     },
 
     nagito: {
@@ -7443,6 +7456,7 @@
         resting:   'assets/Nagito_neutral.png',
         concerned: 'assets/Nagito_concerned.png',
         talking:   'assets/Nagito_Talking.png',
+        cheer:     'assets/Nagito_Cheer.png',
       },
       introLines: [
         "Ah... so we're doing this. I'm Nagito Komaeda — the Ultimate Lucky Student. Though luck like mine is more of a curse, really.",
@@ -7499,6 +7513,18 @@
         "A brief respite. Enjoy it. But don't let your guard down.",
         "All clear. That's... actually good news. I'll allow myself to feel relief for once.",
       ],
+      lines_cheer: [
+        "Someone as worthless as me shouldn't say this, but... you've been at this a while. Rest is part of the process.",
+        "The pursuit of truth is noble. But even noble pursuits require a rested mind. Step away for a moment.",
+        "Hope isn't just about pushing forward endlessly. Even hope needs time to breathe. Take a break.",
+        "My luck has a strange way of knowing when someone needs a reminder. Consider this yours.",
+        "I find it somewhat amusing that I'm the one telling you this, but... drink some water.",
+        "Don't burn yourself out. Despair loves exhaustion — don't give it an opening.",
+        "I've been thinking... truly great hope requires patience. And patience requires rest.",
+        "Even the most talented people need breaks. You're no exception. Take care of yourself.",
+        "It occurs to me that you haven't looked away from this in a while. For what it's worth... I noticed.",
+        "The path to hope is long. Pace yourself. There's no glory in collapsing before the finish.",
+      ],
     },
   };
 
@@ -7506,6 +7532,8 @@
   let _mascotBubbleTimer = null;
   let _mascotLastLine = -1;
   let _mascotClickCount = 0;
+  let _mascotChatterTimer = null;
+  let _mascotChatterLastLine = -1;
 
   function mascotClick() {
     const mascot = MASCOTS[_mascotActive];
@@ -7573,6 +7601,47 @@
     }, 4500);
   }
 
+  function _mascotChatter() {
+    const mascot = MASCOTS[_mascotActive];
+    if (!mascot || !mascot.lines_cheer) return;
+
+    const bubble = document.getElementById('mascotBubble');
+    const sprite = document.getElementById('mascotSprite');
+
+    // Don't interrupt an existing bubble
+    if (bubble.classList.contains('visible')) return;
+
+    const pool = mascot.lines_cheer;
+    let idx;
+    do { idx = Math.floor(Math.random() * pool.length); }
+    while (idx === _mascotChatterLastLine && pool.length > 1);
+    _mascotChatterLastLine = idx;
+
+    sprite.src = mascot.sprites.cheer;
+    sprite.classList.remove('idle');
+    void sprite.offsetWidth;
+
+    bubble.textContent = pool[idx];
+    bubble.classList.add('visible');
+
+    clearTimeout(_mascotBubbleTimer);
+    _mascotBubbleTimer = setTimeout(() => {
+      bubble.classList.remove('visible');
+      sprite.src = MASCOTS[_mascotActive].sprites.resting;
+      setTimeout(() => sprite.classList.add('idle'), 300);
+    }, 4500);
+  }
+
+  function _scheduleChatter() {
+    clearTimeout(_mascotChatterTimer);
+    // Fire every 50–80 seconds
+    const delay = 50000 + Math.floor(Math.random() * 30000);
+    _mascotChatterTimer = setTimeout(() => {
+      _mascotChatter();
+      _scheduleChatter();
+    }, delay);
+  }
+
   function mascotSetActive(key) {
     const mascot = MASCOTS[key];
     if (!mascot) return;
@@ -7591,6 +7660,8 @@
     const mascotLabel = document.getElementById('mascotName');
     if (mascotLabel) mascotLabel.textContent = 'currently: ' + mascot.name.split(' ')[0].charAt(0) + mascot.name.split(' ')[0].slice(1).toLowerCase();
     localStorage.setItem('carnage_mascot', key);
+    _mascotChatterLastLine = -1;
+    _scheduleChatter();
   }
 
   function mascotSetVisible(visible) {
@@ -7618,6 +7689,8 @@
     if (tog) tog.checked = visible;
     // Start idle bounce after a short delay
     setTimeout(() => document.getElementById('mascotSprite').classList.add('idle'), 800);
+    // Start periodic chatter
+    _scheduleChatter();
   });
 
 </script>
