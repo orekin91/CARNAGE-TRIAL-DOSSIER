@@ -3246,6 +3246,8 @@
   #mascotSprite {
     width:  clamp(70px,  8vw, 110px);
     height: clamp(115px, 13vw, 180px);
+    -webkit-user-drag: none;
+    user-select: none;
   }
 
   /* ── Tablet / small laptop (≤1024px) ───────────────────────── */
@@ -7292,7 +7294,7 @@
 <div id="mascotContainer">
   <div id="mascotBubble"></div>
   <div id="mascotNameTag">KAEDE AKAMATSU</div>
-  <img id="mascotSprite" src="assets/asset_png_3.png" alt="Mascot" onclick="mascotClick()" title="Click me!" />
+  <img id="mascotSprite" src="assets/asset_png_3.png" alt="Mascot" draggable="false" onclick="mascotClick()" title="Click me!" />
 </div>
 
 <div id="jumpscareOverlay">
