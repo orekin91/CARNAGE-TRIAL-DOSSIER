@@ -8087,6 +8087,8 @@
       lines_sure: [
         "Hold on — are you absolutely sure about this? Once we mark someone guilty, there's no taking it back. This is the moment of truth.",
         "Wait! Before you commit — are you certain? Look at everything one more time. There's no going back from this.",
+        "Oh — one more thing before you decide. Having a weapon doesn't clear someone, but it doesn't condemn them either. If it's marked as a Static, it's just background — it doesn't point to anyone specifically. And if a mastermind was involved, they might have used someone else entirely. Please keep that in mind.",
+        "Wait — does the weapon actually belong to the person you're accusing in a meaningful way? Because a Static weapon is basically scenery — it doesn't incriminate. And a mastermind wouldn't need to leave a trail back to themselves. Are you accounting for all of that?",
       ],
       lines_verdict_correct: [
         "We got it right!! I KNEW we could do it — I just knew it! You caught the real culprit! Justice has been served!",
@@ -8105,6 +8107,9 @@
       ],
       lines_verdict_player_victim_correct: [
         "...You were the victim. We solved it, but — you were the one who was — I can't. We got it right and I still can't feel good about this. I'm so sorry. I'm so, so sorry.",
+      ],
+      lines_verdict_player_victim_wrong: [
+        "Wrong. And you — you were the victim of this crime. We couldn't figure out who did this to you, and we made it worse by accusing someone who didn't do it. I'm so sorry. I'm sorry we couldn't do right by you. We'll keep trying.",
       ],
       lines_verdict_player_accused_wrong: [
         "Wrong. And honestly? I'm so relieved. I never wanted to believe it was you. You've been here with us, working toward the truth this whole time. Let's find the real answer together, okay? I know we can.",
@@ -8266,6 +8271,8 @@
         "You know, trash like me has no business telling you what to do. But even I know that naming the wrong person is a despair that lingers. So I'll ask, just once — are you sure?",
         "Haha... it's funny, isn't it? The closer you get to hope, the more terrifying it becomes. What if you're right? What if you're wrong? Both possibilities are overwhelming. ...Are you sure?",
         "I've been wrong before. About many things. About people. About hope itself. So before you commit — genuinely ask yourself. Not for my sake. For yours.",
+        "Ah — and one more thing, if you'll humour someone like me. A weapon doesn't clear someone, but it doesn't convict them either. If it's Static, it's just part of the room — it means nothing on its own. And if a mastermind is involved, the real culprit might have kept their hands entirely clean. Isn't that a delightfully horrible thought?",
+        "Before the final curtain — just consider this. Does the weapon actually tell you what you think it does? A Static weapon is scenery, not evidence. And a mastermind wouldn't need to leave a trail. Make sure you're not being led somewhere on purpose.",
       ],
       lines_verdict_correct: [
         "...You were right. The truth prevailed. This is what hope looks like — shining through the darkest despair. You should be proud.",
@@ -8284,6 +8291,9 @@
       ],
       lines_verdict_player_victim_correct: [
         "...You were the victim. The one solving the case was the victim all along. I — ahaha. That's the kind of despair I didn't think I could feel anymore. We found the answer. I wish it felt more like hope. I'm sorry.",
+      ],
+      lines_verdict_player_victim_wrong: [
+        "Wrong. And you — you were the one who died, and we still couldn't get it right. Ahaha... I don't have words for how that feels. But I refuse to let despair win here. We owe you the truth. We'll find it. I promise.",
       ],
       lines_verdict_player_accused_wrong: [
         "Wrong. Ahaha... maybe that's okay. Maybe this is just my luck doing what it always does — pulling despair close before hope breaks through. You're not the culprit. I didn't want to believe you were. Let's find the real answer. We owe everyone that much.",
@@ -8439,6 +8449,8 @@
         "You're ready to name a culprit. I need you to be certain, not just confident. There's a difference.",
         "A wrong accusation doesn't just fail the investigation — it fails every person involved. Are you sure?",
         "I've seen investigations fall apart at this exact moment. Slow down. Verify. Then decide.",
+        "One critical note before you commit: weapon possession is not equivalent to guilt. A Static weapon is environmental — it implicates no one specifically. And if a mastermind is involved, the murder may have been orchestrated through a third party who had no motive of their own. Don't let a weapon be your primary evidence.",
+        "Account for the weapon's classification. A Static weapon is background — it doesn't incriminate. Additionally, consider whether someone else could have engineered this without leaving direct evidence. A mastermind leaves very little trace of their own involvement. Are you certain you're accusing the right person?",
       ],
       lines_verdict_correct: [
         "Correct. The evidence held. That's what a proper investigation looks like — well done.",
@@ -8457,6 +8469,9 @@
       ],
       lines_verdict_player_victim_correct: [
         "...Correct. The victim was you. I solved it. I don't know what to do with that — which is an unusual state for me. We found the truth. I suppose that has to be enough.",
+      ],
+      lines_verdict_player_victim_wrong: [
+        "Wrong. The person who was killed is also the person who built this dossier, and we still failed to identify their killer. That's unacceptable. Go back through everything. Find what we missed. We owe the victim that much.",
       ],
       lines_verdict_player_accused_wrong: [
         "Wrong. Good. I didn't like where the evidence was pointing, and now I have grounds to doubt it. Let's re-examine everything. Properly, this time.",
@@ -9716,7 +9731,10 @@
         pool = mascot.lines_verdict_correct;
       }
     } else {
-      if (_accusedIsPlayer() && mascot.lines_verdict_player_accused_wrong) {
+      if (_playerIsVictim() && mascot.lines_verdict_player_victim_wrong) {
+        // Player was the victim and verdict was wrong
+        pool = mascot.lines_verdict_player_victim_wrong;
+      } else if (_accusedIsPlayer() && mascot.lines_verdict_player_accused_wrong) {
         // Player was wrongly accused
         pool = mascot.lines_verdict_player_accused_wrong;
       } else if (_accusedIsMascot() && mascot.lines_verdict_mascot_accused_wrong) {
