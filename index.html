@@ -3270,6 +3270,97 @@
     .radio-tab  { top: 140px; }
     .notes-tab  { top: 196px; }
   }
+
+  /* ── KAEDE INTRO SEQUENCE ───────────────────────────────────── */
+  #kaedeIntro {
+    position: fixed;
+    inset: 0;
+    z-index: 99000;
+    background: rgba(0,0,0,0.82);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.5s;
+    cursor: pointer;
+  }
+  #kaedeIntro.visible { opacity: 1; }
+  #kaedeIntro.exiting { opacity: 0; pointer-events: none; }
+
+  #kaedeIntroSprite {
+    position: absolute;
+    bottom: 120px;
+    right: clamp(40px, 8vw, 160px);
+    height: clamp(300px, 55vh, 520px);
+    width: auto;
+    object-fit: contain;
+    object-position: bottom;
+    -webkit-user-drag: none;
+    user-select: none;
+    filter: drop-shadow(0 0 24px rgba(224,48,48,0.25));
+    transform: translateY(20px);
+    opacity: 0;
+    transition: transform 0.5s cubic-bezier(0.22,1,0.36,1), opacity 0.5s;
+  }
+  #kaedeIntro.visible #kaedeIntroSprite {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  #kaedeIntroBox {
+    position: absolute;
+    bottom: 0;
+    left: 0; right: 0;
+    background: linear-gradient(180deg, rgba(10,10,14,0.96) 0%, rgba(10,10,14,1) 100%);
+    border-top: 2px solid var(--accent, #e03030);
+    padding: clamp(16px, 2.5vh, 28px) clamp(20px, 5vw, 80px);
+    min-height: 120px;
+    box-sizing: border-box;
+  }
+  #kaedeIntroName {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(16px, 2vw, 22px);
+    letter-spacing: 3px;
+    color: var(--accent, #e03030);
+    margin-bottom: 8px;
+  }
+  #kaedeIntroText {
+    font-family: 'Special Elite', serif;
+    font-size: clamp(13px, 1.3vw, 17px);
+    color: var(--fg, #c8b99a);
+    line-height: 1.65;
+    min-height: 2.5em;
+  }
+  #kaedeIntroContinue {
+    position: absolute;
+    bottom: clamp(14px, 2vh, 22px);
+    right: clamp(20px, 4vw, 60px);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted, #555);
+    animation: introBlink 1.1s ease-in-out infinite;
+  }
+  @keyframes introBlink {
+    0%,100% { opacity: 0.3; }
+    50%      { opacity: 1; }
+  }
+  #kaedeIntroSkip {
+    position: absolute;
+    top: clamp(12px, 2vh, 20px);
+    right: clamp(16px, 3vw, 32px);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--muted, #555);
+    background: none;
+    border: 1px solid var(--border, #2a2a35);
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    border-radius: 2px;
+  }
+  #kaedeIntroSkip:hover { color: var(--fg, #c8b99a); border-color: var(--fg, #c8b99a); }
 </style>
 </head>
 <body class="gate-locked">
@@ -6449,6 +6540,8 @@
         document.body.classList.add('dossier-revealed');
         // If radio player already ready, start playing immediately
         if (ytPlayer && ytApiReady && !radioCurrentTrack) radioPlayNext();
+        // Launch Kaede intro after panels have animated in
+        setTimeout(kaedeIntroStart, 1400);
       }, { once: true });
     }
 
@@ -7132,6 +7225,103 @@
   };
 
 
+  // ── KAEDE INTRO SEQUENCE ────────────────────────────────────
+  const _KAEDE_INTRO_LINES = [
+    "Oh! You've made it in — I'm so glad! My name is Kaede Akamatsu. Nice to meet you!",
+    "I'll be hanging around in the corner of the dossier. Click on me whenever you want and I'll share what's on my mind!",
+    "We've got a culprit to catch, so let's give it everything we've got — together, okay? Let's do this!",
+  ];
+
+  let _introLineIdx = 0;
+  let _introTypeTimer = null;
+  let _introTyping = false;
+
+  function _introType(text, el, done) {
+    el.textContent = '';
+    _introTyping = true;
+    let i = 0;
+    clearInterval(_introTypeTimer);
+    _introTypeTimer = setInterval(() => {
+      el.textContent += text[i++];
+      if (i >= text.length) {
+        clearInterval(_introTypeTimer);
+        _introTyping = false;
+        if (done) done();
+      }
+    }, 22);
+  }
+
+  function _introShowLine(idx) {
+    const textEl = document.getElementById('kaedeIntroText');
+    const cont   = document.getElementById('kaedeIntroContinue');
+    if (!textEl) return;
+    cont.style.opacity = '0';
+    _introType(_KAEDE_INTRO_LINES[idx], textEl, () => {
+      const isLast = idx >= _KAEDE_INTRO_LINES.length - 1;
+      cont.textContent = isLast ? '▼ CLICK TO CLOSE' : '▼ CLICK TO CONTINUE';
+      cont.style.opacity = '';
+    });
+  }
+
+  function _introAdvance() {
+    // If still typing, skip to end of current line
+    if (_introTyping) {
+      clearInterval(_introTypeTimer);
+      _introTyping = false;
+      const textEl = document.getElementById('kaedeIntroText');
+      const cont   = document.getElementById('kaedeIntroContinue');
+      if (textEl) textEl.textContent = _KAEDE_INTRO_LINES[_introLineIdx];
+      const isLast = _introLineIdx >= _KAEDE_INTRO_LINES.length - 1;
+      if (cont) {
+        cont.textContent = isLast ? '▼ CLICK TO CLOSE' : '▼ CLICK TO CONTINUE';
+        cont.style.opacity = '';
+      }
+      return;
+    }
+    _introLineIdx++;
+    if (_introLineIdx >= _KAEDE_INTRO_LINES.length) {
+      kaedeIntroEnd();
+    } else {
+      _introShowLine(_introLineIdx);
+    }
+  }
+
+  function kaedeIntroStart() {
+    const overlay = document.getElementById('kaedeIntro');
+    if (!overlay) return;
+    _introLineIdx = 0;
+    // Hide mascot while intro is running
+    document.getElementById('mascotContainer').style.visibility = 'hidden';
+    overlay.style.display = 'flex';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      overlay.classList.add('visible');
+      _introShowLine(0);
+    }));
+    overlay.addEventListener('click', _introAdvance);
+  }
+
+  function kaedeIntroEnd() {
+    const overlay = document.getElementById('kaedeIntro');
+    if (!overlay) return;
+    clearInterval(_introTypeTimer);
+    overlay.classList.add('exiting');
+    overlay.removeEventListener('click', _introAdvance);
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      overlay.classList.remove('visible', 'exiting');
+      // Restore mascot
+      document.getElementById('mascotContainer').style.visibility = '';
+      // Snap sprite back to neutral
+      const sprite = document.getElementById('mascotSprite');
+      if (sprite) sprite.src = 'assets/asset_png_3.png';
+    }, 500);
+  }
+
+  function kaedeIntroSkip() {
+    event.stopPropagation();
+    kaedeIntroEnd();
+  }
+
   // ── MASCOT SYSTEM ────────────────────────────────────────────
   const KAEDE_SPRITE_NEUTRAL   = 'assets/asset_png_3.png';
   const KAEDE_SPRITE_CONCERNED = 'assets/asset_png_3.png';
@@ -7291,6 +7481,15 @@
 
 <div id="toastContainer"></div>
 <!-- MASCOT ASSISTANT -->
+<div id="kaedeIntro">
+  <button id="kaedeIntroSkip" onclick="kaedeIntroSkip()">SKIP ▸▸</button>
+  <img id="kaedeIntroSprite" src="assets/kaede_intro.png" alt="Kaede Akamatsu" draggable="false" />
+  <div id="kaedeIntroBox">
+    <div id="kaedeIntroName">KAEDE AKAMATSU</div>
+    <div id="kaedeIntroText"></div>
+    <div id="kaedeIntroContinue">▼ CLICK TO CONTINUE</div>
+  </div>
+</div>
 <div id="mascotContainer">
   <div id="mascotBubble"></div>
   <div id="mascotNameTag">KAEDE AKAMATSU</div>
