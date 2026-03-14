@@ -572,7 +572,7 @@
     gap: 12px;
     margin: 14px 0 10px;
     color: var(--muted);
-    font-size: 9px;
+    font-size: var(--fs-tiny, 9px);
     letter-spacing: 3px;
   }
   .participants-divider::before,
@@ -2700,7 +2700,7 @@
     align-items: center;
     pointer-events: none;
     visibility: visible;
-    transition: opacity 0.4s;
+    transition: opacity 0.4s, transform 0.45s cubic-bezier(0.22,1,0.36,1);
   }
   #mascotContainer.hidden { opacity: 0; visibility: hidden; }
 
@@ -3241,6 +3241,22 @@
   /* ── Side tab vertical positions scale with viewport height ─ */
   .radio-tab    { top: clamp(160px, 28vh, 340px); }
   .notes-tab    { top: clamp(220px, 36vh, 420px); }
+  .settings-tab { top: clamp(60px,  10vh, 120px); }
+
+  /* ── Side tab buttons scale with viewport ──────────────────── */
+  .radio-tab-btn,
+  .notes-tab-btn,
+  .settings-tab-btn {
+    font-size:   clamp(8px, 0.65vw, 10px);
+    padding:     clamp(10px, 1.2vh, 14px) clamp(5px, 0.55vw, 8px);
+    gap:         clamp(5px, 0.6vh, 8px);
+    letter-spacing: clamp(1px, 0.2vw, 2px);
+  }
+  .radio-tab-btn .radio-icon,
+  .notes-tab-btn .notes-icon,
+  .settings-tab-btn .settings-icon {
+    font-size: clamp(11px, 1.1vw, 14px);
+  }
 
   /* ── Mascot scales with viewport width ─────────────────────── */
   #mascotSprite {
@@ -3261,6 +3277,8 @@
     .trial-timer-bar{ gap: 10px; flex-wrap: wrap; }
     .radio-tab      { top: 160px; }
     .notes-tab      { top: 220px; }
+    .settings-tab   { top: 64px; }
+    .radio-tab-btn, .notes-tab-btn, .settings-tab-btn { font-size: 8px; padding: 10px 5px; }
   }
 
   /* ── Small mobile (≤480px) ──────────────────────────────────── */
@@ -3269,6 +3287,8 @@
     .verdict-box{ flex-direction: column; }
     .radio-tab  { top: 140px; }
     .notes-tab  { top: 196px; }
+    .settings-tab { top: 56px; }
+    .radio-tab-btn, .notes-tab-btn, .settings-tab-btn { font-size: 7px; padding: 8px 4px; gap: 4px; }
   }
 
   /* ── KAEDE INTRO SEQUENCE ───────────────────────────────────── */
@@ -3323,6 +3343,15 @@
     letter-spacing: 3px;
     color: var(--accent, #e03030);
     margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  #kaedeIntroTalent {
+    font-size: clamp(9px, 1vw, 12px);
+    letter-spacing: 4px;
+    color: var(--yellow, #d4a017);
+    opacity: 0.85;
   }
   #kaedeIntroText {
     font-family: 'Special Elite', serif;
@@ -3546,6 +3575,13 @@
             <span class="toggle-slider"></span>
           </label>
         </div>
+      </div>
+      <div class="settings-row">
+        <div class="settings-label">Choose Mascot</div>
+        <select id="mascotSelector" onchange="mascotSetActive(this.value)" style="background:#16161c;color:var(--text);border:1px solid var(--border);border-radius:3px;padding:4px 8px;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px;cursor:pointer;">
+          <option value="kaede">Kaede Akamatsu</option>
+          <option value="nagito">Nagito Komaeda</option>
+        </select>
       </div>
 
     </div>
@@ -7225,12 +7261,8 @@
   };
 
 
-  // ── KAEDE INTRO SEQUENCE ────────────────────────────────────
-  const _KAEDE_INTRO_LINES = [
-    "Oh! You've made it in — I'm so glad! My name is Kaede Akamatsu. Nice to meet you!",
-    "I'll be hanging around in the corner of the dossier. Click on me whenever you want and I'll share what's on my mind!",
-    "We've got a culprit to catch, so let's give it everything we've got — together, okay? Let's do this!",
-  ];
+  // ── MASCOT INTRO SEQUENCE ───────────────────────────────────
+  // Lines are now sourced from MASCOTS[_mascotActive].introLines at runtime
 
   let _introLineIdx = 0;
   let _introTypeTimer = null;
@@ -7255,23 +7287,25 @@
     const textEl = document.getElementById('kaedeIntroText');
     const cont   = document.getElementById('kaedeIntroContinue');
     if (!textEl) return;
+    const lines = MASCOTS[_mascotActive].introLines;
     cont.style.opacity = '0';
-    _introType(_KAEDE_INTRO_LINES[idx], textEl, () => {
-      const isLast = idx >= _KAEDE_INTRO_LINES.length - 1;
+    _introType(lines[idx], textEl, () => {
+      const isLast = idx >= lines.length - 1;
       cont.textContent = isLast ? '▼ CLICK TO CLOSE' : '▼ CLICK TO CONTINUE';
       cont.style.opacity = '';
     });
   }
 
   function _introAdvance() {
+    const lines = MASCOTS[_mascotActive].introLines;
     // If still typing, skip to end of current line
     if (_introTyping) {
       clearInterval(_introTypeTimer);
       _introTyping = false;
       const textEl = document.getElementById('kaedeIntroText');
       const cont   = document.getElementById('kaedeIntroContinue');
-      if (textEl) textEl.textContent = _KAEDE_INTRO_LINES[_introLineIdx];
-      const isLast = _introLineIdx >= _KAEDE_INTRO_LINES.length - 1;
+      if (textEl) textEl.textContent = lines[_introLineIdx];
+      const isLast = _introLineIdx >= lines.length - 1;
       if (cont) {
         cont.textContent = isLast ? '▼ CLICK TO CLOSE' : '▼ CLICK TO CONTINUE';
         cont.style.opacity = '';
@@ -7279,7 +7313,7 @@
       return;
     }
     _introLineIdx++;
-    if (_introLineIdx >= _KAEDE_INTRO_LINES.length) {
+    if (_introLineIdx >= lines.length) {
       kaedeIntroEnd();
     } else {
       _introShowLine(_introLineIdx);
@@ -7289,6 +7323,14 @@
   function kaedeIntroStart() {
     const overlay = document.getElementById('kaedeIntro');
     if (!overlay) return;
+    const mascot = MASCOTS[_mascotActive];
+    // Update intro sprite and name/talent from active mascot
+    const introSprite = document.getElementById('kaedeIntroSprite');
+    const introName   = document.getElementById('kaedeIntroName');
+    const introTalent = document.getElementById('kaedeIntroTalent');
+    if (introSprite) introSprite.src = mascot.sprites.intro;
+    if (introName)   introName.childNodes[0].textContent = mascot.name;
+    if (introTalent) introTalent.textContent = mascot.talent;
     _introLineIdx = 0;
     // Hide mascot while intro is running
     document.getElementById('mascotContainer').style.visibility = 'hidden';
@@ -7311,9 +7353,9 @@
       overlay.classList.remove('visible', 'exiting');
       // Restore mascot
       document.getElementById('mascotContainer').style.visibility = '';
-      // Snap sprite back to neutral
+      // Snap sprite back to resting pose for active mascot
       const sprite = document.getElementById('mascotSprite');
-      if (sprite) sprite.src = 'assets/asset_png_3.png';
+      if (sprite) sprite.src = MASCOTS[_mascotActive].sprites.resting;
     }, 500);
   }
 
@@ -7323,14 +7365,22 @@
   }
 
   // ── MASCOT SYSTEM ────────────────────────────────────────────
-  const KAEDE_SPRITE_NEUTRAL   = 'assets/asset_png_3.png';
-  const KAEDE_SPRITE_CONCERNED = 'assets/asset_png_3.png';
-
   const MASCOTS = {
     kaede: {
-      name: 'KAEDE AKAMATSU',
-      img: document.getElementById('mascotSprite') ? document.getElementById('mascotSprite').src : '',
-      sprite: KAEDE_SPRITE_NEUTRAL,
+      name:   'KAEDE AKAMATSU',
+      talent: 'ULTIMATE PIANIST',
+      sprites: {
+        intro:     'assets/kaede_intro.png',
+        neutral:   'assets/kaede_intro.png',
+        resting:   'assets/asset_png_3.png',
+        concerned: 'assets/asset_png_3.png',
+        talking:   'assets/kaede_intro.png',
+      },
+      introLines: [
+        "Oh! You've made it in — I'm so glad! My name is Kaede Akamatsu — the Ultimate Pianist. Nice to meet you!",
+        "I'll be hanging around in the corner of the dossier. Click on me whenever you want and I'll share what's on my mind!",
+        "We've got a culprit to catch, so let's give it everything we've got — together, okay? Let's do this!",
+      ],
       lines: [
         "I believe in everyone here... we can figure this out together!",
         "Music helps me think. Playing piano always helped me clear my head.",
@@ -7382,12 +7432,80 @@
         "All clear for now. But don't let your guard down yet.",
         "I'm relieved... but also a little confused. Something still doesn't add up.",
       ],
-    }
+    },
+
+    nagito: {
+      name:   'NAGITO KOMAEDA',
+      talent: 'ULTIMATE LUCKY STUDENT',
+      sprites: {
+        intro:     'assets/Nagito_intro.png',
+        neutral:   'assets/Nagito_neutral.png',
+        resting:   'assets/Nagito_neutral.png',
+        concerned: 'assets/Nagito_concerned.png',
+        talking:   'assets/Nagito_Talking.png',
+      },
+      introLines: [
+        "Ah... so we're doing this. I'm Nagito Komaeda — the Ultimate Lucky Student. Though luck like mine is more of a curse, really.",
+        "I'm not sure I deserve to be here alongside such talented people, but... I'll do what I can from the sidelines.",
+        "Hope is a fragile thing in a place like this. Guard it carefully. I'll be watching — and rooting for you.",
+      ],
+      lines: [
+        "Hope will always prevail in the end. I truly believe that.",
+        "My luck is... complicated. But maybe it'll be useful here.",
+        "Someone as unremarkable as me shouldn't speak out of turn. But I will say — pay attention.",
+        "I've seen a lot of strange things. This situation feels familiar in a way I don't like.",
+        "The trash that I am has no right to speculate. But my instincts are rarely wrong.",
+        "Every terrible thing that happens... it's all just fertilizer for hope. Right?",
+        "I don't deserve to stand beside any of you. But here I am anyway.",
+        "There's a thread of hope in all this darkness. You just have to find it.",
+        "I wonder if my luck is working for us or against us right now.",
+        "Despair is just the shadow hope casts. Don't lose sight of the light.",
+        "My role in all this is probably minor. But I'm watching everything.",
+        "I find it hard to trust my own judgement. But I trust the process.",
+      ],
+      lines_sus: [
+        "Someone here reeks of despair... and I don't mean that metaphorically.",
+        "I won't name names. But I've noticed. I notice everything.",
+        "My luck tends to drag bad things toward me. It's doing that right now.",
+        "A liar in a group like this is especially dangerous. Stay sharp.",
+        "I can feel it — someone here isn't who they're pretending to be.",
+        "My instincts about people are... eerily accurate. And right now they're screaming.",
+        "Hope and despair exist in balance. Someone here has tipped the scales.",
+        "I've been watching. You should be too.",
+      ],
+      lines_victim: [
+        "Someone lost everything here. We owe them the truth — even if the truth is ugly.",
+        "Their death can't be meaningless. It won't be. Not if I have anything to say about it.",
+        "Loss like this... it either breeds despair or hardens your resolve. Choose the latter.",
+        "I've been close to death before. It changes how you see things. See clearly.",
+        "The least we can do for them now is find out why. And who.",
+        "It hurts. But pain is just proof that something mattered.",
+        "We carry them forward by finding the truth.",
+        "Don't let grief cloud your reasoning. They wouldn't want that.",
+      ],
+      lines_culprit: [
+        "So it's come to this. I can't say I'm surprised — hope often requires sacrifice.",
+        "I don't condemn them. But I can't excuse them either.",
+        "Everyone who walks into despair had reasons. That doesn't make it right.",
+        "The worst part about understanding someone's motive is that you can still see their humanity.",
+        "I wonder what broke them. Something always breaks people.",
+        "They made a choice that can't be undone. Now we face the consequences together.",
+        "Was there a moment they could have turned back? There always is.",
+        "I feel a strange kinship with people who've lost their way. It doesn't mean I'll let them go.",
+      ],
+      lines_all_cleared: [
+        "Everyone's cleared? Then the hope I believed in wasn't misplaced after all.",
+        "No culprit among us... for now. Remain vigilant. My luck doesn't stay quiet for long.",
+        "A brief respite. Enjoy it. But don't let your guard down.",
+        "All clear. That's... actually good news. I'll allow myself to feel relief for once.",
+      ],
+    },
   };
 
   let _mascotActive = 'kaede';
   let _mascotBubbleTimer = null;
   let _mascotLastLine = -1;
+  let _mascotClickCount = 0;
 
   function mascotClick() {
     const mascot = MASCOTS[_mascotActive];
@@ -7424,11 +7542,11 @@
 
     const bubble = document.getElementById('mascotBubble');
     const sprite = document.getElementById('mascotSprite');
+    const container = document.getElementById('mascotContainer');
 
-    // Swap sprite based on context (only for Kaede)
-    if (_mascotActive === 'kaede') {
-      sprite.src = concerned ? KAEDE_SPRITE_CONCERNED : KAEDE_SPRITE_NEUTRAL;
-    }
+    // Swap sprite based on context
+    const sprites = MASCOTS[_mascotActive].sprites;
+    sprite.src = concerned ? sprites.concerned : sprites.talking;
 
     // Stop idle bounce while talking
     sprite.classList.remove('idle');
@@ -7437,9 +7555,19 @@
     bubble.textContent = pool[idx];
     bubble.classList.add('visible');
 
+    // Every second click: random leftward drift
+    _mascotClickCount++;
+    if (_mascotClickCount % 2 === 0) {
+      const drift = Math.floor(Math.random() * 40) + 20; // 20–59 px
+      container.style.transform = `translateX(-${drift}px)`;
+    }
+
     clearTimeout(_mascotBubbleTimer);
     _mascotBubbleTimer = setTimeout(() => {
       bubble.classList.remove('visible');
+      // Revert sprite to resting pose and reset any positional drift
+      sprite.src = MASCOTS[_mascotActive].sprites.resting;
+      container.style.transform = '';
       setTimeout(() => sprite.classList.add('idle'), 300);
     }, 4500);
   }
@@ -7448,14 +7576,19 @@
     const mascot = MASCOTS[key];
     if (!mascot) return;
     _mascotActive = key;
-    const sprite = document.getElementById('mascotSprite');
+    const sprite  = document.getElementById('mascotSprite');
     const nameTag = document.getElementById('mascotNameTag');
-    // If mascot has a stored src, use it; otherwise keep current
-    if (mascot.imgSrc) sprite.src = mascot.imgSrc;
+    sprite.src = mascot.sprites.resting;
     nameTag.textContent = mascot.name;
-    // Dismiss bubble
+    // Dismiss bubble and reset idle
     document.getElementById('mascotBubble').classList.remove('visible');
     clearTimeout(_mascotBubbleTimer);
+    sprite.classList.remove('idle');
+    void sprite.offsetWidth;
+    setTimeout(() => sprite.classList.add('idle'), 300);
+    // Update settings label
+    const mascotLabel = document.getElementById('mascotName');
+    if (mascotLabel) mascotLabel.textContent = 'currently: ' + mascot.name.split(' ')[0].charAt(0) + mascot.name.split(' ')[0].slice(1).toLowerCase();
     localStorage.setItem('carnage_mascot', key);
   }
 
@@ -7466,8 +7599,18 @@
 
   // Init on load
   (function initMascot() {
-    // Store kaede sprite srcs for later mascot swaps
-    MASCOTS.kaede.imgSrc = KAEDE_SPRITE_NEUTRAL;
+    // Restore saved mascot choice
+    const savedMascot = localStorage.getItem('carnage_mascot') || 'kaede';
+    if (MASCOTS[savedMascot] && savedMascot !== 'kaede') {
+      _mascotActive = savedMascot;
+      const sprite  = document.getElementById('mascotSprite');
+      const nameTag = document.getElementById('mascotNameTag');
+      if (sprite)  sprite.src = MASCOTS[savedMascot].sprites.resting;
+      if (nameTag) nameTag.textContent = MASCOTS[savedMascot].name;
+    }
+    // Sync mascot selector
+    const sel = document.getElementById('mascotSelector');
+    if (sel) sel.value = _mascotActive;
     const visible = localStorage.getItem('carnage_mascot_visible') !== '0';
     mascotSetVisible(visible);
     // Sync settings toggle
@@ -7485,7 +7628,7 @@
   <button id="kaedeIntroSkip" onclick="kaedeIntroSkip()">SKIP ▸▸</button>
   <img id="kaedeIntroSprite" src="assets/kaede_intro.png" alt="Kaede Akamatsu" draggable="false" />
   <div id="kaedeIntroBox">
-    <div id="kaedeIntroName">KAEDE AKAMATSU</div>
+    <div id="kaedeIntroName">KAEDE AKAMATSU<span id="kaedeIntroTalent">ULTIMATE PIANIST</span></div>
     <div id="kaedeIntroText"></div>
     <div id="kaedeIntroContinue">▼ CLICK TO CONTINUE</div>
   </div>
