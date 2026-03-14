@@ -7599,8 +7599,8 @@
     localStorage.setItem('carnage_mascot_visible', visible ? '1' : '0');
   }
 
-  // Init on load
-  (function initMascot() {
+  // Init on load — deferred so mascot DOM elements exist
+  document.addEventListener('DOMContentLoaded', function initMascot() {
     // Restore saved mascot choice — always apply, even for kaede
     const savedMascot = localStorage.getItem('carnage_mascot') || 'kaede';
     _mascotActive = MASCOTS[savedMascot] ? savedMascot : 'kaede';
@@ -7619,7 +7619,7 @@
     if (tog) tog.checked = visible;
     // Start idle bounce after a short delay
     setTimeout(() => document.getElementById('mascotSprite').classList.add('idle'), 800);
-  })();
+  });
 
 </script>
 
