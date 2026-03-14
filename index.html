@@ -5672,12 +5672,13 @@
   function endTrialReset() {
     document.getElementById('endTrialModal').style.display = 'none';
     softReset();
+    _mascotShowScoreLine();
   }
 
   function endTrialSaveImage() {
     document.getElementById('endTrialModal').style.display = 'none';
     downloadImage();
-    setTimeout(() => softReset(), 800);
+    setTimeout(() => { softReset(); _mascotShowScoreLine(); }, 800);
   }
 
   function saveTrial(silent = false) {
@@ -8529,8 +8530,9 @@
 
   let _mascotActive = 'kaede';
   let _mascotBubbleTimer = null;
-  let _caseCorrectCount = 0;
-  let _caseWrongCount   = 0;
+  let _caseCorrectCount  = 0;
+  let _caseWrongCount    = 0;
+  let _lastVerdictCorrect = null;
   let _mascotLastLine = -1;
   let _mascotClickCount = 0;
   let _mascotChatterTimer = null;
@@ -9785,35 +9787,38 @@
     } else {
       _caseWrongCount = Math.min(_caseWrongCount + 1, 5);
     }
+    _lastVerdictCorrect = correct;
+  }
 
-    // Show a score-based comment from the sidebar mascot after a short delay
-    const mascot = MASCOTS[_mascotActive];
-    if (mascot) {
-      const pool = correct ? mascot.lines_score_correct : mascot.lines_score_wrong;
-      const idx  = correct ? (_caseCorrectCount - 1) : (_caseWrongCount - 1);
-      if (pool && pool[idx]) {
-        setTimeout(() => {
-          const bubble    = document.getElementById('mascotBubble');
-          const sprite    = document.getElementById('mascotSprite');
-          const container = document.getElementById('mascotContainer');
-          if (!bubble || !sprite) return;
-          const spriteKey = correct ? 'cheer' : 'concerned';
-          const timeout   = correct ? 5000 : 6000;
-          sprite.src = MASCOTS[_mascotActive].sprites[spriteKey] || MASCOTS[_mascotActive].sprites.neutral;
-          sprite.classList.remove('idle');
-          void sprite.offsetWidth;
-          bubble.textContent = pool[idx];
-          bubble.classList.add('visible');
-          clearTimeout(_mascotBubbleTimer);
-          _mascotBubbleTimer = setTimeout(() => {
-            bubble.classList.remove('visible');
-            sprite.src = MASCOTS[_mascotActive].sprites.resting;
-            container.style.transform = '';
-            setTimeout(() => sprite.classList.add('idle'), 300);
-          }, timeout);
-        }, 800);
-      }
-    }
+  // Called after the trial is archived so the score comment appears on the fresh dossier
+  function _mascotShowScoreLine() {
+    if (_lastVerdictCorrect === null) return;
+    const correct = _lastVerdictCorrect;
+    const mascot  = MASCOTS[_mascotActive];
+    if (!mascot) return;
+    const pool = correct ? mascot.lines_score_correct : mascot.lines_score_wrong;
+    const idx  = correct ? (_caseCorrectCount - 1) : (_caseWrongCount - 1);
+    if (!pool || !pool[idx]) return;
+    setTimeout(() => {
+      const bubble    = document.getElementById('mascotBubble');
+      const sprite    = document.getElementById('mascotSprite');
+      const container = document.getElementById('mascotContainer');
+      if (!bubble || !sprite) return;
+      const spriteKey = correct ? 'cheer' : 'concerned';
+      const timeout   = correct ? 5000 : 6000;
+      sprite.src = MASCOTS[_mascotActive].sprites[spriteKey] || MASCOTS[_mascotActive].sprites.neutral;
+      sprite.classList.remove('idle');
+      void sprite.offsetWidth;
+      bubble.textContent = pool[idx];
+      bubble.classList.add('visible');
+      clearTimeout(_mascotBubbleTimer);
+      _mascotBubbleTimer = setTimeout(() => {
+        bubble.classList.remove('visible');
+        sprite.src = MASCOTS[_mascotActive].sprites.resting;
+        container.style.transform = '';
+        setTimeout(() => sprite.classList.add('idle'), 300);
+      }, timeout);
+    }, 800);
   }
 
   function onGuiltyClick() {
