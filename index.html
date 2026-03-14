@@ -3687,6 +3687,81 @@
   .verdict-mascot-btn.cancel { border-color: var(--border, #2a2a35); color: var(--muted, #555); font-size: clamp(10px, 1vw, 13px); }
   .verdict-mascot-btn.cancel:hover { border-color: var(--muted, #555); color: var(--fg, #c8b99a); }
 
+  /* ── NAGITO BINARIA EASTER EGG OVERLAY ── */
+  #nagitoBinariaOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99000;
+    background: #000;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.6s;
+  }
+  #nagitoBinariaOverlay.visible { opacity: 1; display: flex; }
+  #nagitoBinariaOverlay.clickable { cursor: pointer; }
+  #nagitoBinariaOverlay.exiting  { opacity: 0; pointer-events: none; }
+  #nagitoBinariaBg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    opacity: 0;
+    transition: opacity 1.2s;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+  #nagitoBinariaBg.visible { opacity: 0.18; }
+  #nagitoBinariaBox {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    background: linear-gradient(180deg, rgba(10,10,14,0.96) 0%, rgba(10,10,14,1) 100%);
+    border-top: 2px solid var(--yellow, #d4a017);
+    padding: clamp(16px, 2.5vh, 28px) clamp(20px, 5vw, 80px);
+    min-height: 130px;
+    box-sizing: border-box;
+  }
+  #nagitoBinariaName {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(16px, 2vw, 22px);
+    letter-spacing: 3px;
+    color: var(--yellow, #d4a017);
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  #nagitoBinariaTalent {
+    font-size: clamp(9px, 1vw, 12px);
+    letter-spacing: 4px;
+    color: var(--muted, #555);
+    opacity: 0.85;
+  }
+  #nagitoBinariaText {
+    font-family: 'Special Elite', serif;
+    font-size: clamp(13px, 1.3vw, 17px);
+    color: var(--fg, #c8b99a);
+    line-height: 1.6;
+    min-height: 2.4em;
+    padding-right: clamp(80px, 20vw, 260px);
+  }
+  #nagitoBinariaContinue {
+    position: absolute;
+    bottom: clamp(14px, 2vh, 22px);
+    right: clamp(20px, 4vw, 60px);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted, #555);
+    animation: introBlink 1.1s ease-in-out infinite;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
   /* ── NAGITO ROULETTE OVERLAY ── */
   #nagitoRouletteOverlay {
     position: fixed;
@@ -6693,6 +6768,14 @@
               clearTimeout(_kaedeMidwayTimer);
               _kaedeMidwayTimer = setTimeout(_kaedeMidwayPrompt, CLAIRE_MIDWAY_MS);
             }
+            // Nagito binaria easter egg — triggers once per session when the song starts
+            if (!_nagitoBinariaTriggered
+                && _mascotActive === 'nagito'
+                && radioCurrentTrack
+                && radioCurrentTrack.videoId === 'aVgEa3Drj8s') {
+              _nagitoBinariaTriggered = true;
+              setTimeout(nagitoBinariaOpen, 1800);
+            }
             radioPlaying = true;
             radioStartElapsedTimer();
             gridVisualizerStart();
@@ -8749,9 +8832,10 @@
     const mascotLabel = document.getElementById('mascotName');
     if (mascotLabel) mascotLabel.textContent = 'currently: ' + mascot.name.split(' ')[0].charAt(0) + mascot.name.split(' ')[0].slice(1).toLowerCase();
     localStorage.setItem('carnage_mascot', key);
-    _mascotChatterLastLine = -1;
-    _mascotWellbeingAsks   = 0;
-    _mascotTalentAsks      = 0;
+    _mascotChatterLastLine  = -1;
+    _mascotWellbeingAsks    = 0;
+    _mascotTalentAsks       = 0;
+    _nagitoBinariaTriggered = false;
     _scheduleChatter();
   }
 
@@ -9022,6 +9106,100 @@
     document.getElementById('kaedeMusicOverlay').removeEventListener('click', _kmEndAdvance);
     _kmClose();
     radioSkip(); // advance queue now that the song is done
+  }
+
+  // ── NAGITO BINARIA EASTER EGG ────────────────────────────────
+  let _nagitoBinariaTriggered = false; // once per session
+
+  const NAGITO_BINARIA_BEATS = [
+    "...This song.",
+    "I haven't heard it in a while. Or maybe I stopped letting myself remember what it sounded like.",
+    "It reminds me of someone. Her name was Chiaki Nanami. Ultimate Gamer. She was in my class at Hope's Peak — and she was the heart of it. The kind of person who made everyone around her want to be better just by existing.",
+    "She wasn't designed to survive, you know. None of us were. Hope's Peak manufactured the whole thing — the hope, the bonds, the grief — specifically so that when it was torn apart, what was left could be shaped into despair. It worked. On almost everyone.",
+    "I used to think I understood what hope was. But she understood it better than I ever did. She played games with us. She smiled. She cared, not because she was programmed to — though she was — but because she chose to. Over and over.",
+    "...Ahaha. I'm sorry. You didn't ask for this. The song just opened something. Just — don't take the people around you for granted. Even here. Especially here.",
+  ];
+
+  let _nbBeat      = 0;
+  let _nbTyping    = false;
+  let _nbTypeTimer = null;
+  let _nbCurrentLine = '';
+
+  function _nbType(text, done) {
+    const el = document.getElementById('nagitoBinariaText');
+    el.textContent = '';
+    _nbTyping = true;
+    let i = 0;
+    clearInterval(_nbTypeTimer);
+    _nbTypeTimer = setInterval(() => {
+      el.textContent += text[i++];
+      if (i >= text.length) {
+        clearInterval(_nbTypeTimer);
+        _nbTyping = false;
+        if (done) done();
+      }
+    }, 28);
+  }
+
+  function _nbClose() {
+    const overlay = document.getElementById('nagitoBinariaOverlay');
+    overlay.classList.add('exiting');
+    overlay.classList.remove('clickable');
+    overlay.removeEventListener('click', _nbAdvance);
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      overlay.classList.remove('visible', 'exiting');
+      document.getElementById('nagitoBinariaBg').classList.remove('visible');
+      document.getElementById('mascotContainer').style.visibility = '';
+    }, 600);
+  }
+
+  function nagitoBinariaOpen() {
+    if (_mascotActive !== 'nagito') return;
+    const overlay = document.getElementById('nagitoBinariaOverlay');
+    _nbBeat = 0;
+    document.getElementById('nagitoBinariaText').textContent = '';
+    const cont = document.getElementById('nagitoBinariaContinue');
+    cont.style.opacity = '0';
+    cont.textContent = '▼ CLICK TO CONTINUE';
+    document.getElementById('mascotContainer').style.visibility = 'hidden';
+
+    overlay.style.display = 'flex';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      overlay.classList.add('visible');
+      // Fade in bg after a beat
+      setTimeout(() => document.getElementById('nagitoBinariaBg').classList.add('visible'), 400);
+      _nbCurrentLine = NAGITO_BINARIA_BEATS[0];
+      _nbType(_nbCurrentLine, () => {
+        cont.style.opacity = '1';
+        overlay.classList.add('clickable');
+        overlay.addEventListener('click', _nbAdvance);
+      });
+    }));
+  }
+
+  function _nbAdvance() {
+    const overlay = document.getElementById('nagitoBinariaOverlay');
+    const cont    = document.getElementById('nagitoBinariaContinue');
+    // Skip to end of current line if still typing
+    if (_nbTyping) {
+      clearInterval(_nbTypeTimer);
+      _nbTyping = false;
+      document.getElementById('nagitoBinariaText').textContent = _nbCurrentLine;
+      cont.style.opacity = '1';
+      return;
+    }
+    _nbBeat++;
+    if (_nbBeat < NAGITO_BINARIA_BEATS.length) {
+      cont.style.opacity = '0';
+      if (_nbBeat === NAGITO_BINARIA_BEATS.length - 1) cont.textContent = '▼ CLICK TO CLOSE';
+      _nbCurrentLine = NAGITO_BINARIA_BEATS[_nbBeat];
+      _nbType(_nbCurrentLine, () => { cont.style.opacity = '1'; });
+    } else {
+      overlay.classList.remove('clickable');
+      overlay.removeEventListener('click', _nbAdvance);
+      _nbClose();
+    }
   }
 
   // ── NAGITO ROULETTE EASTER EGG ───────────────────────────────
@@ -9481,6 +9659,16 @@
       <button class="verdict-mascot-btn cancel" onclick="verdictMascotCancel(event)">↩ NEVER MIND</button>
     </div>
     <div id="verdictMascotContinue">▼ CLICK TO CONTINUE</div>
+  </div>
+</div>
+
+<!-- NAGITO BINARIA EASTER EGG OVERLAY -->
+<div id="nagitoBinariaOverlay">
+  <img id="nagitoBinariaBg" src="assets/NagitoFDR.png" alt="" draggable="false" />
+  <div id="nagitoBinariaBox">
+    <div id="nagitoBinariaName">NAGITO KOMAEDA<span id="nagitoBinariaTalent">ULTIMATE LUCKY STUDENT</span></div>
+    <div id="nagitoBinariaText"></div>
+    <div id="nagitoBinariaContinue">▼ CLICK TO CONTINUE</div>
   </div>
 </div>
 
