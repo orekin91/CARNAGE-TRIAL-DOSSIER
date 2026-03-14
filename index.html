@@ -2774,6 +2774,62 @@
     opacity: 0.7;
   }
 
+  /* ── MASCOT QUESTIONNAIRE ── */
+  #mascotQuestionnaire {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: var(--panel-bg, #111114);
+    border: 1px solid var(--accent, #e03030);
+    border-radius: 10px;
+    padding: 10px 12px;
+    width: 200px;
+    margin-bottom: 6px;
+    pointer-events: auto;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  #mascotQuestionnaire.visible { opacity: 1; transform: translateY(0); }
+  .mq-header {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--accent, #e03030);
+    margin-bottom: 3px;
+    opacity: 0.85;
+  }
+  .mq-btn {
+    background: transparent;
+    border: 1px solid rgba(224,48,48,0.3);
+    border-radius: 5px;
+    color: var(--fg, #c8b99a);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10.5px;
+    padding: 5px 8px;
+    cursor: pointer;
+    text-align: left;
+    line-height: 1.4;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+    pointer-events: auto;
+  }
+  .mq-btn:hover { border-color: var(--accent, #e03030); background: rgba(224,48,48,0.08); color: var(--fg, #e8e6e3); }
+  .mq-btn:disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+  .mq-close {
+    background: transparent;
+    border: none;
+    color: rgba(224,48,48,0.4);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9.5px;
+    padding: 2px 0 0;
+    cursor: pointer;
+    text-align: right;
+    letter-spacing: 1px;
+    pointer-events: auto;
+    align-self: flex-end;
+  }
+  .mq-close:hover { color: var(--accent, #e03030); }
+
   /* hidden YT iframe */
   #ytHiddenFrame { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; left: -9999px; }
 
@@ -7790,6 +7846,17 @@
         "Don't push yourself too hard. We need you sharp, not exhausted!",
         "I'm rooting for you! But also — seriously, take a break if you need one!",
       ],
+      lines_wellbeing: [
+        "I'm doing okay! A little on edge, but staying positive — that's kind of my whole thing.",
+        "Honestly? I keep thinking about home. About the piano. But I can't let myself get distracted.",
+        "I'm holding up! Someone has to keep spirits from dropping, right? May as well be me.",
+        "Some days are harder than others. But as long as we're working together... I think we'll be okay.",
+      ],
+      lines_talent: [
+        "I'm the Ultimate Pianist! Music is everything to me — the way a piece can make you feel things words can't even reach.",
+        "Piano has been my whole life since I was little. There's a rhythm to everything, you know? Even to a case like this.",
+        "I've spent years practicing until my fingers knew the keys better than anything. I just wish I could play right now. It always helps me think.",
+      ],
     },
 
     nagito: {
@@ -7903,6 +7970,16 @@
         "It occurs to me that you haven't looked away from this in a while. For what it's worth... I noticed.",
         "The path to hope is long. Pace yourself. There's no glory in collapsing before the finish.",
       ],
+      lines_wellbeing: [
+        "Me? Don't worry about me. My well-being is entirely irrelevant — what matters is that hope emerges from all of this.",
+        "I'm... fine. Better than I deserve, honestly. When your luck is rock-bottom, things can only go up from here. Ahahaha...",
+        "Doing wonderfully! Having even a small role in helping hope prevail is more than someone like me could ever ask for.",
+      ],
+      lines_talent: [
+        "Ahahaha... I'm the Ultimate Lucky Student. Which isn't really a talent, is it? I didn't earn it. I was just born this way.",
+        "Super High School Level Luck. Sounds impressive until you realize it's entirely out of my hands. I'm just a vehicle for luck to flow through — for good or bad.",
+        "My talent is luck. And luck, unlike skill, doesn't care about who's carrying it. It's a blessing and a curse. Mostly a curse, if I'm being honest.",
+      ],
     },
 
     kyoko: {
@@ -8012,6 +8089,17 @@
         "Don't confuse persistence with effectiveness. Sometimes they're opposites.",
         "Take five minutes. The dossier will still be here. You need to be sharp when you come back.",
       ],
+      lines_wellbeing: [
+        "That's not a relevant question.",
+        "Functional. That's all that matters right now.",
+        "...Fine.",
+        "Asking about my well-being won't help solve anything. Direct your energy appropriately.",
+      ],
+      lines_talent: [
+        "Ultimate Detective. I observe, analyze, and deduce. I don't theorize without evidence.",
+        "I've solved cases most people wouldn't recognize as cases. The truth is always there — it requires patience and a willingness to look where others won't.",
+        "Detection isn't glamorous. It's methodical. Disciplined. Most people want a dramatic revelation. I prefer an irrefutable one.",
+      ],
     },
   };
 
@@ -8023,6 +8111,10 @@
   let _mascotChatterLastLine = -1;
 
   function mascotClick() {
+    // Don't fire a normal click if a long-press just triggered the questionnaire
+    if (_mascotLPFired) { _mascotLPFired = false; return; }
+    // Click while questionnaire is open → close it
+    if (_mqOpen) { mascotQuestionnaireClose(); return; }
     const mascot = MASCOTS[_mascotActive];
     if (!mascot) return;
 
@@ -8118,6 +8210,145 @@
       container.style.transform = '';
       setTimeout(() => sprite.classList.add('idle'), 300);
     }, 4500);
+  }
+
+  // ── MASCOT QUESTIONNAIRE ─────────────────────────────────────────────────────
+  let _mascotLPTimer   = null;
+  let _mascotLPFired   = false;
+  let _mqOpen          = false;
+
+  (function _initMascotLongPress() {
+    const sprite = document.getElementById('mascotSprite');
+    if (!sprite) return;
+    function lpStart() {
+      _mascotLPFired = false;
+      _mascotLPTimer = setTimeout(() => { _mascotLPFired = true; mascotQuestionnaireOpen(); }, 600);
+    }
+    function lpCancel() { clearTimeout(_mascotLPTimer); }
+    sprite.addEventListener('mousedown',  e => { if (e.button === 0) lpStart(); });
+    sprite.addEventListener('mouseup',    lpCancel);
+    sprite.addEventListener('mouseleave', lpCancel);
+    sprite.addEventListener('touchstart', e => { e.preventDefault(); lpStart(); }, { passive: false });
+    sprite.addEventListener('touchend',   lpCancel);
+    sprite.addEventListener('touchcancel',lpCancel);
+  })();
+
+  function mascotQuestionnaireOpen() {
+    const panel      = document.getElementById('mascotQuestionnaire');
+    const culpritBtn = document.getElementById('mqCulpritBtn');
+    const allSuspects = (typeof suspects !== 'undefined' ? suspects : []);
+    const allVictims  = (typeof victims  !== 'undefined' ? victims  : []);
+    const hasData = allSuspects.length > 0 || allVictims.length > 0;
+    culpritBtn.disabled = !hasData;
+    culpritBtn.title    = hasData ? '' : 'No suspects or victims added yet.';
+    _mqOpen = true;
+    panel.style.display = 'flex';
+    requestAnimationFrame(() => requestAnimationFrame(() => panel.classList.add('visible')));
+  }
+
+  function mascotQuestionnaireClose() {
+    const panel = document.getElementById('mascotQuestionnaire');
+    _mqOpen = false;
+    panel.classList.remove('visible');
+    setTimeout(() => { if (!_mqOpen) panel.style.display = 'none'; }, 220);
+  }
+
+  function mascotAnswer(type) {
+    mascotQuestionnaireClose();
+    const mascot = MASCOTS[_mascotActive];
+    if (!mascot) return;
+    let line      = '';
+    let spriteKey = 'talking';
+    let timeout   = 5500;
+
+    if (type === 'wellbeing') {
+      const pool = mascot.lines_wellbeing || mascot.lines;
+      line = pool[Math.floor(Math.random() * pool.length)];
+    } else if (type === 'talent') {
+      const pool = mascot.lines_talent || mascot.lines;
+      line = pool[Math.floor(Math.random() * pool.length)];
+    } else if (type === 'culprit') {
+      line      = _mascotCulpritGuess();
+      spriteKey = 'concerned';
+      timeout   = 7000;
+    }
+    if (!line) return;
+
+    const bubble    = document.getElementById('mascotBubble');
+    const sprite    = document.getElementById('mascotSprite');
+    const container = document.getElementById('mascotContainer');
+    sprite.src = MASCOTS[_mascotActive].sprites[spriteKey];
+    sprite.classList.remove('idle');
+    void sprite.offsetWidth;
+    bubble.textContent = line;
+    bubble.classList.add('visible');
+    clearTimeout(_mascotBubbleTimer);
+    _mascotBubbleTimer = setTimeout(() => {
+      bubble.classList.remove('visible');
+      sprite.src = MASCOTS[_mascotActive].sprites.resting;
+      container.style.transform = '';
+      setTimeout(() => sprite.classList.add('idle'), 300);
+    }, timeout);
+  }
+
+  function _mascotCulpritGuess() {
+    const allSuspects = (typeof suspects !== 'undefined' ? suspects : []);
+    const allVictims  = (typeof victims  !== 'undefined' ? victims  : []);
+
+    const weaponEl    = document.getElementById('murderWeaponText');
+    const murderWeapon = weaponEl ? weaponEl.textContent.trim() : '';
+    const selfKill    = /\b(c4|c4 explosive|poison)\b/i.test(murderWeapon);
+
+    // Count non-static weapons tied to a suspect
+    function countEvidence(s) {
+      return (s.suspectWeapons || []).filter(w => !w.startsWith('Static ')).length;
+    }
+
+    const active    = allSuspects.filter(s => s.status !== 'cleared');
+    const accused   = active.find(s => s.accused);
+    const guiltySus = active.filter(s => s.status === 'guilty' || s.status === 'sus');
+
+    let candidate = null;
+    if (accused) {
+      candidate = accused;
+    } else if (guiltySus.length > 0) {
+      candidate = guiltySus.reduce((best, s) => countEvidence(s) >= countEvidence(best) ? s : best);
+    } else if (active.length > 0) {
+      candidate = active.reduce((best, s) => countEvidence(s) >= countEvidence(best) ? s : best);
+    }
+
+    const name = candidate ? (candidate.displayName || candidate.nickname || candidate.name) : null;
+    const ev   = candidate ? countEvidence(candidate) : 0;
+    const statusNote = candidate?.accused      ? 'already accused'
+                     : candidate?.status === 'guilty' ? 'marked guilty'
+                     : candidate?.status === 'sus'    ? 'flagged as suspicious'
+                     : 'the only uncleared lead';
+    const evNote   = ev > 0
+      ? ` ${ev} piece${ev > 1 ? 's' : ''} of non-static evidence point${ev === 1 ? 's' : ''} their way.`
+      : ` No exclusive evidence ties them specifically — just process of elimination.`;
+    const selfNote = selfKill ? ` Also — ${murderWeapon} can be self-inflicted. Keep that in mind.` : '';
+
+    // No data at all
+    if (!name && !selfKill) {
+      if (_mascotActive === 'kyoko')   return "Insufficient data. Add suspects, weapons, and statuses before asking me this.";
+      if (_mascotActive === 'nagito')  return "Ahaha... there's nothing here for me to go on yet. Maybe that's a kind of hope — no despair has taken a defined shape.";
+      return "I don't have enough to go on yet! Add some suspects and evidence first and I'll give you my best guess!";
+    }
+    // Self-kill possibility with no clear suspect
+    if (!name && selfKill) {
+      if (_mascotActive === 'kyoko')   return `The weapon — ${murderWeapon} — is consistent with self-infliction. With no clear suspect, that possibility can't be dismissed.`;
+      if (_mascotActive === 'nagito')  return `Ahahaha... ${murderWeapon}. A weapon that can turn inward. Without anyone else to point to... maybe the victim chose this themselves. I hope I'm wrong.`;
+      return `If there's no one clear to point to, and the weapon is ${murderWeapon}... could it have been self-inflicted? I don't want to think that, but we have to consider it.`;
+    }
+
+    if (_mascotActive === 'kyoko') {
+      return `Based on available data: ${name} is the most probable perpetrator. They're ${statusNote}.${evNote}${selfNote} This is analysis, not certainty — verify the evidence.`;
+    }
+    if (_mascotActive === 'nagito') {
+      return `Ahahaha... someone like me really shouldn't be guessing, but... ${name}? They're ${statusNote}.${evNote}${selfNote} I hope for everyone's sake that hope finds a way through this.`;
+    }
+    // Kaede
+    return `This is hard to say, but if I had to guess... ${name}. They're ${statusNote}.${evNote}${selfNote} I could be completely wrong — please take this with a grain of salt. I'm not a detective.`;
   }
 
   function _mascotChatter() {
@@ -8897,9 +9128,16 @@
 </div>
 
 <div id="mascotContainer">
+  <div id="mascotQuestionnaire">
+    <div class="mq-header">WHAT WOULD YOU LIKE TO ASK?</div>
+    <button class="mq-btn" onclick="mascotAnswer('wellbeing')">How are you doing?</button>
+    <button class="mq-btn" onclick="mascotAnswer('talent')">Tell me about your talent.</button>
+    <button class="mq-btn" id="mqCulpritBtn" onclick="mascotAnswer('culprit')">Who do you think is the culprit?</button>
+    <button class="mq-close" onclick="mascotQuestionnaireClose()">✕ CLOSE</button>
+  </div>
   <div id="mascotBubble"></div>
   <div id="mascotNameTag">KAEDE AKAMATSU</div>
-  <img id="mascotSprite" src="assets/kaede_neutral.png" alt="Mascot" draggable="false" onclick="mascotClick()" title="Click me!" />
+  <img id="mascotSprite" src="assets/kaede_neutral.png" alt="Mascot" draggable="false" onclick="mascotClick()" title="Click me! (hold for questions)" />
 </div>
 
 <div id="jumpscareOverlay">
