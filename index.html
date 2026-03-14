@@ -2772,7 +2772,28 @@
     color: var(--accent, #e03030);
     margin-bottom: 2px;
     opacity: 0.7;
+    display: flex;
+    align-items: center;
+    gap: 5px;
   }
+  #mascotAskBtn {
+    background: transparent;
+    border: 1px solid rgba(224,48,48,0.4);
+    border-radius: 50%;
+    color: var(--accent, #e03030);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 8px;
+    width: 14px;
+    height: 14px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    pointer-events: auto;
+    opacity: 0.7;
+    transition: opacity 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+  }
+  #mascotAskBtn:hover { opacity: 1; border-color: var(--accent, #e03030); }
 
   /* ── MASCOT QUESTIONNAIRE ── */
   #mascotQuestionnaire {
@@ -3223,6 +3244,81 @@
     visibility: hidden;
     pointer-events: none;
   }
+
+  /* ── MODE PICKER ── */
+  .gate-mode-pick {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+    animation: fadeSlideDown 0.35s ease both;
+  }
+  .mp-cards { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+  .mp-card {
+    width: 100%;
+    background: transparent;
+    border: 1px solid rgba(var(--accent-rgb), 0.3);
+    border-radius: 6px;
+    padding: 14px 16px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.2s, background 0.2s;
+    color: inherit;
+    font-family: inherit;
+  }
+  .mp-card:hover { border-color: var(--accent); background: rgba(var(--accent-rgb), 0.07); }
+  .mp-card--enhanced { border-color: var(--accent); background: rgba(var(--accent-rgb), 0.04); }
+  .mp-card--enhanced:hover { background: rgba(var(--accent-rgb), 0.11); }
+  .mp-card-label {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 20px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+  }
+  .mp-card--simple .mp-card-label { color: var(--muted); }
+  .mp-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 8.5px;
+    letter-spacing: 1.5px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    opacity: 0.85;
+    vertical-align: middle;
+  }
+  .mp-badge--dim { border-color: var(--muted); color: var(--muted); opacity: 0.6; }
+  .mp-card-desc {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10.5px;
+    color: var(--fg, #c8b99a);
+    opacity: 0.65;
+    line-height: 1.5;
+  }
+
+  /* ── SIMPLE MODE — suppress extras ── */
+  body.simple-mode .radio-tab,
+  body.simple-mode .settings-tab,
+  body.simple-mode #mascotContainer { display: none !important; }
+  /* Skip entry animations — everything appears instantly */
+  body.simple-mode.dossier-revealed .header,
+  body.simple-mode.dossier-revealed .divider,
+  body.simple-mode.dossier-revealed .trial-timer-bar,
+  body.simple-mode.dossier-revealed .panel-draggable,
+  body.simple-mode.dossier-revealed .notes-tab {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+  }
+  body.simple-mode.dossier-revealed::after { display: none !important; }
 
   /* ── RESPONSIVE SCALING ─────────────────────────────────────────
      All sizing is driven by clamp() tokens injected here.
@@ -3770,6 +3866,25 @@
     </div>
     <button class="gate-enter-btn" id="gateEnterBtn">ACCESS DOSSIER</button>
     <div class="gate-footer">AUTHORIZED PERSONNEL ONLY</div>
+  </div>
+
+  <!-- MODE PICKER (shown after name entry) -->
+  <div class="gate-mode-pick" id="gateModePick">
+    <div class="gate-logo">CARNAGE</div>
+    <div class="gate-subtitle">Trial Dossier System</div>
+    <div class="gate-divider"></div>
+    <div class="gate-prompt">Choose your experience</div>
+    <div class="mp-cards">
+      <button class="mp-card mp-card--enhanced" onclick="selectMode('enhanced')">
+        <div class="mp-card-label">ENHANCED <span class="mp-badge">RECOMMENDED</span></div>
+        <div class="mp-card-desc">Full experience — mascot companion, radio player, animations, settings, and all features.</div>
+      </button>
+      <button class="mp-card mp-card--simple" onclick="selectMode('simple')">
+        <div class="mp-card-label">SIMPLE <span class="mp-badge mp-badge--dim">LOWER-END DEVICES</span></div>
+        <div class="mp-card-desc">Core suspect tracking only. No mascot, no radio, no animations. Best for low-end devices.</div>
+      </button>
+    </div>
+    <div class="gate-footer">CHOICE IS LOCKED IN FOR THIS SESSION</div>
   </div>
 </div>
 
@@ -6499,7 +6614,7 @@
     radioSetVolume(radioVolume);
   });
 
-  // Load YT IFrame API (hidden)
+  // Load YT IFrame API at page start (needed for gate-screen menu music)
   (function() {
     const tag = document.createElement('script');
     tag.src = 'https://www.youtube.com/iframe_api';
@@ -6518,8 +6633,8 @@
       events: {
         onReady: () => {
           ytPlayer.setVolume(radioVolume);
-          // Only autoplay if user has already entered the dossier
-          if (!document.getElementById('investigatorGate')) radioPlayNext();
+          // Only autoplay in enhanced mode after the gate is gone
+          if (carnageMode === 'enhanced' && !document.getElementById('investigatorGate')) radioPlayNext();
         },
         onStateChange: e => {
           if (e.data === YT.PlayerState.ENDED) {
@@ -6911,6 +7026,41 @@
     });
   }
 
+  // ── MODE SELECTION ──
+  let carnageMode = null; // 'enhanced' | 'simple'
+
+  function selectMode(mode) {
+    carnageMode = mode;
+    const gate = document.getElementById('investigatorGate');
+
+    if (mode === 'simple') {
+      document.body.classList.add('simple-mode');
+      // Stop menu music — simple mode has no audio
+      if (typeof menuMusicPlayer !== 'undefined' && menuMusicPlayer && menuMusicPlayer.stopVideo) {
+        menuMusicPlayer.stopVideo();
+      }
+    } else {
+      // Enhanced: stop menu music (radio takes over after entry)
+      if (typeof menuMusicPlayer !== 'undefined' && menuMusicPlayer && menuMusicPlayer.stopVideo) {
+        menuMusicPlayer.stopVideo();
+      }
+    }
+
+    // Animate gate out
+    gate.classList.add('gate-exit');
+    gate.addEventListener('animationend', () => {
+      gate.remove();
+      document.body.classList.remove('gate-locked');
+      document.body.classList.add('dossier-revealed');
+      if (mode === 'enhanced') {
+        // If ytPlayer already ready (API loaded before mode selection), start radio now
+        if (ytPlayer && ytApiReady && !radioCurrentTrack) radioPlayNext();
+        initMascot();
+        setTimeout(kaedeIntroStart, 1400);
+      }
+    }, { once: true });
+  }
+
   // ── INVESTIGATOR GATE ──
   (function() {
     const gate      = document.getElementById('investigatorGate');
@@ -6937,22 +7087,14 @@
       const invField = document.getElementById('investigatorInput');
       if (invField && !invField.value) invField.value = name;
 
-      // Stop menu music when entering dossier
-      if (menuMusicPlayer && menuMusicPlayer.stopVideo) {
-        menuMusicPlayer.stopVideo();
-      }
-
-      // Unlock main content, animate gate out
-      gate.classList.add('gate-exit');
-      gate.addEventListener('animationend', () => {
-        gate.remove();
-        document.body.classList.remove('gate-locked');
-        document.body.classList.add('dossier-revealed');
-        // If radio player already ready, start playing immediately
-        if (ytPlayer && ytApiReady && !radioCurrentTrack) radioPlayNext();
-        // Launch Kaede intro after panels have animated in
-        setTimeout(kaedeIntroStart, 1400);
-      }, { once: true });
+      // Fade the gate-box out and slide in the mode picker
+      const gateBox  = gate.querySelector('.gate-box');
+      const modePick = document.getElementById('gateModePick');
+      gateBox.style.cssText += 'opacity:0;transform:translateY(-10px);transition:opacity 0.25s,transform 0.25s;pointer-events:none;';
+      setTimeout(() => {
+        gateBox.style.display = 'none';
+        modePick.style.display = 'flex';
+      }, 270);
     }
 
     btn.addEventListener('click', tryEnter);
@@ -8111,8 +8253,6 @@
   let _mascotChatterLastLine = -1;
 
   function mascotClick() {
-    // Don't fire a normal click if a long-press just triggered the questionnaire
-    if (_mascotLPFired) { _mascotLPFired = false; return; }
     // Click while questionnaire is open → close it
     if (_mqOpen) { mascotQuestionnaireClose(); return; }
     const mascot = MASCOTS[_mascotActive];
@@ -8213,25 +8353,7 @@
   }
 
   // ── MASCOT QUESTIONNAIRE ─────────────────────────────────────────────────────
-  let _mascotLPTimer   = null;
-  let _mascotLPFired   = false;
-  let _mqOpen          = false;
-
-  (function _initMascotLongPress() {
-    const sprite = document.getElementById('mascotSprite');
-    if (!sprite) return;
-    function lpStart() {
-      _mascotLPFired = false;
-      _mascotLPTimer = setTimeout(() => { _mascotLPFired = true; mascotQuestionnaireOpen(); }, 600);
-    }
-    function lpCancel() { clearTimeout(_mascotLPTimer); }
-    sprite.addEventListener('mousedown',  e => { if (e.button === 0) lpStart(); });
-    sprite.addEventListener('mouseup',    lpCancel);
-    sprite.addEventListener('mouseleave', lpCancel);
-    sprite.addEventListener('touchstart', e => { e.preventDefault(); lpStart(); }, { passive: false });
-    sprite.addEventListener('touchend',   lpCancel);
-    sprite.addEventListener('touchcancel',lpCancel);
-  })();
+  let _mqOpen = false;
 
   function mascotQuestionnaireOpen() {
     const panel      = document.getElementById('mascotQuestionnaire');
@@ -8420,7 +8542,7 @@
   }
 
   // Init on load — deferred so mascot DOM elements exist
-  document.addEventListener('DOMContentLoaded', function initMascot() {
+  function initMascot() {
     // Restore saved mascot choice — always apply, even for kaede
     const savedMascot = localStorage.getItem('carnage_mascot') || 'kaede';
     _mascotActive = MASCOTS[savedMascot] ? savedMascot : 'kaede';
@@ -8441,7 +8563,7 @@
     setTimeout(() => document.getElementById('mascotSprite').classList.add('idle'), 800);
     // Start periodic chatter
     _scheduleChatter();
-  });
+  }
 
   // ── KAEDE MUSIC EASTER EGG ───────────────────────────────────
   let _kaedeNeutralClicks = 0;
@@ -9136,8 +9258,8 @@
     <button class="mq-close" onclick="mascotQuestionnaireClose()">✕ CLOSE</button>
   </div>
   <div id="mascotBubble"></div>
-  <div id="mascotNameTag">KAEDE AKAMATSU</div>
-  <img id="mascotSprite" src="assets/kaede_neutral.png" alt="Mascot" draggable="false" onclick="mascotClick()" title="Click me! (hold for questions)" />
+  <div id="mascotNameTag">KAEDE AKAMATSU<button id="mascotAskBtn" onclick="mascotQuestionnaireOpen()" title="Ask a question">?</button></div>
+  <img id="mascotSprite" src="assets/kaede_neutral.png" alt="Mascot" draggable="false" onclick="mascotClick()" title="Click me!" />
 </div>
 
 <div id="jumpscareOverlay">
