@@ -572,7 +572,7 @@
     gap: 12px;
     margin: 14px 0 10px;
     color: var(--muted);
-    font-size: 9px;
+    font-size: var(--fs-tiny, 9px);
     letter-spacing: 3px;
   }
   .participants-divider::before,
@@ -3241,6 +3241,22 @@
   /* ── Side tab vertical positions scale with viewport height ─ */
   .radio-tab    { top: clamp(160px, 28vh, 340px); }
   .notes-tab    { top: clamp(220px, 36vh, 420px); }
+  .settings-tab { top: clamp(60px,  10vh, 120px); }
+
+  /* ── Side tab buttons scale with viewport ──────────────────── */
+  .radio-tab-btn,
+  .notes-tab-btn,
+  .settings-tab-btn {
+    font-size:   clamp(8px, 0.65vw, 10px);
+    padding:     clamp(10px, 1.2vh, 14px) clamp(5px, 0.55vw, 8px);
+    gap:         clamp(5px, 0.6vh, 8px);
+    letter-spacing: clamp(1px, 0.2vw, 2px);
+  }
+  .radio-tab-btn .radio-icon,
+  .notes-tab-btn .notes-icon,
+  .settings-tab-btn .settings-icon {
+    font-size: clamp(11px, 1.1vw, 14px);
+  }
 
   /* ── Mascot scales with viewport width ─────────────────────── */
   #mascotSprite {
@@ -3261,6 +3277,8 @@
     .trial-timer-bar{ gap: 10px; flex-wrap: wrap; }
     .radio-tab      { top: 160px; }
     .notes-tab      { top: 220px; }
+    .settings-tab   { top: 64px; }
+    .radio-tab-btn, .notes-tab-btn, .settings-tab-btn { font-size: 8px; padding: 10px 5px; }
   }
 
   /* ── Small mobile (≤480px) ──────────────────────────────────── */
@@ -3269,6 +3287,8 @@
     .verdict-box{ flex-direction: column; }
     .radio-tab  { top: 140px; }
     .notes-tab  { top: 196px; }
+    .settings-tab { top: 56px; }
+    .radio-tab-btn, .notes-tab-btn, .settings-tab-btn { font-size: 7px; padding: 8px 4px; gap: 4px; }
   }
 
   /* ── KAEDE INTRO SEQUENCE ───────────────────────────────────── */
