@@ -8037,6 +8037,12 @@
         "Piano. Keys. Music. Still the answer. Do you want me to teach you a scale? Maybe later — culprit first!",
         "Okay, I respect the enthusiasm, but at some point you've just gotta trust that I know what I'm doing and get back to the case!",
       ],
+      lines_song_recommend: [
+        "Oh, {song}! That one came to mind right away. I hope it helps you focus — or just gives you a little break. Music has a way of making everything feel more manageable.",
+        "Hmm... {song}! Trust me on this one. I've got good taste in music, I promise!",
+        "You know what would be perfect right now? {song}. Just let it play and breathe for a second. You've earned it.",
+        "I'd go with {song}. There's something in it that always helps me clear my head when things get heavy.",
+      ],
       lines_cheer: [
         "Hey — have you taken a break recently? Don't forget to stretch! Even I know rest is important!",
         "Just checking in! How are you holding up? Remember to take care of yourself, okay?",
@@ -8186,6 +8192,12 @@
         "If I didn't know better, I'd say you were trying to distract me. Which is funny, because I have nothing to be distracted FROM.",
         "Asking again... you must really want to understand luck. I respect that. But even luck can't solve a murder — only you can do that.",
       ],
+      lines_song_recommend: [
+        "Ahaha... a song recommendation from someone like me feels almost presumptuous. But — {song}. There's something in it that feels like hope, even if only faintly.",
+        "Music is a strange kind of hope, isn't it? It reaches people when nothing else can. Try {song}. I think it'll resonate with you.",
+        "{song}. I can't tell you why that came to mind first — maybe my luck is guiding me toward something meaningful. Or maybe it's just noise. You'll have to decide.",
+        "If I had to choose something for you right now... {song}. Don't ask me to explain it. Some things only make sense when you listen.",
+      ],
       lines_cheer: [
         "Someone as worthless as me shouldn't say this, but... you've been at this a while. Rest is part of the process.",
         "The pursuit of truth is noble. But even noble pursuits require a rested mind. Step away for a moment.",
@@ -8329,6 +8341,12 @@
         "I've described my talent twice now. If you need a third explanation, I'd suggest taking notes.",
         "My answer won't change. Though I suppose if you ask enough times I might start wondering why.",
         "Detection. Evidence. Deduction. Still the same. Can we move forward now?",
+      ],
+      lines_song_recommend: [
+        "{song}. I find certain pieces aid concentration. Whether it works for you depends on how you listen.",
+        "If you need something to listen to: {song}. I don't make recommendations lightly.",
+        "{song}. It came to mind. That's all I'll say about it.",
+        "Try {song}. I've found it useful for focused work. Take that for what it's worth.",
       ],
       lines_cheer: [
         "You've been at this for a while. A rested investigator is a better investigator. Step away briefly.",
@@ -8551,6 +8569,26 @@
       const pool = useRepeat ? mascot.lines_talent_repeat : (mascot.lines_talent || mascot.lines);
       line = pool[Math.floor(Math.random() * pool.length)];
       if (useRepeat) spriteKey = 'concerned';
+    } else if (type === 'song') {
+      // Kaede biases toward piano; everyone else draws from the full playlist
+      const songPool = (_mascotActive === 'kaede') ? KAEDE_PIANO_PLAYLIST : MASCOT_PLAYLIST;
+      const song = songPool[Math.floor(Math.random() * songPool.length)];
+      const inRoom = typeof roomCode !== 'undefined' && roomCode;
+      // Build the spoken line
+      const tplPool = mascot.lines_song_recommend || mascot.lines_cheer;
+      const tpl = tplPool[Math.floor(Math.random() * tplPool.length)];
+      line = tpl.replace('{song}', `"${song.title}"`);
+      spriteKey = 'cheer';
+      timeout = 6500;
+      if (!inRoom) {
+        radioQueue.unshift({ videoId: song.videoId, title: song.title, duration: null });
+        radioSkip();
+        if (typeof radioOpen !== 'undefined' && !radioOpen) {
+          radioOpen = true;
+          document.getElementById('radioPanel').classList.add('open');
+          document.getElementById('radioTabBtn').classList.add('open');
+        }
+      }
     } else if (type === 'culprit') {
       line      = _mascotCulpritGuess();
       spriteKey = _mascotLastCulpritSpriteKey;
@@ -8770,7 +8808,33 @@
   let _kmTyping           = false;
 
   const CLAIRE_DE_LUNE  = { videoId: 'KBKYw1P2LxU', title: 'Clair de Lune — Debussy', duration: null };
-  const CLAIRE_MIDWAY_MS = 152000; // ~2:32 into the 5:05 piece
+  const CLAIRE_MIDWAY_MS = 152000;
+
+  // ── MASCOT SONG RECOMMENDATION PLAYLIST ─────────────────────────────────────
+  const MASCOT_PLAYLIST = [
+    { videoId: 'm_DJ8g9qmYE', title: 'Box 15 (Danganronpa Remix)' },
+    { videoId: 'HoKXTQ0aZEk', title: 'Discussion -HOPE VS DESPAIR- Instrumental Mix' },
+    { videoId: 'YDxriyB_-sE', title: 'Battle! Debate Scrum (ZZZ x DR V3 Mashup)' },
+    { videoId: 'aVgEa3Drj8s', title: 'binaria — カミイロアワせ' },
+    { videoId: 'vATlONpoS1I', title: 'Absolute Despair Girl' },
+    { videoId: '2PK9c8RWjnQ', title: 'New Classmate of the Dead' },
+    { videoId: 'cPRklYJytzo', title: 'RE Underground Trial (DR2 Remix)' },
+    { videoId: 'MIjckiIxAP4', title: 'Climatic Re-Enactment (DR Remix)' },
+    { videoId: 's11EYYzJL5A', title: 'V3 Rebuttal -CROSS SWORD-' },
+    { videoId: 'T9I7Qc7kTBE', title: 'SUPER M.T.B.' },
+    { videoId: 'rAF3M9bK9CQ', title: 'We are Charlie Kirk' },
+    { videoId: 'JX5O3n9K_d0', title: 'Never Forget — Halo 3 OST' },
+    { videoId: 'q9sDCHySub4', title: 'Small Fish in a Small Pond' },
+    { videoId: 'zoUNCoOzAGo', title: 'ENDLESS' },
+    { videoId: 'P4bKZT_Eg4A', title: 'Never Fade Away (SAMURAI Cover)' },
+    { videoId: 'MDk41PC4lLY', title: 'Guilty Confiscation — Death Penalty' },
+  ];
+  // Kaede biases toward her favourite piano pieces
+  const KAEDE_PIANO_PLAYLIST = [
+    { videoId: 'KBKYw1P2LxU', title: 'Clair de Lune — Debussy' },
+    { videoId: 'aVgEa3Drj8s', title: 'binaria — カミイロアワせ' },
+    { videoId: 'JX5O3n9K_d0', title: 'Never Forget — Halo 3 OST' },
+  ]; // ~2:32 into the 5:05 piece
   let _kmAwaitingMidway = false; // true after YES click; timer starts when song begins PLAYING
 
   function _kmType(text, done) {
@@ -9469,6 +9533,7 @@
       <div class="mq-header">WHAT WOULD YOU LIKE TO ASK?</div>
       <button class="mq-btn" onclick="mascotAnswer('wellbeing')">How are you doing?</button>
       <button class="mq-btn" onclick="mascotAnswer('talent')">Tell me about your talent.</button>
+      <button class="mq-btn" onclick="mascotAnswer('song')">Recommend a song.</button>
       <button class="mq-btn" id="mqCulpritBtn" onclick="mascotAnswer('culprit')">Who do you think is the culprit?</button>
       <button class="mq-close" onclick="mascotQuestionnaireClose()">✕ CLOSE</button>
     </div>
