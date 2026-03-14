@@ -7958,24 +7958,18 @@
 
     overlay.style.display = 'flex';
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      overlay.classList.add('visible', 'clickable');
+      overlay.classList.add('visible');
       _kmCurrentLine = "Hey, um... I've been thinking. You've all been working so hard and it seems really stressful. Would you like me to play something soothing? I know a piece that always helps me clear my head.";
       _kmType(_kmCurrentLine, () => {
         document.getElementById('kaedeMusicContinue').style.opacity = '';
+        overlay.classList.add('clickable');
+        overlay.addEventListener('click', _kmAdvance);
       });
     }));
-    overlay.addEventListener('click', _kmAdvance);
   }
 
   function _kmAdvance() {
-    if (_kmPhase !== 'ask') return;
-    if (_kmTyping) {
-      clearInterval(_kmTypeTimer);
-      _kmTyping = false;
-      document.getElementById('kaedeMusicText').textContent = _kmCurrentLine;
-      document.getElementById('kaedeMusicContinue').style.opacity = '';
-      return;
-    }
+    if (_kmPhase !== 'ask' || _kmTyping) return;
     _kmPhase = 'confirm';
     const overlay = document.getElementById('kaedeMusicOverlay');
     overlay.classList.remove('clickable');
