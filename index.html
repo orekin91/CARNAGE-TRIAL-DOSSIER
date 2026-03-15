@@ -3406,7 +3406,7 @@
   .rumiko-ask-btn {
     position: absolute;
     top: 8px;
-    right: 8px;
+    right: -14px;
     width: 22px;
     height: 22px;
     border-radius: 50%;
@@ -4323,7 +4323,7 @@
       <button class="mq-close" onclick="rumikoQuestionnaireClose()">✕ CLOSE</button>
     </div>
     <div class="gate-rumiko-bubble" id="gateRumikoBubble"></div>
-    <img class="gate-rumiko-img" src="assets/Rumiko.png" alt="Rumiko" />
+    <img class="gate-rumiko-img" src="assets/Rumiko.png" alt="Rumiko" draggable="false" />
     <button class="rumiko-ask-btn" id="rumikoAskBtn" onclick="rumikoQuestionnaireOpen()" title="Ask Rumiko a question">?</button>
     <div class="gate-rumiko-label">RUMIKO RUMIYA</div>
   </div>
@@ -7610,10 +7610,12 @@
     "Music during an investigation is a personal choice. I won't judge. Well. I might a little.",
   ];
   let _rumikoMQOpen = false;
+  let _rumikoAsked = false;
 
   function rumikoQuestionnaireOpen() {
     const panel = document.getElementById('rumikoQuestionnaire');
     _rumikoMQOpen = true;
+    _rumikoAsked = true;
     panel.style.display = 'flex';
     requestAnimationFrame(() => requestAnimationFrame(() => panel.classList.add('visible')));
   }
@@ -7694,6 +7696,7 @@
     const rumiko = document.getElementById('gateRumiko');
     rumiko.addEventListener('mouseleave', () => {
       if (_rumikoAnswerActive) { _rumikoAnswerActive = false; return; }
+      if (_rumikoAsked) return;
       idx = (idx + 1) % _rumikoLines.length;
       el.textContent = _rumikoLines[idx];
     });
