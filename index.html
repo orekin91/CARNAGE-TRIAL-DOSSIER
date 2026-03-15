@@ -7838,17 +7838,21 @@
       }
       errEl.classList.remove('visible');
 
-      const { filtered, clean: name } = _filterName(raw);
+      const { filtered, clean } = _filterName(raw);
 
-      // If a slur was detected, show Rumiko's comment and correct the input
+      // If a slur was detected, block entry, clear the field, and let Rumiko respond
       if (filtered) {
-        input.value = name;
+        input.value = '';
+        input.focus();
         const bubble = document.getElementById('gateRumikoBubble');
         if (bubble) {
           _rumikoAnswerActive = true;
           bubble.textContent = _rumikoFilterLines[Math.floor(Math.random() * _rumikoFilterLines.length)];
         }
+        return;
       }
+
+      const name = clean;
 
       // Store investigator name for use elsewhere on the page
       window.investigatorName = name;
@@ -8058,28 +8062,47 @@
     });
   }
 
-  rtdb.ref('active_users').on('value', snap => {
+  // ── ACTIVE USERS — uses rooms/__lobby/presence so no extra rules deployment needed ──
+  // The $roomCode rules already allow: create room when !data.exists(), and
+  // write presence entries when !data.exists() || newData.val() === null.
+
+  const _presenceId     = Date.now() + '_' + Math.random().toString(36).slice(2);
+  const _presenceJoined = Date.now();
+  const _lobbyPresRef   = rtdb.ref('rooms/__lobby/presence');
+
+  rtdb.ref('rooms/__lobby/presence').on('value', snap => {
     _renderActiveUsersList(snap);
   }, err => {
     console.warn('[active users] Firebase read failed:', err.code, err.message);
   });
 
-  // Register this visitor's presence and auto-remove on disconnect
+  // Ensure the lobby room exists with a created field so subsequent writes are allowed
+  rtdb.ref('rooms/__lobby').once('value').then(snap => {
+    if (!snap.exists() || !snap.child('created').exists()) {
+      return rtdb.ref('rooms/__lobby').set({ created: Date.now() });
+    }
+  }).catch(() => {});
+
+  // Register presence: remove first (idempotent on reconnect), then re-add
   (function() {
-    const pid = Date.now() + '_' + Math.random().toString(36).slice(2);
-    _activeUsersPresRef = rtdb.ref('active_users/' + pid);
+    _activeUsersPresRef = rtdb.ref('rooms/__lobby/presence/' + _presenceId);
     rtdb.ref('.info/connected').on('value', snap => {
       if (!snap.val()) return;
-      _activeUsersPresRef.onDisconnect().remove();
-      _activeUsersPresRef.set({ name: window.investigatorName || 'INVESTIGATOR' });
+      _activeUsersPresRef.remove().catch(() => {}).finally(() => {
+        _activeUsersPresRef.onDisconnect().remove();
+        _activeUsersPresRef.set({ joined: _presenceJoined, name: window.investigatorName || 'INVESTIGATOR' }).catch(() => {});
+      });
     });
   })();
 
-  // Update presence name once investigator enters their name at the gate
+  // Update presence name: delete then re-add so the !data.exists() rule passes
   function _updatePresenceName(name) {
-    if (_activeUsersPresRef) {
-      _activeUsersPresRef.set({ name: name || 'INVESTIGATOR' }).catch(() => {});
-    }
+    if (!_activeUsersPresRef) return;
+    const clean = name || 'INVESTIGATOR';
+    _activeUsersPresRef.remove().catch(() => {}).finally(() => {
+      _activeUsersPresRef.onDisconnect().remove();
+      _activeUsersPresRef.set({ joined: _presenceJoined, name: clean }).catch(() => {});
+    });
   }
 
   // ── INVESTIGATOR NAME FILTER (main page) ──
