@@ -7464,6 +7464,7 @@
       const gateBox  = gate.querySelector('.gate-box');
       const modePick = document.getElementById('gateModePick');
       gateBox.style.cssText += 'opacity:0;transform:translateY(-10px);transition:opacity 0.25s,transform 0.25s;pointer-events:none;';
+      document.getElementById('gateAboutBtn').style.display = 'none';
       setTimeout(() => {
         gateBox.style.display = 'none';
         modePick.style.display = 'flex';
