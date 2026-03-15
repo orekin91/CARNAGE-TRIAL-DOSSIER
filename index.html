@@ -3308,14 +3308,14 @@
 
   /* ── GATE RUMIKO CHARACTER ── */
   @keyframes rumikoFloat {
-    0%, 100% { transform: translateX(0) translateY(0px); }
-    50%       { transform: translateX(0) translateY(-14px); }
+    0%, 100% { transform: translateY(-50%); }
+    50%       { transform: translateY(calc(-50% - 14px)); }
   }
   .gate-rumiko {
     position: absolute;
-    bottom: 0;
-    right: clamp(30px, 6vw, 100px);
-    width: clamp(220px, 26vw, 380px);
+    left: clamp(20px, 5vw, 80px);
+    top: 50%;
+    width: clamp(280px, 22vw, 420px);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -3349,16 +3349,17 @@
   .gate-rumiko-bubble {
     position: absolute;
     bottom: calc(100% + 8px);
-    right: 0;
+    left: 50%;
+    transform: translateX(-50%);
     background: #16161c;
     border: 1px solid var(--border);
-    border-radius: 6px 6px 0 6px;
+    border-radius: 6px 6px 6px 0;
     padding: 10px 14px;
     font-family: 'Share Tech Mono', monospace;
     font-size: 9px;
     letter-spacing: 1px;
     line-height: 1.7;
-    color: var(--muted);
+    color: var(--accent);
     max-width: 220px;
     white-space: normal;
     opacity: 1;
@@ -3369,12 +3370,12 @@
     content: '';
     position: absolute;
     bottom: -6px;
-    right: 16px;
+    left: 16px;
     width: 10px;
     height: 6px;
     background: #16161c;
-    clip-path: polygon(0 0, 100% 0, 100% 100%);
-    border-right: 1px solid var(--border);
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+    border-left: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
   }
 
