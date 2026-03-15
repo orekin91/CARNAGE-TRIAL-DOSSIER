@@ -8342,8 +8342,6 @@
       });
     }
 
-    // Process any incoming chat signals
-    _chatProcessSnapshot(snap);
   }
 
   // ── ACTIVE USERS — uses rooms/__lobby/presence so no extra rules deployment needed ──
@@ -8402,79 +8400,72 @@
   }
   function _chatDelete(key)     { return _chatSigRef(key).remove().catch(() => {}); }
 
-  function _chatProcessSnapshot(snap) {
-    const now = Date.now();
-    snap.forEach(child => {
-      const key = child.key;
-      if (!key.startsWith('chat__')) return;
-      if (_chatProcessed.has(key)) return;
-      const val = child.val();
-      if (!val || typeof val !== 'object') return;
-      // Ignore stale signals (older than 30s)
-      if (val.t && (now - val.t) > 30000) { _chatProcessed.add(key); return; }
+  function _chatProcessSignal(key, val) {
+    if (_chatProcessed.has(key)) return;
+    if (!val || typeof val !== 'object') return;
+    if (val.t && (Date.now() - val.t) > 30000) { _chatProcessed.add(key); return; }
 
-      const parts = key.split('__');
-      const type  = parts[1];
+    const parts = key.split('__');
+    const type  = parts[1];
 
-      if (type === 'req') {
-        // chat__req__fromPid__toPid
-        const fromPid = parts[2], toPid = parts[3];
-        if (toPid !== _presenceId) return;
-        _chatProcessed.add(key);
-        if (_chatBlocked.has(fromPid)) { _chatDelete(key); return; }
-        _chatShowReqToast(fromPid, val.n || 'INVESTIGATOR', key);
+    if (type === 'req') {
+      const fromPid = parts[2], toPid = parts[3];
+      if (toPid !== _presenceId) return;
+      _chatProcessed.add(key);
+      if (_chatBlocked.has(fromPid)) { _chatDelete(key); return; }
+      _chatShowReqToast(fromPid, val.n || 'INVESTIGATOR', key);
 
-      } else if (type === 'ack') {
-        // chat__ack__fromPid__toPid — toPid accepted my (fromPid's) request
-        const fromPid = parts[2], toPid = parts[3];
-        if (fromPid !== _presenceId) return;
-        _chatProcessed.add(key);
-        _chatDelete(key);
-        const otherName = val.n || 'INVESTIGATOR';
-        _chatSession = { sessionId: _chatSessId(_presenceId, toPid), otherPid: toPid, otherName };
-        _chatOpen(otherName);
+    } else if (type === 'ack') {
+      const fromPid = parts[2], toPid = parts[3];
+      if (fromPid !== _presenceId) return;
+      _chatProcessed.add(key);
+      _chatDelete(key);
+      _chatSession = { sessionId: _chatSessId(_presenceId, toPid), otherPid: toPid, otherName: val.n || 'INVESTIGATOR' };
+      _chatOpen(val.n || 'INVESTIGATOR');
 
-      } else if (type === 'dcl') {
-        // chat__dcl__fromPid__toPid — toPid declined my request
-        const fromPid = parts[2], toPid = parts[3];
-        if (fromPid !== _presenceId) return;
-        _chatProcessed.add(key);
-        _chatDelete(key);
-        _chatCooldowns[toPid] = now + 5 * 60 * 1000; // 5-min cooldown on decline
-        _chatRefreshButtons();
-        showToast('CHAT REQUEST DECLINED', 'error', 2500);
+    } else if (type === 'dcl') {
+      const fromPid = parts[2], toPid = parts[3];
+      if (fromPid !== _presenceId) return;
+      _chatProcessed.add(key);
+      _chatDelete(key);
+      _chatCooldowns[toPid] = Date.now() + 5 * 60 * 1000;
+      _chatRefreshButtons();
+      showToast('CHAT REQUEST DECLINED', 'error', 2500);
 
-      } else if (type === 'blk') {
-        // chat__blk__fromPid__toPid — toPid blocked my requests
-        const fromPid = parts[2], toPid = parts[3];
-        if (fromPid !== _presenceId) return;
-        _chatProcessed.add(key);
-        _chatDelete(key);
-        _chatBlockedBy.add(toPid);
-        _chatCooldowns[toPid] = Infinity;
-        _chatRefreshButtons();
+    } else if (type === 'blk') {
+      const fromPid = parts[2], toPid = parts[3];
+      if (fromPid !== _presenceId) return;
+      _chatProcessed.add(key);
+      _chatDelete(key);
+      _chatBlockedBy.add(toPid);
+      _chatCooldowns[toPid] = Infinity;
+      _chatRefreshButtons();
 
-      } else if (type === 'msg') {
-        // chat__msg__pidA__pidB__uid  (pidA__pidB = sessionId, sorted)
-        const uid    = parts[parts.length - 1];
-        const sessId = parts.slice(2, parts.length - 1).join('__');
-        if (!_chatSession || _chatSession.sessionId !== sessId) return;
-        _chatProcessed.add(key);
-        if (val.pid !== _presenceId) {
-          _chatAppendMsg(val.n || 'INVESTIGATOR', val.m || '', false);
-        }
-
-      } else if (type === 'end') {
-        // chat__end__pidA__pidB
-        const sessId = parts.slice(2).join('__');
-        if (!_chatSession || _chatSession.sessionId !== sessId) return;
-        _chatProcessed.add(key);
-        _chatDelete(key);
-        _chatCloseLocal();
-        showToast('CHAT SESSION ENDED', '', 2000);
+    } else if (type === 'msg') {
+      const sessId = parts.slice(2, parts.length - 1).join('__');
+      if (!_chatSession || _chatSession.sessionId !== sessId) return;
+      _chatProcessed.add(key);
+      if (val.pid !== _presenceId) {
+        _chatAppendMsg(val.n || 'INVESTIGATOR', val.m || '', false);
       }
-    });
+
+    } else if (type === 'end') {
+      const sessId = parts.slice(2).join('__');
+      if (!_chatSession || _chatSession.sessionId !== sessId) return;
+      _chatProcessed.add(key);
+      _chatDelete(key);
+      _chatCloseLocal();
+      showToast('CHAT SESSION ENDED', '', 2000);
+    }
   }
+
+  // Use child_added so we get notified the moment a new signal arrives,
+  // without having to re-iterate the entire presence snapshot.
+  rtdb.ref('rooms/__lobby/presence').on('child_added', child => {
+    const key = child.key;
+    if (!key.startsWith('chat__')) return;
+    _chatProcessSignal(key, child.val());
+  });
 
   function _chatShowReqToast(fromPid, fromName, reqKey) {
     _chatPendingReq = { fromPid, fromName, reqKey };
@@ -9867,6 +9858,7 @@
     if (!inv || inv.length < 2) return false;
     return list.some(p => {
       const pn = (p.displayName || p.nickname || p.name || '').trim().toLowerCase();
+      if (!pn) return false; // empty name would match any investigator name via inv.includes('')
       return pn.includes(inv) || inv.includes(pn);
     });
   }
