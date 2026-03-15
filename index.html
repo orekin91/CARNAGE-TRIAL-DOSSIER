@@ -1780,6 +1780,17 @@
     border-color: #c060c0;
     color: #c060c0;
   }
+  .tag-btn.leaver {
+    border-color: #5a7a9a;
+    color: #5a7a9a;
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+  .tag-btn.leaver:hover, .tag-btn.leaver.active {
+    background: #5a7a9a;
+    color: #fff;
+    box-shadow: 0 0 8px rgba(90,122,154,0.5);
+  }
 
   /* VERDICT NAMES */
   .verdict-names {
@@ -3295,6 +3306,186 @@
     color: #3a3a4a;
   }
 
+  /* ── GATE RUMIKO CHARACTER ── */
+  .gate-rumiko {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: clamp(160px, 16vw, 260px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    opacity: 0.22;
+    transition: opacity 0.35s, transform 0.35s;
+    z-index: 1;
+    user-select: none;
+    transform: translateX(18%);
+  }
+  .gate-rumiko:hover {
+    opacity: 0.75;
+    transform: translateX(0);
+  }
+  .gate-rumiko-img {
+    width: 100%;
+    display: block;
+    filter: drop-shadow(0 0 18px rgba(var(--accent-rgb), 0.08));
+    transition: filter 0.35s;
+  }
+  .gate-rumiko:hover .gate-rumiko-img {
+    filter: drop-shadow(0 0 30px rgba(var(--accent-rgb), 0.35));
+  }
+  .gate-rumiko-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 3px;
+    color: #2a2a35;
+    margin-top: 4px;
+    transition: color 0.3s;
+  }
+  .gate-rumiko:hover .gate-rumiko-label { color: var(--muted); }
+
+  .gate-rumiko-bubble {
+    position: absolute;
+    bottom: calc(100% - 20px);
+    right: 10px;
+    background: #16161c;
+    border: 1px solid var(--border);
+    border-radius: 6px 6px 0 6px;
+    padding: 8px 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    line-height: 1.6;
+    color: var(--muted);
+    max-width: 200px;
+    white-space: normal;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.25s, transform 0.25s;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .gate-rumiko-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    right: 12px;
+    width: 10px;
+    height: 6px;
+    background: #16161c;
+    clip-path: polygon(0 0, 100% 0, 100% 100%);
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .gate-rumiko:hover .gate-rumiko-bubble,
+  .gate-rumiko-bubble.pinned {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 700px) { .gate-rumiko { display: none; } }
+
+  /* ── GATE ABOUT BUTTON ── */
+  .gate-about-btn {
+    position: absolute;
+    bottom: 18px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: rgba(var(--accent-rgb), 0.4);
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s;
+  }
+  .gate-about-btn:hover { color: var(--accent); }
+
+  /* ── GATE ABOUT PANEL ── */
+  .gate-about {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.25s, transform 0.25s;
+  }
+  .gate-about.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .gate-about-body {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    line-height: 1.8;
+    color: var(--muted);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .gate-about-body strong {
+    color: var(--text);
+    letter-spacing: 1px;
+  }
+  .gate-about-body p { margin: 0; }
+  .gate-about-links {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .gate-about-link-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 3px;
+    color: #2a2a35;
+    text-align: center;
+  }
+  .gate-about-discord {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 14px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-decoration: none;
+    transition: all 0.2s;
+    justify-content: center;
+  }
+  .gate-about-discord:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.05);
+  }
+  .gate-about-discord-icon { font-size: 13px; }
+  .gate-about-back {
+    background: none;
+    border: none;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 4px 0;
+    transition: color 0.2s;
+  }
+  .gate-about-back:hover { color: var(--text); }
+
   /* ── ACTIVE BADGE (main page, bottom-left) ── */
   .active-badge {
     position: fixed;
@@ -4067,6 +4258,40 @@
     <span class="gate-active-dot"></span>
     <span class="gate-active-count active-users-count">—</span>
     <span class="gate-active-label">CURRENTLY ACTIVE</span>
+  </div>
+
+  <button class="gate-about-btn" id="gateAboutBtn" onclick="gateShowAbout()">ABOUT</button>
+
+  <!-- RUMIKO BACKGROUND CHARACTER -->
+  <div class="gate-rumiko" id="gateRumiko" onclick="gateShowAbout()" title="Click to learn more">
+    <div class="gate-rumiko-bubble" id="gateRumikoBubble"></div>
+    <img class="gate-rumiko-img" src="assets/Rumiko.png" alt="Rumiko" />
+    <div class="gate-rumiko-label">RUMIKO</div>
+  </div>
+
+  <!-- ABOUT (shown on about button click) -->
+  <div class="gate-about" id="gateAbout">
+    <div class="gate-logo">CARNAGE</div>
+    <div class="gate-subtitle">Trial Dossier System</div>
+    <div class="gate-divider"></div>
+    <div class="gate-about-body">
+      <p>The <strong>CARNAGE Trial Dossier</strong> is a web-based evidence and suspect tracking tool built for event hosting in the Roblox game <strong>CARNAGE</strong>.</p>
+      <p>Use it to log suspects, track evidence, manage timelines, and reach a verdict — all in one place during live trials.</p>
+    </div>
+    <div class="gate-about-links">
+      <div class="gate-about-link-label">COMMUNITY</div>
+      <a class="gate-about-discord" href="https://discord.gg/ZyC5wWyRGn" target="_blank" rel="noopener">
+        <span class="gate-about-discord-icon">🔗</span>
+        <span>CARNAGE MAIN DISCORD</span>
+      </a>
+      <div class="gate-about-link-label" style="margin-top:10px;">BUG REPORTS & SITE FEEDBACK</div>
+      <a class="gate-about-discord" href="https://discord.gg/fH59wVVqnA" target="_blank" rel="noopener">
+        <span class="gate-about-discord-icon">🔗</span>
+        <span>DOSSIER SITE DISCORD</span>
+      </a>
+    </div>
+    <button class="gate-about-back" onclick="gateHideAbout()">← BACK</button>
+    <div class="gate-footer">CARNAGE TRIAL DOSSIER SYSTEM</div>
   </div>
 </div>
 
@@ -5232,6 +5457,15 @@
     updateSuspectCount();
   }
 
+  function toggleDeceasedLeaver(id) {
+    const d = deceased.find(x => x.id === id);
+    if (!d) return;
+    d.leaver = !d.leaver;
+    const btn = document.querySelector(`#deceased-card-${id} .tag-btn.leaver`);
+    if (btn) btn.classList.toggle('active', d.leaver);
+    saveDossier();
+  }
+
   function removeDeceased(id) {
     deceased = deceased.filter(x => x.id !== id);
     renderDeceased();
@@ -5285,6 +5519,7 @@
             </div>
           </div>
           <div class="suspect-actions">
+            <button class="tag-btn leaver${s.leaver ? ' active' : ''}" onclick="toggleDeceasedLeaver(${s.id})" title="Mark as leaver">⬡ LEAVER</button>
             <button class="tag-btn revive" onclick="reviveSuspect(${s.id})" title="Move back to participants">↩ ALIVE</button>
           </div>
           <button class="del-btn" onclick="removeDeceased(${s.id})">×</button>
@@ -7254,7 +7489,7 @@
     // Register global active presence
     if (!_globalPresenceRef) {
       const _pid = Date.now() + '_' + Math.random().toString(36).slice(2);
-      _globalPresenceRef = rtdb.ref('active/' + _pid);
+      _globalPresenceRef = rtdb.ref('rooms/_active/' + _pid);
       _globalPresenceRef.set(true);
       _globalPresenceRef.onDisconnect().remove();
     }
@@ -7273,6 +7508,67 @@
       }
     }, { once: true });
   }
+
+  // ── GATE ABOUT PANEL ──
+  let _gateAboutFrom = null; // 'box' | 'mode'
+
+  function gateShowAbout() {
+    const gate  = document.getElementById('investigatorGate');
+    const box   = gate.querySelector('.gate-box');
+    const mode  = document.getElementById('gateModePick');
+    const about = document.getElementById('gateAbout');
+    const btn   = document.getElementById('gateAboutBtn');
+    _gateAboutFrom = (mode.style.display === 'flex') ? 'mode' : 'box';
+    box.style.cssText  += ';opacity:0;pointer-events:none;';
+    mode.style.cssText += ';opacity:0;pointer-events:none;';
+    btn.style.display = 'none';
+    about.style.display = 'flex';
+    requestAnimationFrame(() => requestAnimationFrame(() => about.classList.add('visible')));
+  }
+
+  function gateHideAbout() {
+    const gate  = document.getElementById('investigatorGate');
+    const box   = gate.querySelector('.gate-box');
+    const mode  = document.getElementById('gateModePick');
+    const about = document.getElementById('gateAbout');
+    const btn   = document.getElementById('gateAboutBtn');
+    about.classList.remove('visible');
+    setTimeout(() => {
+      about.style.display = 'none';
+      btn.style.display = '';
+      const restore = (_gateAboutFrom === 'mode') ? mode : box;
+      restore.style.opacity = '1';
+      restore.style.pointerEvents = '';
+    }, 250);
+  }
+
+  // ── RUMIKO GATE CHARACTER ──
+  const _rumikoLines = [
+    "I've solved 47 cases this month. This one's yours though.",
+    "Don't touch the evidence. You can touch the input field. That's fine.",
+    "My deduction rate is 100%. Please don't ruin it.",
+    "I once cracked a case from the way someone sneezed. This should be easy.",
+    "Welcome. I didn't decorate this. I would've chosen different colours.",
+    "The real crime is not logging the evidence correctly. I've seen it happen.",
+    "I can tell by your posture you're either a detective or very tired. Either works.",
+    "Every trial has a culprit. Usually. Log everything just in case.",
+    "I took one look at the scene and knew. I always know. It's a gift. And a curse.",
+    "Confidential tip: the weapon section is load-bearing. Don't skip it.",
+    "I have a badge. It's very official. You can't see it right now but it exists.",
+    "Some investigators use gut feelings. I use the dossier. Results speak for themselves.",
+  ];
+  (function _rumikoInit() {
+    const el = document.getElementById('gateRumikoBubble');
+    if (!el) return;
+    let idx = Math.floor(Math.random() * _rumikoLines.length);
+    el.textContent = _rumikoLines[idx];
+    // Cycle to a new line each time the user hovers off then back
+    const rumiko = document.getElementById('gateRumiko');
+    rumiko.addEventListener('mouseleave', () => {
+      idx = (idx + 1) % _rumikoLines.length;
+      el.textContent = _rumikoLines[idx];
+    });
+  })();
 
   // ── INVESTIGATOR GATE ──
   (function() {
@@ -7304,6 +7600,7 @@
       const gateBox  = gate.querySelector('.gate-box');
       const modePick = document.getElementById('gateModePick');
       gateBox.style.cssText += 'opacity:0;transform:translateY(-10px);transition:opacity 0.25s,transform 0.25s;pointer-events:none;';
+      document.getElementById('gateAboutBtn').style.display = 'none';
       setTimeout(() => {
         gateBox.style.display = 'none';
         modePick.style.display = 'flex';
@@ -7477,8 +7774,10 @@
     document.querySelectorAll('.active-users-count').forEach(el => el.textContent = n);
   }
 
-  rtdb.ref('active').on('value', snap => {
+  rtdb.ref('rooms/_active').on('value', snap => {
     _setActiveCount(snap.numChildren());
+  }, err => {
+    console.warn('[active users] Firebase read failed:', err.code, err.message);
   });
 
   // ── ROOM EXPIRY CLEANUP (runs once per page load) ──
