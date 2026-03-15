@@ -3307,62 +3307,61 @@
   }
 
   /* ── GATE RUMIKO CHARACTER ── */
+  @keyframes rumikoFloat {
+    0%, 100% { transform: translateX(0) translateY(0px); }
+    50%       { transform: translateX(0) translateY(-14px); }
+  }
   .gate-rumiko {
     position: absolute;
     bottom: 0;
-    right: 0;
-    width: clamp(160px, 16vw, 260px);
+    right: clamp(30px, 6vw, 100px);
+    width: clamp(220px, 26vw, 380px);
     display: flex;
     flex-direction: column;
     align-items: center;
     cursor: pointer;
-    opacity: 0.22;
-    transition: opacity 0.35s, transform 0.35s;
+    opacity: 0.35;
+    transition: opacity 0.35s;
     z-index: 1;
     user-select: none;
-    transform: translateX(18%);
+    animation: rumikoFloat 4s ease-in-out infinite;
   }
-  .gate-rumiko:hover {
-    opacity: 0.75;
-    transform: translateX(0);
-  }
+  .gate-rumiko:hover { opacity: 0.85; }
   .gate-rumiko-img {
     width: 100%;
     display: block;
-    filter: drop-shadow(0 0 18px rgba(var(--accent-rgb), 0.08));
+    filter: drop-shadow(0 0 20px rgba(var(--accent-rgb), 0.1));
     transition: filter 0.35s;
   }
   .gate-rumiko:hover .gate-rumiko-img {
-    filter: drop-shadow(0 0 30px rgba(var(--accent-rgb), 0.35));
+    filter: drop-shadow(0 0 36px rgba(var(--accent-rgb), 0.4));
   }
   .gate-rumiko-label {
     font-family: 'Share Tech Mono', monospace;
     font-size: 8px;
     letter-spacing: 3px;
-    color: #2a2a35;
-    margin-top: 4px;
+    color: rgba(var(--accent-rgb), 0.25);
+    margin-top: 6px;
     transition: color 0.3s;
   }
-  .gate-rumiko:hover .gate-rumiko-label { color: var(--muted); }
+  .gate-rumiko:hover .gate-rumiko-label { color: rgba(var(--accent-rgb), 0.6); }
 
   .gate-rumiko-bubble {
     position: absolute;
-    bottom: calc(100% - 20px);
-    right: 10px;
+    bottom: calc(100% + 8px);
+    right: 0;
     background: #16161c;
     border: 1px solid var(--border);
     border-radius: 6px 6px 0 6px;
-    padding: 8px 12px;
+    padding: 10px 14px;
     font-family: 'Share Tech Mono', monospace;
     font-size: 9px;
     letter-spacing: 1px;
-    line-height: 1.6;
+    line-height: 1.7;
     color: var(--muted);
-    max-width: 200px;
+    max-width: 220px;
     white-space: normal;
-    opacity: 0;
-    transform: translateY(4px);
-    transition: opacity 0.25s, transform 0.25s;
+    opacity: 1;
     pointer-events: none;
     z-index: 2;
   }
@@ -3370,18 +3369,13 @@
     content: '';
     position: absolute;
     bottom: -6px;
-    right: 12px;
+    right: 16px;
     width: 10px;
     height: 6px;
     background: #16161c;
     clip-path: polygon(0 0, 100% 0, 100% 100%);
     border-right: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
-  }
-  .gate-rumiko:hover .gate-rumiko-bubble,
-  .gate-rumiko-bubble.pinned {
-    opacity: 1;
-    transform: translateY(0);
   }
 
   @media (max-width: 700px) { .gate-rumiko { display: none; } }
@@ -7544,18 +7538,14 @@
 
   // ── RUMIKO GATE CHARACTER ──
   const _rumikoLines = [
-    "I've solved 47 cases this month. This one's yours though.",
-    "Don't touch the evidence. You can touch the input field. That's fine.",
-    "My deduction rate is 100%. Please don't ruin it.",
-    "I once cracked a case from the way someone sneezed. This should be easy.",
-    "Welcome. I didn't decorate this. I would've chosen different colours.",
-    "The real crime is not logging the evidence correctly. I've seen it happen.",
-    "I can tell by your posture you're either a detective or very tired. Either works.",
-    "Every trial has a culprit. Usually. Log everything just in case.",
-    "I took one look at the scene and knew. I always know. It's a gift. And a curse.",
-    "Confidential tip: the weapon section is load-bearing. Don't skip it.",
-    "I have a badge. It's very official. You can't see it right now but it exists.",
-    "Some investigators use gut feelings. I use the dossier. Results speak for themselves.",
+    "Welcome! I've got everything set up and ready for you. Just sign in and we can get started.",
+    "Oh good, you're here! Everything's prepped — suspects, evidence slots, the whole thing. We're ready.",
+    "Welcome to the dossier! I've already organised everything. You just need to walk in.",
+    "Perfect timing. I've had this ready for a while. Everything's in order — I checked twice.",
+    "Welcome! The dossier's all set up. I may have reorganised it three times but it's definitely ready now.",
+    "You made it! I've prepared everything. Evidence panel, suspects, timeline — all good to go.",
+    "Ah, you're here! Don't worry about setup, I handled it. Everything is exactly where it should be.",
+    "Welcome! I had everything ready before you even got here. That's just how I operate.",
   ];
   (function _rumikoInit() {
     const el = document.getElementById('gateRumikoBubble');
