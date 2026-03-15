@@ -475,6 +475,7 @@
     background: transparent;
   }
 
+  #mascotSizeSmall.active, #mascotSizeMedium.active, #mascotSizeBig.active { background: var(--accent) !important; color: #111 !important; }
   .tag-btn.clr { border-color: var(--green); color: var(--green); }
   .tag-btn.clr:hover, .tag-btn.clr.active { background: var(--green); color: #000; }
   .tag-btn.glt { border-color: var(--yellow); color: var(--yellow); }
@@ -4526,9 +4527,9 @@
       <div class="settings-row">
         <div class="settings-label">Mascot Size</div>
         <div style="display:flex;gap:6px;">
-          <button id="mascotSizeSmall"  class="tag-btn active" onclick="mascotSetSize('small')"  style="font-size:10px;letter-spacing:1px;">SMALL</button>
-          <button id="mascotSizeMedium" class="tag-btn"        onclick="mascotSetSize('medium')" style="font-size:10px;letter-spacing:1px;">MEDIUM</button>
-          <button id="mascotSizeBig"    class="tag-btn"        onclick="mascotSetSize('big')"    style="font-size:10px;letter-spacing:1px;">BIG</button>
+          <button id="mascotSizeSmall"  class="tag-btn active" onclick="mascotSetSize('small')"  style="font-size:10px;letter-spacing:1px;border-color:var(--accent);color:var(--accent);">SMALL</button>
+          <button id="mascotSizeMedium" class="tag-btn"        onclick="mascotSetSize('medium')" style="font-size:10px;letter-spacing:1px;border-color:var(--accent);color:var(--accent);">MEDIUM</button>
+          <button id="mascotSizeBig"    class="tag-btn"        onclick="mascotSetSize('big')"    style="font-size:10px;letter-spacing:1px;border-color:var(--accent);color:var(--accent);">BIG</button>
         </div>
       </div>
 
@@ -7561,13 +7562,6 @@
       }
     }
 
-    // Register global active presence
-    if (!_globalPresenceRef) {
-      const _pid = Date.now() + '_' + Math.random().toString(36).slice(2);
-      _globalPresenceRef = rtdb.ref('rooms/_active/' + _pid);
-      _globalPresenceRef.set(true);
-      _globalPresenceRef.onDisconnect().remove();
-    }
 
     // Animate gate out
     gate.classList.add('gate-exit');
@@ -7900,8 +7894,6 @@
   const rtdb = firebase.database();
 
   // ── GLOBAL ACTIVE USERS ──
-  let _globalPresenceRef = null;
-
   function _setActiveCount(n) {
     document.querySelectorAll('.active-users-count').forEach(el => el.textContent = n);
   }
@@ -7911,6 +7903,17 @@
   }, err => {
     console.warn('[active users] Firebase read failed:', err.code, err.message);
   });
+
+  // Register this visitor's presence and auto-remove on disconnect
+  (function() {
+    const pid = Date.now() + '_' + Math.random().toString(36).slice(2);
+    const presRef = rtdb.ref('rooms/_active/' + pid);
+    rtdb.ref('.info/connected').on('value', snap => {
+      if (!snap.val()) return;
+      presRef.onDisconnect().remove();
+      presRef.set(true);
+    });
+  })();
 
   // ── ROOM EXPIRY CLEANUP (runs once per page load) ──
   (function radioRoomCleanup() {
