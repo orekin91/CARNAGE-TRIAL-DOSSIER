@@ -7820,6 +7820,9 @@
       // Store investigator name for use elsewhere on the page
       window.investigatorName = name;
 
+      // Update Firebase presence with real name
+      if (typeof _updatePresenceName === 'function') _updatePresenceName(name);
+
       // Auto-fill the investigator field on the main page
       const invField = document.getElementById('investigatorInput');
       if (invField && !invField.value) invField.value = name;
@@ -8007,6 +8010,7 @@
     const list = document.getElementById('activeUsersList');
     if (!list) return;
     list.innerHTML = '';
+    const myName = (window.investigatorName || '').trim().toUpperCase();
     let idx = 0;
     snap.forEach(child => {
       idx++;
@@ -8016,6 +8020,7 @@
         : 'INVESTIGATOR ' + idx;
       const li = document.createElement('li');
       li.textContent = name;
+      if (myName && name === myName) li.classList.add('is-you');
       list.appendChild(li);
     });
   }
@@ -8033,9 +8038,16 @@
     rtdb.ref('.info/connected').on('value', snap => {
       if (!snap.val()) return;
       _activeUsersPresRef.onDisconnect().remove();
-      _activeUsersPresRef.set(true);
+      _activeUsersPresRef.set({ name: window.investigatorName || 'INVESTIGATOR' });
     });
   })();
+
+  // Update presence name once investigator enters their name at the gate
+  function _updatePresenceName(name) {
+    if (_activeUsersPresRef) {
+      _activeUsersPresRef.set({ name: name || 'INVESTIGATOR' }).catch(() => {});
+    }
+  }
 
   // ── ACTIVE BADGE POPUP TOGGLE ──
   (function() {

@@ -6,7 +6,7 @@
         ".read": true,
         "$uid": {
           ".write": true,
-          ".validate": "newData.isBoolean() || newData.val() === null"
+          ".validate": "newData.isBoolean() || newData.val() === null || (newData.hasChild('name') && newData.child('name').isString())"
         }
       },
       "$roomCode": {
