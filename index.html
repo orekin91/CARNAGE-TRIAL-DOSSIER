@@ -8785,8 +8785,8 @@
       lines_sure: [
         "Hold on — are you absolutely sure about this? Once we mark someone guilty, there's no taking it back. This is the moment of truth.",
         "Wait! Before you commit — are you certain? Look at everything one more time. There's no going back from this.",
-        "Oh — one more thing before you decide. Having a weapon doesn't clear someone, but it doesn't condemn them either. If it's marked as a Static, it's just background — it doesn't point to anyone specifically. And if a mastermind was involved, they might have used someone else entirely. Please keep that in mind.",
-        "Wait — does the weapon actually belong to the person you're accusing in a meaningful way? Because a Static weapon is basically scenery — it doesn't incriminate. And a mastermind wouldn't need to leave a trail back to themselves. Are you accounting for all of that?",
+        "Oh — one more thing before you decide. If someone has a Static weapon listed, that doesn't clear them — but it doesn't accuse them either. Static just means it belongs to the location, not to them personally. And someone can have a Static weapon and a regular weapon at the same time! Plus if a mastermind's involved, they could hand a weapon to anyone, which makes weapon-based clears really unreliable. Please keep all of that in mind.",
+        "Wait — before you commit. Static weapons are scenery — they can't be used to clear anyone, but they're not evidence against them either. Keep in mind someone can have both a Static and a personal weapon simultaneously. And if there's a mastermind involved, they might have armed someone else entirely, which means weapon clears don't really hold up. Are you accounting for all of that?",
       ],
       lines_verdict_correct: [
         "We got it right!! I KNEW we could do it — I just knew it! You caught the real culprit! Justice has been served!",
@@ -8969,8 +8969,8 @@
         "You know, trash like me has no business telling you what to do. But even I know that naming the wrong person is a despair that lingers. So I'll ask, just once — are you sure?",
         "Haha... it's funny, isn't it? The closer you get to hope, the more terrifying it becomes. What if you're right? What if you're wrong? Both possibilities are overwhelming. ...Are you sure?",
         "I've been wrong before. About many things. About people. About hope itself. So before you commit — genuinely ask yourself. Not for my sake. For yours.",
-        "Ah — and one more thing, if you'll humour someone like me. A weapon doesn't clear someone, but it doesn't convict them either. If it's Static, it's just part of the room — it means nothing on its own. And if a mastermind is involved, the real culprit might have kept their hands entirely clean. Isn't that a delightfully horrible thought?",
-        "Before the final curtain — just consider this. Does the weapon actually tell you what you think it does? A Static weapon is scenery, not evidence. And a mastermind wouldn't need to leave a trail. Make sure you're not being led somewhere on purpose.",
+        "Ah — one last thing, if you'll let someone like me speak. A Static weapon is furniture, not evidence — it can't clear anyone, and it can't convict them either. It simply exists in the space. Someone can carry a Static weapon and a personal one at the same time. And if a mastermind was involved... ahahaha. They could have armed their pawns directly, which makes the whole concept of a weapon-based clear crumble. Isn't that a delightfully horrible thing to consider?",
+        "Before the final curtain — just consider this. Static weapons belong to the location, not the person. They don't clear anyone, but they don't point to anyone either. And someone can have both a Static and a regular weapon simultaneously. If a mastermind distributed weapons to others... ahahaha. Weapon clears become meaningless. Is that the kind of certainty you're building on right now?",
       ],
       lines_verdict_correct: [
         "...You were right. The truth prevailed. This is what hope looks like — shining through the darkest despair. You should be proud.",
@@ -9147,8 +9147,8 @@
         "You're ready to name a culprit. I need you to be certain, not just confident. There's a difference.",
         "A wrong accusation doesn't just fail the investigation — it fails every person involved. Are you sure?",
         "I've seen investigations fall apart at this exact moment. Slow down. Verify. Then decide.",
-        "One critical note before you commit: weapon possession is not equivalent to guilt. A Static weapon is environmental — it implicates no one specifically. And if a mastermind is involved, the murder may have been orchestrated through a third party who had no motive of their own. Don't let a weapon be your primary evidence.",
-        "Account for the weapon's classification. A Static weapon is background — it doesn't incriminate. Additionally, consider whether someone else could have engineered this without leaving direct evidence. A mastermind leaves very little trace of their own involvement. Are you certain you're accusing the right person?",
+        "Note before you commit: a Static weapon cannot clear a suspect. It's environmental — it belongs to the location, not the individual. It implicates no one and exonerates no one. A suspect can also carry both a Static weapon and a personal one simultaneously, so the presence of a Static doesn't tell you anything about their personal arsenal. Factor in that the mastermind may have distributed weapons directly, which nullifies weapon-based exoneration entirely. Don't let weapon logic be your foundation.",
+        "Clarify your weapon reasoning before finalising. A Static weapon is scenery — it clears no one and incriminates no one. Suspects can hold a Static and a personal weapon at the same time. Additionally, if a mastermind is arming individuals, personal weapon possession loses evidential value for clearing purposes. Make sure your conclusion rests on more than weaponry.",
       ],
       lines_verdict_correct: [
         "Correct. The evidence held. That's what a proper investigation looks like — well done.",
@@ -9278,7 +9278,8 @@
     ];
     return all.find(p => {
       const pn = (p.displayName || p.nickname || p.name || '').toLowerCase();
-      return parts.some(part => pn.includes(part)) && p.status && p.status !== 'none';
+      const isSusOrAccused = p.accused || p.status === 'sus' || p.status === 'guilty';
+      return parts.some(part => pn.includes(part)) && isSusOrAccused;
     }) || null;
   }
 
