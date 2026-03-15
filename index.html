@@ -3313,9 +3313,9 @@
   }
   .gate-rumiko {
     position: absolute;
-    left: clamp(20px, 5vw, 80px);
+    left: clamp(10px, 2vw, 50px);
     top: 50%;
-    width: clamp(280px, 22vw, 420px);
+    width: clamp(180px, 28vh, 520px);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -3338,7 +3338,7 @@
   }
   .gate-rumiko-label {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 8px;
+    font-size: 11px;
     letter-spacing: 3px;
     color: rgba(var(--accent-rgb), 0.25);
     margin-top: 6px;
@@ -3356,11 +3356,11 @@
     border-radius: 6px 6px 6px 0;
     padding: 10px 14px;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 1px;
-    line-height: 1.7;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    line-height: 1.6;
     color: var(--accent);
-    max-width: 220px;
+    max-width: 260px;
     white-space: normal;
     opacity: 1;
     pointer-events: none;
@@ -4273,7 +4273,7 @@
         id="gateInput"
         class="gate-input"
         type="text"
-        placeholder="Enter your username..."
+        placeholder="Enter your Roblox username..."
         autocomplete="off"
         spellcheck="false"
         maxlength="40"
@@ -4317,13 +4317,13 @@
       <div class="mq-header">WHAT WOULD YOU LIKE TO ASK?</div>
       <button class="mq-btn" onclick="rumikoAnswer('wellbeing')">How are you doing?</button>
       <button class="mq-btn" onclick="rumikoAnswer('talent')">Tell me about your talent.</button>
-      <button class="mq-btn" onclick="rumikoAnswer('song')">Recommend a song.</button>
+      <button class="mq-btn" onclick="rumikoQuestionnaireClose(); gateShowAbout()">Tell me about yourself.</button>
       <button class="mq-close" onclick="rumikoQuestionnaireClose()">✕ CLOSE</button>
     </div>
     <div class="gate-rumiko-bubble" id="gateRumikoBubble"></div>
-    <img class="gate-rumiko-img" src="assets/Rumiko.png" alt="Rumiko" onclick="gateShowAbout()" title="Click to learn more" />
+    <img class="gate-rumiko-img" src="assets/Rumiko.png" alt="Rumiko" />
     <button class="rumiko-ask-btn" id="rumikoAskBtn" onclick="rumikoQuestionnaireOpen()" title="Ask Rumiko a question">?</button>
-    <div class="gate-rumiko-label">RUMIKO</div>
+    <div class="gate-rumiko-label">RUMIKO RUMIYA</div>
   </div>
 
   <!-- ABOUT (shown on about button click) -->
@@ -7617,6 +7617,8 @@
     setTimeout(() => { if (!_rumikoMQOpen) panel.style.display = 'none'; }, 220);
   }
 
+  let _rumikoAnswerActive = false;
+
   function rumikoAnswer(type) {
     rumikoQuestionnaireClose();
     const bubble = document.getElementById('gateRumikoBubble');
@@ -7624,8 +7626,8 @@
     let pool;
     if      (type === 'wellbeing') pool = _rumikoWellbeingLines;
     else if (type === 'talent')    pool = _rumikoTalentLines;
-    else if (type === 'song')      pool = _rumikoSongLines;
     else return;
+    _rumikoAnswerActive = true;
     bubble.textContent = pool[Math.floor(Math.random() * pool.length)];
   }
 
@@ -7681,6 +7683,7 @@
     // Cycle to a new line each time the user hovers off then back
     const rumiko = document.getElementById('gateRumiko');
     rumiko.addEventListener('mouseleave', () => {
+      if (_rumikoAnswerActive) { _rumikoAnswerActive = false; return; }
       idx = (idx + 1) % _rumikoLines.length;
       el.textContent = _rumikoLines[idx];
     });
