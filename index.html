@@ -6121,6 +6121,7 @@
     if (mwc) mwc.style.display = 'none';
 
     // Clear verdict state
+    _lastVerdictCorrect = null;
     try { setVerdict(null); } catch(e){} currentVerdict = null;
     document.getElementById('verdictConfirm').style.display = 'none';
     document.getElementById('realMurdererWrap').style.display = 'none';
@@ -9243,8 +9244,8 @@
 
   let _mascotActive = 'kaede';
   let _mascotBubbleTimer = null;
-  let _caseCorrectCount  = 0;
-  let _caseWrongCount    = 0;
+  let _correctStreak     = 0;
+  let _wrongStreak       = 0;
   let _lastVerdictCorrect = null;
   let _mascotLastLine = -1;
   let _mascotClickCount = 0;
@@ -10498,11 +10499,13 @@
     document.getElementById('innocentStampAccused').classList.remove('show');
     confirmVerdict(correct);
 
-    // Score tracking — cap at 5 for dialogue purposes
+    // Streak tracking — resets when the outcome changes, cap at 5 for dialogue
     if (correct) {
-      _caseCorrectCount = Math.min(_caseCorrectCount + 1, 5);
+      _correctStreak = Math.min(_correctStreak + 1, 5);
+      _wrongStreak   = 0;
     } else {
-      _caseWrongCount = Math.min(_caseWrongCount + 1, 5);
+      _wrongStreak   = Math.min(_wrongStreak + 1, 5);
+      _correctStreak = 0;
     }
     _lastVerdictCorrect = correct;
   }
@@ -10514,7 +10517,7 @@
     const mascot  = MASCOTS[_mascotActive];
     if (!mascot) return;
     const pool = correct ? mascot.lines_score_correct : mascot.lines_score_wrong;
-    const idx  = correct ? (_caseCorrectCount - 1) : (_caseWrongCount - 1);
+    const idx  = correct ? (_correctStreak - 1) : (_wrongStreak - 1);
     if (!pool || !pool[idx]) return;
     setTimeout(() => {
       const bubble    = document.getElementById('mascotBubble');
