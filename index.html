@@ -3402,10 +3402,10 @@
     display: none;
     flex-direction: column;
     align-items: center;
-    gap: 24px;
+    gap: 32px;
     width: 100%;
-    max-width: 420px;
-    padding: 20px;
+    max-width: 780px;
+    padding: 40px 48px;
     opacity: 0;
     transform: translateY(10px);
     transition: opacity 0.25s, transform 0.25s;
@@ -3416,14 +3416,15 @@
   }
   .gate-about-body {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 1px;
-    line-height: 1.8;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    line-height: 2;
     color: var(--muted);
     text-align: center;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 14px;
+    max-width: 600px;
   }
   .gate-about-body strong {
     color: var(--text);
@@ -3432,10 +3433,16 @@
   .gate-about-body p { margin: 0; }
   .gate-about-links {
     width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 24px;
+    align-items: start;
+  }
+  .gate-about-link-col {
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 8px;
+    align-items: center;
   }
   .gate-about-link-label {
     font-family: 'Share Tech Mono', monospace;
@@ -3449,7 +3456,7 @@
     align-items: center;
     gap: 10px;
     width: 100%;
-    padding: 10px 14px;
+    padding: 14px 18px;
     background: transparent;
     border: 1px solid var(--border);
     border-radius: 2px;
@@ -3466,7 +3473,7 @@
     color: var(--accent);
     background: rgba(var(--accent-rgb), 0.05);
   }
-  .gate-about-discord-icon { font-size: 13px; }
+  .gate-about-discord-icon { font-size: 14px; }
   .gate-about-back {
     background: none;
     border: none;
@@ -4273,16 +4280,20 @@
       <p>Use it to log suspects, track evidence, manage timelines, and reach a verdict — all in one place during live trials.</p>
     </div>
     <div class="gate-about-links">
-      <div class="gate-about-link-label">COMMUNITY</div>
-      <a class="gate-about-discord" href="https://discord.gg/ZyC5wWyRGn" target="_blank" rel="noopener">
-        <span class="gate-about-discord-icon">🔗</span>
-        <span>CARNAGE MAIN DISCORD</span>
-      </a>
-      <div class="gate-about-link-label" style="margin-top:10px;">BUG REPORTS & SITE FEEDBACK</div>
-      <a class="gate-about-discord" href="https://discord.gg/fH59wVVqnA" target="_blank" rel="noopener">
-        <span class="gate-about-discord-icon">🔗</span>
-        <span>DOSSIER SITE DISCORD</span>
-      </a>
+      <div class="gate-about-link-col">
+        <div class="gate-about-link-label">COMMUNITY</div>
+        <a class="gate-about-discord" href="https://discord.gg/ZyC5wWyRGn" target="_blank" rel="noopener">
+          <span class="gate-about-discord-icon">🔗</span>
+          <span>CARNAGE MAIN DISCORD</span>
+        </a>
+      </div>
+      <div class="gate-about-link-col">
+        <div class="gate-about-link-label">BUG REPORTS & SITE FEEDBACK</div>
+        <a class="gate-about-discord" href="https://discord.gg/fH59wVVqnA" target="_blank" rel="noopener">
+          <span class="gate-about-discord-icon">🔗</span>
+          <span>DOSSIER SITE DISCORD</span>
+        </a>
+      </div>
     </div>
     <button class="gate-about-back" onclick="gateHideAbout()">← BACK</button>
     <div class="gate-footer">CARNAGE TRIAL DOSSIER SYSTEM</div>
@@ -7538,14 +7549,14 @@
 
   // ── RUMIKO GATE CHARACTER ──
   const _rumikoLines = [
-    "Welcome! I've got everything set up and ready for you. Just sign in and we can get started.",
-    "Oh good, you're here! Everything's prepped — suspects, evidence slots, the whole thing. We're ready.",
-    "Welcome to the dossier! I've already organised everything. You just need to walk in.",
-    "Perfect timing. I've had this ready for a while. Everything's in order — I checked twice.",
-    "Welcome! The dossier's all set up. I may have reorganised it three times but it's definitely ready now.",
-    "You made it! I've prepared everything. Evidence panel, suspects, timeline — all good to go.",
-    "Ah, you're here! Don't worry about setup, I handled it. Everything is exactly where it should be.",
-    "Welcome! I had everything ready before you even got here. That's just how I operate.",
+    "Oh! You're here. I've got the dossier all set up for you — evidence slots, suspects, everything. You just focus on the case.",
+    "Welcome! I prepped everything. You're the detective, I'm just here to make sure the paperwork's in order.",
+    "Good timing. I had everything ready just in case. The hard part is yours though — I just handle the setup.",
+    "Hi! The dossier's all yours. I organised the panels — probably too many times — but it's ready when you are.",
+    "You made it! I've got the evidence section, suspects, timeline all prepared. Lead the way, detective.",
+    "Oh great, you're here. I set everything up as best I could. The actual detective work is all you.",
+    "Welcome! I've been waiting. Everything's prepped and in order. I'm just the CSI — you're the one solving this.",
+    "The dossier is ready! I triple-checked it. Which might be excessive. But still — it's ready for you.",
   ];
   (function _rumikoInit() {
     const el = document.getElementById('gateRumikoBubble');
