@@ -4317,7 +4317,6 @@
       <div class="mq-header">WHAT WOULD YOU LIKE TO ASK?</div>
       <button class="mq-btn" onclick="rumikoAnswer('wellbeing')">How are you doing?</button>
       <button class="mq-btn" onclick="rumikoAnswer('talent')">Tell me about your talent.</button>
-      <button class="mq-btn" onclick="rumikoAnswer('song')">Recommend a song.</button>
       <button class="mq-btn" onclick="rumikoQuestionnaireClose(); gateShowAbout()">Tell me about yourself.</button>
       <button class="mq-close" onclick="rumikoQuestionnaireClose()">✕ CLOSE</button>
     </div>
@@ -7618,6 +7617,8 @@
     setTimeout(() => { if (!_rumikoMQOpen) panel.style.display = 'none'; }, 220);
   }
 
+  let _rumikoAnswerActive = false;
+
   function rumikoAnswer(type) {
     rumikoQuestionnaireClose();
     const bubble = document.getElementById('gateRumikoBubble');
@@ -7625,8 +7626,8 @@
     let pool;
     if      (type === 'wellbeing') pool = _rumikoWellbeingLines;
     else if (type === 'talent')    pool = _rumikoTalentLines;
-    else if (type === 'song')      pool = _rumikoSongLines;
     else return;
+    _rumikoAnswerActive = true;
     bubble.textContent = pool[Math.floor(Math.random() * pool.length)];
   }
 
@@ -7682,6 +7683,7 @@
     // Cycle to a new line each time the user hovers off then back
     const rumiko = document.getElementById('gateRumiko');
     rumiko.addEventListener('mouseleave', () => {
+      if (_rumikoAnswerActive) { _rumikoAnswerActive = false; return; }
       idx = (idx + 1) % _rumikoLines.length;
       el.textContent = _rumikoLines[idx];
     });
