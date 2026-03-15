@@ -3295,6 +3295,106 @@
     color: #3a3a4a;
   }
 
+  /* ── GATE ABOUT BUTTON ── */
+  .gate-about-btn {
+    position: absolute;
+    bottom: 18px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: #2a2a35;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s;
+  }
+  .gate-about-btn:hover { color: var(--muted); }
+
+  /* ── GATE ABOUT PANEL ── */
+  .gate-about {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.25s, transform 0.25s;
+  }
+  .gate-about.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .gate-about-body {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    line-height: 1.8;
+    color: var(--muted);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .gate-about-body strong {
+    color: var(--text);
+    letter-spacing: 1px;
+  }
+  .gate-about-body p { margin: 0; }
+  .gate-about-links {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .gate-about-link-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 3px;
+    color: #2a2a35;
+    text-align: center;
+  }
+  .gate-about-discord {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 14px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-decoration: none;
+    transition: all 0.2s;
+    justify-content: center;
+  }
+  .gate-about-discord:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.05);
+  }
+  .gate-about-discord-icon { font-size: 13px; }
+  .gate-about-back {
+    background: none;
+    border: none;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 4px 0;
+    transition: color 0.2s;
+  }
+  .gate-about-back:hover { color: var(--text); }
+
   /* ── ACTIVE BADGE (main page, bottom-left) ── */
   .active-badge {
     position: fixed;
@@ -4067,6 +4167,33 @@
     <span class="gate-active-dot"></span>
     <span class="gate-active-count active-users-count">—</span>
     <span class="gate-active-label">CURRENTLY ACTIVE</span>
+  </div>
+
+  <button class="gate-about-btn" id="gateAboutBtn" onclick="gateShowAbout()">ABOUT</button>
+
+  <!-- ABOUT (shown on about button click) -->
+  <div class="gate-about" id="gateAbout">
+    <div class="gate-logo">CARNAGE</div>
+    <div class="gate-subtitle">Trial Dossier System</div>
+    <div class="gate-divider"></div>
+    <div class="gate-about-body">
+      <p>The <strong>CARNAGE Trial Dossier</strong> is a web-based evidence and suspect tracking tool built for event hosting in the Roblox game <strong>CARNAGE</strong>.</p>
+      <p>Use it to log suspects, track evidence, manage timelines, and reach a verdict — all in one place during live trials.</p>
+    </div>
+    <div class="gate-about-links">
+      <div class="gate-about-link-label">COMMUNITY</div>
+      <a class="gate-about-discord" href="https://discord.gg/ZyC5wWyRGn" target="_blank" rel="noopener">
+        <span class="gate-about-discord-icon">🔗</span>
+        <span>CARNAGE MAIN DISCORD</span>
+      </a>
+      <div class="gate-about-link-label" style="margin-top:10px;">BUG REPORTS & SITE FEEDBACK</div>
+      <a class="gate-about-discord" href="https://discord.gg/fH59wVVqnA" target="_blank" rel="noopener">
+        <span class="gate-about-discord-icon">🔗</span>
+        <span>DOSSIER SITE DISCORD</span>
+      </a>
+    </div>
+    <button class="gate-about-back" onclick="gateHideAbout()">← BACK</button>
+    <div class="gate-footer">CARNAGE TRIAL DOSSIER SYSTEM</div>
   </div>
 </div>
 
@@ -7272,6 +7399,39 @@
         setTimeout(kaedeIntroStart, 1400);
       }
     }, { once: true });
+  }
+
+  // ── GATE ABOUT PANEL ──
+  let _gateAboutFrom = null; // 'box' | 'mode'
+
+  function gateShowAbout() {
+    const gate  = document.getElementById('investigatorGate');
+    const box   = gate.querySelector('.gate-box');
+    const mode  = document.getElementById('gateModePick');
+    const about = document.getElementById('gateAbout');
+    const btn   = document.getElementById('gateAboutBtn');
+    _gateAboutFrom = (mode.style.display === 'flex') ? 'mode' : 'box';
+    box.style.cssText  += ';opacity:0;pointer-events:none;';
+    mode.style.cssText += ';opacity:0;pointer-events:none;';
+    btn.style.display = 'none';
+    about.style.display = 'flex';
+    requestAnimationFrame(() => requestAnimationFrame(() => about.classList.add('visible')));
+  }
+
+  function gateHideAbout() {
+    const gate  = document.getElementById('investigatorGate');
+    const box   = gate.querySelector('.gate-box');
+    const mode  = document.getElementById('gateModePick');
+    const about = document.getElementById('gateAbout');
+    const btn   = document.getElementById('gateAboutBtn');
+    about.classList.remove('visible');
+    setTimeout(() => {
+      about.style.display = 'none';
+      btn.style.display = '';
+      const restore = (_gateAboutFrom === 'mode') ? mode : box;
+      restore.style.opacity = '1';
+      restore.style.pointerEvents = '';
+    }, 250);
   }
 
   // ── INVESTIGATOR GATE ──
