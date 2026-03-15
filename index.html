@@ -3269,6 +3269,79 @@
     text-align: center;
   }
 
+  .gate-active-users {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: #2a2a35;
+    white-space: nowrap;
+  }
+  .gate-active-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #2e7d4f;
+    box-shadow: 0 0 4px #2e7d4f;
+    flex-shrink: 0;
+  }
+  .gate-active-count {
+    color: #3a3a4a;
+  }
+
+  /* ── ACTIVE BADGE (main page, bottom-left) ── */
+  .active-badge {
+    position: fixed;
+    bottom: 12px;
+    left: 0;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #16161c;
+    border: 1px solid var(--border);
+    border-left: none;
+    border-radius: 0 4px 4px 0;
+    padding: 6px 10px 6px 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s;
+  }
+  body.dossier-revealed .active-badge {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .active-badge-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #2e7d4f;
+    box-shadow: 0 0 5px #2e7d4f;
+    flex-shrink: 0;
+    animation: activePulse 2.5s ease-in-out infinite;
+  }
+  @keyframes activePulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+  }
+  .active-badge-count {
+    color: var(--text);
+    font-size: 11px;
+  }
+  .active-badge-label {
+    color: var(--muted);
+  }
+
   /* Hide main content until gate is cleared */
   body.gate-locked > *:not(#investigatorGate) {
     visibility: hidden;
@@ -3989,6 +4062,12 @@
     </div>
     <div class="gate-footer">CHOICE IS LOCKED IN FOR THIS SESSION</div>
   </div>
+
+  <div class="gate-active-users" id="gateActiveUsers">
+    <span class="gate-active-dot"></span>
+    <span class="gate-active-count active-users-count">—</span>
+    <span class="gate-active-label">CURRENTLY ACTIVE</span>
+  </div>
 </div>
 
 <!-- RADIO PANEL -->
@@ -4171,6 +4250,12 @@
     <span class="settings-icon">⚙</span>
     SETTINGS
   </button>
+</div>
+
+<div class="active-badge" id="activeBadge">
+  <span class="active-badge-dot"></span>
+  <span class="active-badge-count active-users-count">—</span>
+  <span class="active-badge-label">ACTIVE</span>
 </div>
 
 <div class="header">
@@ -7166,6 +7251,14 @@
       }
     }
 
+    // Register global active presence
+    if (!_globalPresenceRef) {
+      const _pid = Date.now() + '_' + Math.random().toString(36).slice(2);
+      _globalPresenceRef = rtdb.ref('active/' + _pid);
+      _globalPresenceRef.set(true);
+      _globalPresenceRef.onDisconnect().remove();
+    }
+
     // Animate gate out
     gate.classList.add('gate-exit');
     gate.addEventListener('animationend', () => {
@@ -7376,6 +7469,17 @@
     appId: "1:1045504298612:web:c516b79201654ff8630b21"
   });
   const rtdb = firebase.database();
+
+  // ── GLOBAL ACTIVE USERS ──
+  let _globalPresenceRef = null;
+
+  function _setActiveCount(n) {
+    document.querySelectorAll('.active-users-count').forEach(el => el.textContent = n);
+  }
+
+  rtdb.ref('active').on('value', snap => {
+    _setActiveCount(snap.numChildren());
+  });
 
   // ── ROOM EXPIRY CLEANUP (runs once per page load) ──
   (function radioRoomCleanup() {
@@ -8698,7 +8802,7 @@
     const isKyokoNeutral = (_mascotActive === 'kyoko' && pool === MASCOTS['kyoko'].lines);
     if (isKyokoNeutral && !_kyokoEggOffered) {
       _kyokoNeutralClicks++;
-      if (_kyokoNeutralClicks >= 4) {
+      if (_kyokoNeutralClicks >= 8) {
         _kyokoEggOffered = true;
         setTimeout(kyokoEggOpen, 4800);
       }
