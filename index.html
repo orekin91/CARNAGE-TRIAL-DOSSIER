@@ -9097,7 +9097,7 @@
     roomHostTickInterval = setInterval(() => {
       if (!roomIsHost || !roomRef || !radioCurrentTrack) return;
       const elapsed = ytPlayer && ytPlayer.getCurrentTime ? Math.floor(ytPlayer.getCurrentTime()) : radioElapsedSec;
-      roomRef.child('state').update({ elapsed, playing: radioPlaying, updatedAt: Date.now() });
+      roomRef.child('state').update({ videoId: radioCurrentTrack.videoId, elapsed, playing: radioPlaying, updatedAt: Date.now() });
     }, 3000);
   }
 
