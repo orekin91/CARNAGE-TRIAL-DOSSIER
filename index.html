@@ -1780,6 +1780,17 @@
     border-color: #c060c0;
     color: #c060c0;
   }
+  .tag-btn.leaver {
+    border-color: #5a7a9a;
+    color: #5a7a9a;
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+  .tag-btn.leaver:hover, .tag-btn.leaver.active {
+    background: #5a7a9a;
+    color: #fff;
+    box-shadow: 0 0 8px rgba(90,122,154,0.5);
+  }
 
   /* VERDICT NAMES */
   .verdict-names {
@@ -3305,12 +3316,12 @@
     font-family: 'Share Tech Mono', monospace;
     font-size: 9px;
     letter-spacing: 2px;
-    color: #2a2a35;
+    color: rgba(var(--accent-rgb), 0.4);
     cursor: pointer;
     padding: 0;
     transition: color 0.2s;
   }
-  .gate-about-btn:hover { color: var(--muted); }
+  .gate-about-btn:hover { color: var(--accent); }
 
   /* ── GATE ABOUT PANEL ── */
   .gate-about {
@@ -5359,6 +5370,15 @@
     updateSuspectCount();
   }
 
+  function toggleDeceasedLeaver(id) {
+    const d = deceased.find(x => x.id === id);
+    if (!d) return;
+    d.leaver = !d.leaver;
+    const btn = document.querySelector(`#deceased-card-${id} .tag-btn.leaver`);
+    if (btn) btn.classList.toggle('active', d.leaver);
+    saveDossier();
+  }
+
   function removeDeceased(id) {
     deceased = deceased.filter(x => x.id !== id);
     renderDeceased();
@@ -5412,6 +5432,7 @@
             </div>
           </div>
           <div class="suspect-actions">
+            <button class="tag-btn leaver${s.leaver ? ' active' : ''}" onclick="toggleDeceasedLeaver(${s.id})" title="Mark as leaver">⬡ LEAVER</button>
             <button class="tag-btn revive" onclick="reviveSuspect(${s.id})" title="Move back to participants">↩ ALIVE</button>
           </div>
           <button class="del-btn" onclick="removeDeceased(${s.id})">×</button>
