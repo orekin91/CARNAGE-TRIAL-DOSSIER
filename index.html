@@ -6607,6 +6607,18 @@
           ctx.fillStyle = '#c060c0'; ctx.font = '13px "Special Elite", cursive'; ctx.textAlign = 'left';
           ctx.fillText(truncate(ctx, d.name, PW - 20), px + 6, py + 15);
           if (d.talent) { ctx.fillStyle = YELLOW; ctx.font = '9px "Share Tech Mono", monospace'; ctx.fillText(truncate(ctx, (useShsl ? 'SHSL' : 'Ultimate') + ' ' + d.talent, PW - 20), px + 6, py + 28); }
+
+          // LEAVER badge
+          if (d.leaver) {
+            const badge = 'LEAVER';
+            ctx.font = '8px "Share Tech Mono", monospace';
+            const bw = ctx.measureText(badge).width + 10;
+            const bx = px + (PW - 8) - bw - 4, by = py + cardH - 14, bh = 11;
+            ctx.fillStyle = 'rgba(90,122,154,0.25)'; roundRect(ctx, bx, by, bw, bh, 2); ctx.fill();
+            ctx.strokeStyle = '#5a7a9a'; ctx.lineWidth = 0.75; roundRect(ctx, bx, by, bw, bh, 2); ctx.stroke();
+            ctx.fillStyle = '#5a7a9a'; ctx.textAlign = 'center';
+            ctx.fillText(badge, bx + bw / 2, by + 8.5);
+          }
         });
       }
 
