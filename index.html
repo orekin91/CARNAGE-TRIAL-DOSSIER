@@ -8011,11 +8011,13 @@
     if (!list) return;
     list.innerHTML = '';
     const myName = (window.investigatorName || '').trim().toUpperCase();
+    let idx = 0;
     snap.forEach(child => {
+      idx++;
       const val = child.val();
       const name = (typeof val === 'object' && val && val.name)
         ? val.name.toUpperCase()
-        : 'INVESTIGATOR';
+        : 'INVESTIGATOR ' + idx;
       const li = document.createElement('li');
       li.textContent = name;
       if (myName && name === myName) li.classList.add('is-you');
@@ -8040,7 +8042,7 @@
     });
   })();
 
-  // Update presence name once investigator enters their name
+  // Update presence name once investigator enters their name at the gate
   function _updatePresenceName(name) {
     if (_activeUsersPresRef) {
       _activeUsersPresRef.set({ name: name || 'INVESTIGATOR' }).catch(() => {});
