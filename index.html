@@ -152,16 +152,6 @@
     animation: logoBreathe 5s ease-in-out infinite;
   }
 
-  .logo-owner {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 6px;
-    color: var(--accent);
-    text-transform: uppercase;
-    margin-bottom: 6px;
-    opacity: 0.75;
-  }
-
   .subtitle {
     font-size: 11px;
     letter-spacing: 4px;
@@ -3182,6 +3172,17 @@
     padding: 20px;
   }
 
+  .gate-logo::before {
+    content: "RUMIKO'S";
+    display: block;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 6px;
+    color: var(--accent);
+    opacity: 0.7;
+    margin-bottom: 4px;
+  }
+
   .gate-logo {
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(52px, 12vw, 80px);
@@ -3592,6 +3593,90 @@
   }
   .active-badge-label {
     color: var(--muted);
+  }
+  .active-badge {
+    cursor: pointer;
+  }
+  .active-badge:hover .active-badge-label,
+  .active-badge:hover .active-badge-count {
+    color: var(--accent);
+  }
+
+  /* ── ACTIVE USERS POPUP ── */
+  .active-users-popup {
+    position: fixed;
+    bottom: 44px;
+    left: 8px;
+    z-index: 1000;
+    background: #16161c;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    min-width: 200px;
+    max-width: 260px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(6px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+  .active-users-popup.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+  .active-users-popup-header {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px 6px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    font-size: 9px;
+    letter-spacing: 2px;
+  }
+  .active-users-popup-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green, #2e7d4f);
+    box-shadow: 0 0 5px var(--green, #2e7d4f);
+    flex-shrink: 0;
+  }
+  .active-users-list {
+    list-style: none;
+    margin: 0;
+    padding: 6px 0;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+  .active-users-list li {
+    padding: 5px 14px;
+    color: var(--text);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .active-users-list li::before {
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--green, #2e7d4f);
+    flex-shrink: 0;
+  }
+  .active-users-list li.is-you {
+    color: var(--accent);
+  }
+  .active-users-list li.is-you::after {
+    content: 'YOU';
+    font-size: 8px;
+    color: var(--muted);
+    margin-left: 4px;
   }
 
   /* Hide main content until gate is cleared */
@@ -4551,14 +4636,20 @@
   </button>
 </div>
 
-<div class="active-badge" id="activeBadge">
+<div class="active-badge" id="activeBadge" role="button" tabindex="0" title="View active investigators">
   <span class="active-badge-dot"></span>
   <span class="active-badge-count active-users-count">—</span>
   <span class="active-badge-label">ACTIVE</span>
 </div>
+<div class="active-users-popup" id="activeUsersPopup" aria-hidden="true">
+  <div class="active-users-popup-header">
+    <span class="active-users-popup-dot"></span>
+    INVESTIGATORS ONLINE
+  </div>
+  <ul class="active-users-list" id="activeUsersList"></ul>
+</div>
 
 <div class="header">
-  <div class="logo-owner">RUMIKO</div>
   <img src="assets/asset_png_1.png" alt="CARNAGE" class="header-logo" ondblclick="window.open('https://www.roblox.com/games/135849823614481/CARNAGE#!/about','_blank')" />
   <div class="subtitle">TRIAL DOSSIER — EVIDENCE & SUSPECT TRACKING</div>
 
@@ -7729,6 +7820,9 @@
       // Store investigator name for use elsewhere on the page
       window.investigatorName = name;
 
+      // Update Firebase presence with real name
+      if (typeof _updatePresenceName === 'function') _updatePresenceName(name);
+
       // Auto-fill the investigator field on the main page
       const invField = document.getElementById('investigatorInput');
       if (invField && !invField.value) invField.value = name;
@@ -7905,12 +7999,32 @@
   const rtdb = firebase.database();
 
   // ── GLOBAL ACTIVE USERS ──
+  let _activeUsersPresRef = null;
+
   function _setActiveCount(n) {
     document.querySelectorAll('.active-users-count').forEach(el => el.textContent = n);
   }
 
-  rtdb.ref('rooms/_active').on('value', snap => {
+  function _renderActiveUsersList(snap) {
     _setActiveCount(snap.numChildren());
+    const list = document.getElementById('activeUsersList');
+    if (!list) return;
+    list.innerHTML = '';
+    const myName = (window.investigatorName || '').trim().toUpperCase();
+    snap.forEach(child => {
+      const val = child.val();
+      const name = (typeof val === 'object' && val && val.name)
+        ? val.name.toUpperCase()
+        : 'INVESTIGATOR';
+      const li = document.createElement('li');
+      li.textContent = name;
+      if (myName && name === myName) li.classList.add('is-you');
+      list.appendChild(li);
+    });
+  }
+
+  rtdb.ref('rooms/_active').on('value', snap => {
+    _renderActiveUsersList(snap);
   }, err => {
     console.warn('[active users] Firebase read failed:', err.code, err.message);
   });
@@ -7918,11 +8032,44 @@
   // Register this visitor's presence and auto-remove on disconnect
   (function() {
     const pid = Date.now() + '_' + Math.random().toString(36).slice(2);
-    const presRef = rtdb.ref('rooms/_active/' + pid);
+    _activeUsersPresRef = rtdb.ref('rooms/_active/' + pid);
     rtdb.ref('.info/connected').on('value', snap => {
       if (!snap.val()) return;
-      presRef.onDisconnect().remove();
-      presRef.set(true);
+      _activeUsersPresRef.onDisconnect().remove();
+      _activeUsersPresRef.set({ name: window.investigatorName || 'INVESTIGATOR' });
+    });
+  })();
+
+  // Update presence name once investigator enters their name
+  function _updatePresenceName(name) {
+    if (_activeUsersPresRef) {
+      _activeUsersPresRef.set({ name: name || 'INVESTIGATOR' }).catch(() => {});
+    }
+  }
+
+  // ── ACTIVE BADGE POPUP TOGGLE ──
+  (function() {
+    const badge  = document.getElementById('activeBadge');
+    const popup  = document.getElementById('activeUsersPopup');
+    if (!badge || !popup) return;
+
+    function togglePopup(e) {
+      e.stopPropagation();
+      const isOpen = popup.classList.contains('open');
+      popup.classList.toggle('open', !isOpen);
+      popup.setAttribute('aria-hidden', isOpen ? 'true' : 'false');
+    }
+
+    badge.addEventListener('click', togglePopup);
+    badge.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePopup(e); }
+    });
+
+    document.addEventListener('click', e => {
+      if (!badge.contains(e.target) && !popup.contains(e.target)) {
+        popup.classList.remove('open');
+        popup.setAttribute('aria-hidden', 'true');
+      }
     });
   })();
 
