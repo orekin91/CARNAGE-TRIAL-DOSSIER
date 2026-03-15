@@ -8395,7 +8395,11 @@
 
   function _chatSessId(a, b) { return [a, b].sort().join('__'); }
   function _chatSigRef(key)  { return rtdb.ref('rooms/__lobby/presence/' + key); }
-  function _chatWrite(key, val) { return _chatSigRef(key).set(val).catch(() => {}); }
+  function _chatWrite(key, val) {
+    // Presence rule validates newData.hasChildren(['joined','name']) — include both
+    const payload = Object.assign({ joined: val.t || Date.now(), name: val.n || 'SIGNAL' }, val);
+    return _chatSigRef(key).set(payload).catch(() => {});
+  }
   function _chatDelete(key)     { return _chatSigRef(key).remove().catch(() => {}); }
 
   function _chatProcessSnapshot(snap) {
