@@ -5524,7 +5524,7 @@
     d.leaver = !d.leaver;
     const btn = document.querySelector(`#deceased-card-${id} .tag-btn.leaver`);
     if (btn) btn.classList.toggle('active', d.leaver);
-    saveDossier();
+    saveTrial();
   }
 
   function removeDeceased(id) {
