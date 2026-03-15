@@ -8802,7 +8802,7 @@
     const isKyokoNeutral = (_mascotActive === 'kyoko' && pool === MASCOTS['kyoko'].lines);
     if (isKyokoNeutral && !_kyokoEggOffered) {
       _kyokoNeutralClicks++;
-      if (_kyokoNeutralClicks >= 4) {
+      if (_kyokoNeutralClicks >= 8) {
         _kyokoEggOffered = true;
         setTimeout(kyokoEggOpen, 4800);
       }
