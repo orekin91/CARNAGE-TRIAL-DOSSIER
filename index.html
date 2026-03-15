@@ -7254,7 +7254,7 @@
     // Register global active presence
     if (!_globalPresenceRef) {
       const _pid = Date.now() + '_' + Math.random().toString(36).slice(2);
-      _globalPresenceRef = rtdb.ref('active/' + _pid);
+      _globalPresenceRef = rtdb.ref('rooms/_active/' + _pid);
       _globalPresenceRef.set(true);
       _globalPresenceRef.onDisconnect().remove();
     }
@@ -7477,8 +7477,10 @@
     document.querySelectorAll('.active-users-count').forEach(el => el.textContent = n);
   }
 
-  rtdb.ref('active').on('value', snap => {
+  rtdb.ref('rooms/_active').on('value', snap => {
     _setActiveCount(snap.numChildren());
+  }, err => {
+    console.warn('[active users] Firebase read failed:', err.code, err.message);
   });
 
   // ── ROOM EXPIRY CLEANUP (runs once per page load) ──
