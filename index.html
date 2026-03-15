@@ -7772,6 +7772,26 @@
     }, 250);
   }
 
+  // ── NAME FILTER ──
+  // Returns { filtered: bool, clean: string }
+  // Matches slurs as whole words/tokens (case-insensitive).
+  const _SLUR_PATTERN = /\b(n[i1]gg[ae]r?s?|f[a@]gg?[o0]ts?|k[i1]k[e3]s?|sp[i1]c?ks?|ch[i1]nks?|w[e3]tb[a@]cks?|tr[a@]nn[yi]e?s?|r[e3]t[a@]rds?|c[o0]{2}ns?|g[o0]{2}ks?|r[a@]ghe[a@]ds?|towelhe[a@]ds?|sand?n[i1]gg[ae]r?s?)\b/i;
+
+  function _filterName(raw) {
+    const trimmed = raw.trim();
+    if (_SLUR_PATTERN.test(trimmed)) {
+      return { filtered: true, clean: 'Not a very nice person' };
+    }
+    return { filtered: false, clean: trimmed };
+  }
+
+  const _rumikoFilterLines = [
+    "That's... not going in the dossier. I've listed you as 'Not a very nice person' instead. That feels accurate.",
+    "I process evidence for a living. I've seen a lot. That name is still not passing inspection. Replaced.",
+    "Sorry — that didn't clear the intake form. I've substituted something more fitting. We're moving on.",
+    "I'm going to need you to not do that. Replacing with 'Not a very nice person.' Please reconsider your choices.",
+  ];
+
   // ── RUMIKO GATE CHARACTER ──
   const _rumikoLines = [
     "Oh! You're here. I've got the dossier all set up for you — evidence slots, suspects, everything. You just focus on the case.",
@@ -7810,13 +7830,25 @@
     startMenuMusic();
 
     function tryEnter() {
-      const name = input.value.trim();
-      if (!name) {
+      const raw = input.value.trim();
+      if (!raw) {
         errEl.classList.add('visible');
         input.focus();
         return;
       }
       errEl.classList.remove('visible');
+
+      const { filtered, clean: name } = _filterName(raw);
+
+      // If a slur was detected, show Rumiko's comment and correct the input
+      if (filtered) {
+        input.value = name;
+        const bubble = document.getElementById('gateRumikoBubble');
+        if (bubble) {
+          _rumikoAnswerActive = true;
+          bubble.textContent = _rumikoFilterLines[Math.floor(Math.random() * _rumikoFilterLines.length)];
+        }
+      }
 
       // Store investigator name for use elsewhere on the page
       window.investigatorName = name;
@@ -8049,6 +8081,40 @@
       _activeUsersPresRef.set({ name: name || 'INVESTIGATOR' }).catch(() => {});
     }
   }
+
+  // ── INVESTIGATOR NAME FILTER (main page) ──
+  (function() {
+    const invField = document.getElementById('investigatorInput');
+    if (!invField) return;
+    invField.addEventListener('blur', () => {
+      const raw = invField.value.trim();
+      if (!raw) return;
+      const { filtered, clean } = _filterName(raw);
+      if (!filtered) return;
+      invField.value = clean;
+      window.investigatorName = clean;
+      if (typeof _updatePresenceName === 'function') _updatePresenceName(clean);
+      // Trigger mascot reaction
+      const mascot = MASCOTS[_mascotActive];
+      if (!mascot || !mascot.lines_name_filter) return;
+      const bubble    = document.getElementById('mascotBubble');
+      const sprite    = document.getElementById('mascotSprite');
+      const container = document.getElementById('mascotContainer');
+      if (!bubble || !sprite) return;
+      sprite.src = mascot.sprites.concerned || mascot.sprites.neutral;
+      sprite.classList.remove('idle');
+      void sprite.offsetWidth;
+      bubble.textContent = mascot.lines_name_filter[Math.floor(Math.random() * mascot.lines_name_filter.length)];
+      bubble.classList.add('visible');
+      clearTimeout(_mascotBubbleTimer);
+      _mascotBubbleTimer = setTimeout(() => {
+        bubble.classList.remove('visible');
+        sprite.src = MASCOTS[_mascotActive].sprites.resting;
+        container.style.transform = '';
+        setTimeout(() => sprite.classList.add('idle'), 300);
+      }, 7000);
+    });
+  })();
 
   // ── ACTIVE BADGE POPUP TOGGLE ──
   (function() {
@@ -8866,6 +8932,11 @@
         "Don't push yourself too hard. We need you sharp, not exhausted!",
         "I'm rooting for you! But also — seriously, take a break if you need one!",
       ],
+      lines_name_filter: [
+        "Oh — I just need to flag something. That name isn't... okay. I've changed it to something more appropriate. I really hope it was a typo.",
+        "Hey, um. I saw what you put there. I fixed it — it says 'Not a very nice person' now. That felt like the right call. Please be kinder.",
+        "I had to step in on that one. The name's been changed. This dossier is for finding the truth, not for... that. Please.",
+      ],
       lines_wellbeing: [
         "I'm doing okay! A little on edge, but staying positive — that's kind of my whole thing.",
         "Honestly? I keep thinking about home. About the piano. But I can't let myself get distracted.",
@@ -9050,6 +9121,11 @@
         "It occurs to me that you haven't looked away from this in a while. For what it's worth... I noticed.",
         "The path to hope is long. Pace yourself. There's no glory in collapsing before the finish.",
       ],
+      lines_name_filter: [
+        "Ah... I saw that. Someone of low character trying to plant that in the dossier. I've replaced it. A name like that would only drag the whole investigation into despair. Let's not give despair more to work with than it already has.",
+        "Ahahaha... 'Not a very nice person.' Yes. Yes, that's accurate, isn't it? I think that's a more honest name than whatever was there before. I've taken care of it.",
+        "I caught that. I'm always watching. The name has been... corrected. For the sake of hope — and basic decency — please don't do that again.",
+      ],
       lines_wellbeing: [
         "Me? Don't worry about me. My well-being is entirely irrelevant — what matters is that hope emerges from all of this.",
         "I'm... fine. Better than I deserve, honestly. When your luck is rock-bottom, things can only go up from here. Ahahaha...",
@@ -9227,6 +9303,11 @@
         "I've caught more leads after stepping away than I ever did by pushing through. Something to consider.",
         "Don't confuse persistence with effectiveness. Sometimes they're opposites.",
         "Take five minutes. The dossier will still be here. You need to be sharp when you come back.",
+      ],
+      lines_name_filter: [
+        "I've corrected the investigator field. That name wasn't going into the record. 'Not a very nice person' is more accurate and considerably more printable.",
+        "Noted and overridden. Whatever you thought that accomplished — it didn't. The field has been corrected. Move on.",
+        "I caught that. The name has been replaced. If you'd like to be taken seriously in this investigation, I'd suggest starting by taking the dossier seriously.",
       ],
       lines_wellbeing: [
         "That's not a relevant question.",
