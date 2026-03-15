@@ -1,0 +1,13 @@
+{
+  "rules": {
+    "rooms": {
+      "_active": {
+        ".read": true,
+        "$pid": {
+          ".write": true,
+          ".validate": "newData.isBoolean()"
+        }
+      }
+    }
+  }
+}
