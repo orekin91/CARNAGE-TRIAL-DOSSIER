@@ -6348,14 +6348,14 @@
 
   function endTrialReset() {
     document.getElementById('endTrialModal').style.display = 'none';
-    softReset();
     _mascotShowScoreLine();
+    softReset();
   }
 
   function endTrialSaveImage() {
     document.getElementById('endTrialModal').style.display = 'none';
     downloadImage();
-    setTimeout(() => { softReset(); _mascotShowScoreLine(); }, 800);
+    setTimeout(() => { _mascotShowScoreLine(); softReset(); }, 800);
   }
 
   function saveTrial(silent = false) {
