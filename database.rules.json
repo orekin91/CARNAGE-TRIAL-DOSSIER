@@ -2,13 +2,6 @@
   "rules": {
     "rooms": {
       ".indexOn": ["clientId"],
-      "_active": {
-        ".read": true,
-        "$uid": {
-          ".write": true,
-          ".validate": "newData.isBoolean() || newData.val() === null || (newData.hasChild('name') && newData.child('name').isString())"
-        }
-      },
       "$roomCode": {
         ".read": true,
         ".write": "!data.exists() || data.child('created').exists()",
@@ -27,6 +20,13 @@
           }
         },
         "$other": { ".validate": false }
+      }
+    },
+    "active_users": {
+      ".read": true,
+      "$uid": {
+        ".write": true,
+        ".validate": "newData.isBoolean() || newData.val() === null || (newData.hasChild('name') && newData.child('name').isString())"
       }
     },
     "$other": { ".read": false, ".write": false }

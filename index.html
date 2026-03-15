@@ -8026,7 +8026,7 @@
     });
   }
 
-  rtdb.ref('rooms/_active').on('value', snap => {
+  rtdb.ref('active_users').on('value', snap => {
     _renderActiveUsersList(snap);
   }, err => {
     console.warn('[active users] Firebase read failed:', err.code, err.message);
@@ -8035,7 +8035,7 @@
   // Register this visitor's presence and auto-remove on disconnect
   (function() {
     const pid = Date.now() + '_' + Math.random().toString(36).slice(2);
-    _activeUsersPresRef = rtdb.ref('rooms/_active/' + pid);
+    _activeUsersPresRef = rtdb.ref('active_users/' + pid);
     rtdb.ref('.info/connected').on('value', snap => {
       if (!snap.val()) return;
       _activeUsersPresRef.onDisconnect().remove();
@@ -9619,8 +9619,8 @@
 
   function _scheduleChatter() {
     clearTimeout(_mascotChatterTimer);
-    // Fire every 50–80 seconds
-    const delay = 50000 + Math.floor(Math.random() * 30000);
+    // Fire every 3–4 minutes
+    const delay = 180000 + Math.floor(Math.random() * 60000);
     _mascotChatterTimer = setTimeout(() => {
       _mascotChatter();
       _scheduleChatter();
