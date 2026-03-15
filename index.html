@@ -3392,15 +3392,16 @@
     opacity: 0;
     transition: opacity 0.2s, transform 0.2s;
     position: absolute;
-    bottom: calc(100% + 10px);
-    left: 50%;
-    transform: translateX(-50%) translateY(8px);
+    bottom: 40%;
+    left: 100%;
+    margin-left: 12px;
+    transform: translateY(8px);
     z-index: 20;
     white-space: normal;
   }
   #rumikoQuestionnaire.visible {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
   }
   .rumiko-ask-btn {
     position: absolute;
@@ -4317,7 +4318,8 @@
       <div class="mq-header">WHAT WOULD YOU LIKE TO ASK?</div>
       <button class="mq-btn" onclick="rumikoAnswer('wellbeing')">How are you doing?</button>
       <button class="mq-btn" onclick="rumikoAnswer('talent')">Tell me about your talent.</button>
-      <button class="mq-btn" onclick="rumikoQuestionnaireClose(); gateShowAbout()">Tell me about yourself.</button>
+      <button class="mq-btn" onclick="rumikoAnswer('mascot')">Why aren't you a mascot?</button>
+      <button class="mq-btn" onclick="rumikoQuestionnaireClose(); gateShowAbout()">What is this?</button>
       <button class="mq-close" onclick="rumikoQuestionnaireClose()">✕ CLOSE</button>
     </div>
     <div class="gate-rumiko-bubble" id="gateRumikoBubble"></div>
@@ -7592,8 +7594,14 @@
   const _rumikoTalentLines = [
     "Oh — I'm the Ultimate CSI. Crime Scene Investigation. I handle the evidence, the analysis, the documentation. You handle the deductions. That's the deal.",
     "Ultimate Crime Scene Investigator! I catalogue, process, preserve. The detective gets the glory, I get the filing. It works out.",
-    "Crime scene work, mostly. Evidence collection, analysis, documentation. Think of me as the person who makes sure you actually have something to work with.",
-    "I process the scene so you can solve it. That's the short version. The long version involves a lot of labels and evidence bags.",
+    "I'm the Ultimate Crime Scene Investigator — CSI for short. Evidence collection, analysis, documentation. Think of me as the person who makes sure you actually have something to work with.",
+    "CSI. Crime Scene Investigator. I process the scene so you can solve it. That's the short version. The long version involves a lot of labels and evidence bags.",
+  ];
+  const _rumikoMascotLines = [
+    "I — what? No. I'm support staff. That's a different role entirely. Also my expression sheet isn't... fully filed yet. It's pending.",
+    "Mascot duty requires a full set of poses. I have one. That's not sufficient. I'd like to be properly prepared before I'm put in front of anyone.",
+    "I'm still being processed. Think of me as pending approval. When the paperwork clears, I'll let you know.",
+    "That's not — I'm not cleared for that yet. The documentation isn't complete. Ask me again when it is.",
   ];
   const _rumikoSongLines = [
     "Hmm. Something focused but not too intense? You've got a case to solve — can't have you getting distracted.",
@@ -7626,6 +7634,7 @@
     let pool;
     if      (type === 'wellbeing') pool = _rumikoWellbeingLines;
     else if (type === 'talent')    pool = _rumikoTalentLines;
+    else if (type === 'mascot')    pool = _rumikoMascotLines;
     else return;
     _rumikoAnswerActive = true;
     bubble.textContent = pool[Math.floor(Math.random() * pool.length)];
@@ -7674,6 +7683,7 @@
     "Oh great, you're here. I set everything up as best I could. The actual detective work is all you.",
     "Welcome! I've been waiting. Everything's prepped and in order. I'm just the CSI — you're the one solving this.",
     "The dossier is ready! I triple-checked it. Which might be excessive. But still — it's ready for you.",
+    "Oh — before you dive in, pick Kyoko as your mascot. Trust me on this one.",
   ];
   (function _rumikoInit() {
     const el = document.getElementById('gateRumikoBubble');
