@@ -3392,15 +3392,16 @@
     opacity: 0;
     transition: opacity 0.2s, transform 0.2s;
     position: absolute;
-    bottom: calc(100% + 10px);
-    left: 50%;
-    transform: translateX(-50%) translateY(8px);
+    bottom: 40%;
+    left: 100%;
+    margin-left: 12px;
+    transform: translateY(8px);
     z-index: 20;
     white-space: normal;
   }
   #rumikoQuestionnaire.visible {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
   }
   .rumiko-ask-btn {
     position: absolute;
@@ -7674,6 +7675,7 @@
     "Oh great, you're here. I set everything up as best I could. The actual detective work is all you.",
     "Welcome! I've been waiting. Everything's prepped and in order. I'm just the CSI — you're the one solving this.",
     "The dossier is ready! I triple-checked it. Which might be excessive. But still — it's ready for you.",
+    "Oh — before you dive in, pick Kyoko as your mascot. Trust me on this one.",
   ];
   (function _rumikoInit() {
     const el = document.getElementById('gateRumikoBubble');
