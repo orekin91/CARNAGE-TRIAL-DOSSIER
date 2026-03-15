@@ -3310,29 +3310,30 @@
   .gate-rumiko {
     position: absolute;
     bottom: 0;
-    right: clamp(20px, 5vw, 80px);
-    width: clamp(140px, 18vw, 240px);
+    right: 0;
+    width: clamp(160px, 16vw, 260px);
     display: flex;
     flex-direction: column;
     align-items: center;
     cursor: pointer;
-    opacity: 0.55;
-    transition: opacity 0.3s, transform 0.3s;
+    opacity: 0.22;
+    transition: opacity 0.35s, transform 0.35s;
     z-index: 1;
     user-select: none;
+    transform: translateX(18%);
   }
   .gate-rumiko:hover {
-    opacity: 1;
-    transform: translateY(-4px);
+    opacity: 0.75;
+    transform: translateX(0);
   }
   .gate-rumiko-img {
     width: 100%;
     display: block;
-    filter: drop-shadow(0 0 18px rgba(var(--accent-rgb), 0.15));
-    transition: filter 0.3s;
+    filter: drop-shadow(0 0 18px rgba(var(--accent-rgb), 0.08));
+    transition: filter 0.35s;
   }
   .gate-rumiko:hover .gate-rumiko-img {
-    filter: drop-shadow(0 0 28px rgba(var(--accent-rgb), 0.4));
+    filter: drop-shadow(0 0 30px rgba(var(--accent-rgb), 0.35));
   }
   .gate-rumiko-label {
     font-family: 'Share Tech Mono', monospace;
