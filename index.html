@@ -7851,10 +7851,11 @@
   }
 
   const _rumikoFilterLines = [
-    "That's... not going in the dossier. I've listed you as 'Not a very nice person' instead. That feels accurate.",
-    "I process evidence for a living. I've seen a lot. That name is still not passing inspection. Replaced.",
-    "Sorry — that didn't clear the intake form. I've substituted something more fitting. We're moving on.",
-    "I'm going to need you to not do that. Replacing with 'Not a very nice person.' Please reconsider your choices.",
+    "That's not going in the dossier. Please try a different name.",
+    "That name didn't pass intake. I'm going to need you to try again.",
+    "I process evidence for a living. That's not passing inspection. Pick something else.",
+    "Yeah, no. That's not going through. Try a different name.",
+    "Access denied. Please enter a different name to continue.",
   ];
 
   // ── RUMIKO GATE CHARACTER ──
@@ -8141,14 +8142,8 @@
     console.warn('[active users] Firebase read failed:', err.code, err.message);
   });
 
-  // Ensure the lobby room exists with a created field so subsequent writes are allowed
-  rtdb.ref('rooms/__lobby').once('value').then(snap => {
-    if (!snap.exists() || !snap.child('created').exists()) {
-      return rtdb.ref('rooms/__lobby').set({ created: Date.now() });
-    }
-  }).catch(() => {});
-
   // Register presence: remove first (idempotent on reconnect), then re-add
+  // No room-level bootstrap needed — child presence rules override the parent write condition.
   (function() {
     _activeUsersPresRef = rtdb.ref('rooms/__lobby/presence/' + _presenceId);
     rtdb.ref('.info/connected').on('value', snap => {
